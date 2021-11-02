@@ -10,6 +10,9 @@ e.g.
 bdk network create -i
 ```
 
+![bdk network create -i](images/bdk-network-create.gif)
+![bdk channel create -i](images/bdk-channel-create.gif)
+
 ## 版本 (Releases)
 
 | Latest | Stable |
