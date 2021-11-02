@@ -1,0 +1,8 @@
+{
+  "extends": [
+    "./node_modules/ericlint"
+  ],
+  "parserOptions": {
+    "project": "tsconfig.eslint.json"
+  }
+}
