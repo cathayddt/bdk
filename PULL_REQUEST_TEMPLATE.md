@@ -38,4 +38,4 @@ Please include a summary of the change and which issue is fixed. Please also inc
 
 I have completed the checklist and agree to abide by the [code of conduct](CODE_OF_CONDUCT.md).
 
-[ ] 同意 (I consent)
+- [ ] 同意 (I consent)
