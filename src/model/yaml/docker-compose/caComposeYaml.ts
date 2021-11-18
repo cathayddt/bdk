@@ -7,6 +7,7 @@ import {
 } from '../../type/caService.type'
 import { Config } from '../../../config'
 import DockerComposeYaml from './dockerComposeYaml'
+import os from 'os'
 
 class CaDockerComposeYaml extends DockerComposeYaml {
   public addCa (
@@ -22,7 +23,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
     const caEnv: string[] = [
       `FABRIC_CA_SERVER_PORT=${basic.port}`,
       `FABRIC_CA_SERVER_CA_NAME=${basic.caName}`,
-      `FABRIC_CA_SERVER_HOME=/etc/hyperledger/${basic.caName}/crypto`,
+      `FABRIC_CA_SERVER_HOME=/fabric-ca/${basic.caName}/crypto`,
       'FABRIC_CA_SERVER_DEBUG=true',
       'FABRIC_CA_SERVER_TLS_ENABLED=true',
       // Signing options
@@ -69,7 +70,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
               `FABRIC_CA_SERVER_INTERMEDIATE_PARENTSERVER_CANAME=${intermediate.parentserverCn}`,
               `FABRIC_CA_SERVER_INTERMEDIATE_ENROLLMENT_HOSTS=${intermediate.enrollmentHost}`,
               'FABRIC_CA_SERVER_INTERMEDIATE_ENROLLMENT_PROFILE=ca',
-              `FABRIC_CA_SERVER_INTERMEDIATE_TLS_CERTFILES=/etc/hyperledger/${intermediate.parentserverCn}/crypto/tls-cert.pem`,
+              `FABRIC_CA_SERVER_INTERMEDIATE_TLS_CERTFILES=/fabric-ca/${intermediate.parentserverCn}/crypto/tls-cert.pem`,
           ]
           : [],
       )
@@ -81,8 +82,9 @@ class CaDockerComposeYaml extends DockerComposeYaml {
       networks: [config.networkName],
       ports: [`${basic.port}:${basic.port}`],
       volumes: [
-        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/ca:/etc/hyperledger`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/ca:/fabric-ca`,
       ],
+      user: `${os.userInfo().uid}:${os.userInfo().gid}`
     })
   }
 }
