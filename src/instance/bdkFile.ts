@@ -310,7 +310,7 @@ export default class BdkFile {
       `${this.orgPath}/peers/${peerName}`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/peers/${peerName}/msp/cacerts/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/msp/cacerts`)}`,
+      `${this.orgPath}/eers/${peerName}/msp/cacerts/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/msp/cacerts`)}`,
       `${this.orgPath}/peers/${peerName}/msp/tlscacerts/tlsca.${hostname}-cert.pem`)
     fs.copySync(
       `${this.orgPath}/peers/${peerName}/msp/intermediatecerts`,
