@@ -7,6 +7,7 @@ import {
 } from '../../type/caService.type'
 import { Config } from '../../../config'
 import DockerComposeYaml from './dockerComposeYaml'
+import os from 'os'
 
 class CaDockerComposeYaml extends DockerComposeYaml {
   public addCa (
