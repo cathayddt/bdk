@@ -1,0 +1,120 @@
+{
+  "ordererOrgs": [
+    {
+      "name": "BenOrderer",
+      "domain": "orderer.ben.cathaybc.com",
+      "enableNodeOUs": true,
+      "hostname": [
+        "orderer0",
+        "orderer1"
+      ],
+      "ports": [
+        {
+          "port": 7050,
+          "isPublishPort": true,
+          "operationPort": 8443,
+          "isPublishOperationPort": true
+        },
+        {
+          "port": 7150,
+          "isPublishPort": true,
+          "operationPort": 8543,
+          "isPublishOperationPort": true
+        }
+      ]
+    },
+    {
+      "name": "GraceOrderer",
+      "domain": "orderer.grace.cathaybc.com",
+      "enableNodeOUs": true,
+      "hostname": [
+        "orderer0"
+      ],
+      "ports": [
+        {
+          "port": 7250,
+          "isPublishPort": true,
+          "operationPort": 8643,
+          "isPublishOperationPort": true
+        }
+      ]
+    }
+  ],
+  "peerOrgs": [
+    {
+      "name": "Ben",
+      "domain": "ben.cathaybc.com",
+      "enableNodeOUs": true,
+      "peerCount": 3,
+      "userCount": 1,
+      "ports": [
+        {
+          "port": 7051,
+          "isPublishPort": true,
+          "operationPort": 9443,
+          "isPublishOperationPort": true
+        },
+        {
+          "port": 7051,
+          "isPublishPort": false,
+          "operationPort": 9443,
+          "isPublishOperationPort": false
+        },
+        {
+          "port": 7051,
+          "isPublishPort": false,
+          "operationPort": 9443,
+          "isPublishOperationPort": false
+        }
+      ]
+    },
+    {
+      "name": "Grace",
+      "domain": "grace.cathaybc.com",
+      "enableNodeOUs": true,
+      "peerCount": 4,
+      "userCount": 1,
+      "ports": [
+        {
+          "port": 7151,
+          "isPublishPort": true,
+          "operationPort": 9543,
+          "isPublishOperationPort": true
+        },
+        {
+          "port": 7151,
+          "isPublishPort": false,
+          "operationPort": 9543,
+          "isPublishOperationPort": false
+        },
+        {
+          "port": 7151,
+          "isPublishPort": false,
+          "operationPort": 9543,
+          "isPublishOperationPort": false
+        },
+        {
+          "port": 7151,
+          "isPublishPort": false,
+          "operationPort": 9543,
+          "isPublishOperationPort": false
+        }
+      ]
+    },
+    {
+      "name": "Eugene",
+      "domain": "eugene.cathaybc.com",
+      "enableNodeOUs": true,
+      "peerCount": 1,
+      "userCount": 1,
+      "ports": [
+        {
+          "port": 7251,
+          "isPublishPort": true,
+          "operationPort": 9643,
+          "isPublishOperationPort": true
+        }
+      ]
+    }
+  ]
+}
