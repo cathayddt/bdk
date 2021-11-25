@@ -1,0 +1,29 @@
+[
+    {
+      "name": "Eric",
+      "domain": "eric.cathaybc.com",
+      "enableNodeOUs": true,
+      "peerCount": 3,
+      "userCount": 1,
+      "ports": [
+        {
+          "port": 7351,
+          "isPublishPort": true,
+          "operationPort": 9743,
+          "isPublishOperationPort": true
+        },
+        {
+          "port": 7351,
+          "isPublishPort": false,
+          "operationPort": 9743,
+          "isPublishOperationPort": false
+        },
+        {
+          "port": 7351,
+          "isPublishPort": false,
+          "operationPort": 9743,
+          "isPublishOperationPort": false
+        }
+      ]
+    }
+  ]

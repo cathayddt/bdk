@@ -24,6 +24,7 @@ interface ServiceInterface {
     timeout: string
     retries: number
   }
+  user?: string
 }
 
 interface VolumeInterface {
