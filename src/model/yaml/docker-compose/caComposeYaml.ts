@@ -7,7 +7,6 @@ import {
 } from '../../type/caService.type'
 import { Config } from '../../../config'
 import DockerComposeYaml from './dockerComposeYaml'
-import os from 'os'
 
 class CaDockerComposeYaml extends DockerComposeYaml {
   public addCa (
@@ -84,7 +83,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
       volumes: [
         `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/ca:/fabric-ca`,
       ],
-      user: `${os.userInfo().uid}:${os.userInfo().gid}`
+      user: `${config.UID}:${config.GID}`
     })
   }
 }
