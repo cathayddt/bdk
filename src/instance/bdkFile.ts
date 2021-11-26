@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import YAML from 'yaml'
+import YAML from 'js-yaml'
 import { parse, stringify } from 'envfile'
 import CryptoConfigYaml from '../model/yaml/network/cryptoConfigYaml'
 import ConnectionConfigYaml from '../model/yaml/network/connectionConfigYaml'
@@ -12,6 +12,7 @@ import CaDockerComposeYaml from '../model/yaml/docker-compose/caComposeYaml'
 import { OrgJsonType } from '../model/type/org.type'
 import { ProcessError } from '../util'
 import { Config } from '../config'
+import { DockerComposeYamlInterface } from '../model/yaml/docker-compose/dockerComposeYaml'
 
 export enum InstanceTypeEnum {
   ca = 'ca',
@@ -157,8 +158,8 @@ export default class BdkFile {
     fs.writeFileSync(this.getDockerComposeYamlPath(hostName, type), dockerComposeYaml.getYamlString())
   }
 
-  public getDockerComposeYaml (hostName: string, type: InstanceTypeEnum) {
-    return YAML.parse(fs.readFileSync(this.getDockerComposeYamlPath(hostName, type)).toString())
+  public getDockerComposeYaml (hostName: string, type: InstanceTypeEnum): DockerComposeYamlInterface {
+    return YAML.load(fs.readFileSync(this.getDockerComposeYamlPath(hostName, type)).toString()) as DockerComposeYamlInterface
   }
 
   public createOrgConfigEnv (address: string, dotEnv: string) {
