@@ -83,7 +83,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
       volumes: [
         `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/ca:/fabric-ca`,
       ],
-      user: `${config.UID}:${config.GID}`
+      user: `${config.UID}:${config.GID}`,
     })
   }
 }

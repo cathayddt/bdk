@@ -302,7 +302,7 @@ export default class BdkFile {
     })
   }
 
-  public caFormatPeer(orgName: string, peerName: string, hostname: string) {
+  public caFormatPeer (orgName: string, peerName: string, hostname: string) {
     this.setOrgPath(hostname, 'peer')
 
     fs.mkdirSync(`${this.orgPath}/peers/${peerName}/msp/admincerts`, { recursive: true })
