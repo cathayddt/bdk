@@ -1,10 +1,27 @@
 # Changelog
+
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
 
-## [1.0.0][1.0.0] - YYYY-MM-DD
+## [1.0.1][1.0.1] - 2021-11-29
+
 ### new
+
+- Add CICD workflows
+
+### changed
+
+- Docker image prerequisites
+
+### fixed
+
+- Fix ca file permission issues
+
+## [1.0.0][1.0.0] - 2021-11-02
+
+### new
+
 - 初始專案原始碼 (Initial project code)
 
 [1.0.0]: https://github.com/cathayddt/bdk/releases/tag/v1.0.0

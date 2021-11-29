@@ -17,9 +17,9 @@ bdk network create -i
 
 | Latest | Stable |
 |-------------------|-------------------|
-| [v1.0.0][v1.0.0]  | [v1.0.0][v1.0.0]  |
+| [v1.0.1][v1.0.1]  | [v1.0.1][v1.0.1]  |
 
-[v1.0.0]: link-to-v1.0.0-release
+[v1.0.1]: link-to-v1.0.1-release
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
