@@ -67,18 +67,6 @@ npm install
 npm run build:console
 ```
 
-### 下載 Docker 映像檔 (Pre-Download Docker Images)
-
-```bash
-docker pull hyperledger/fabric-orderer:2.2.1
-docker pull hyperledger/fabric-peer:2.2.1
-docker pull hyperledger/fabric-tools:2.2.1
-docker pull hyperledger/fabric-ca:1.5.0
-docker pull hyperledger/fabric-ccenv:2.2.1
-docker pull hyperledger/explorer:1.1.3
-docker pull hyperledger/explorer-db:1.1.3
-```
-
 ## 設定 (Configuration)
 
 ### 設定自動完成 (Configure AutoComplete)
