@@ -11,6 +11,7 @@ import { DockerResultType, InfraRunner } from '../InfraRunner.interface'
 
 export class Runner implements InfraRunner<DockerResultType> {
   private dockerode: Dockerode
+  private existingImages: { [key: string]: boolean } = {}
 
   constructor () {
     this.dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
@@ -38,6 +39,13 @@ export class Runner implements InfraRunner<DockerResultType> {
         Binds: payload.volumes,
       },
       User: `${config.UID}:${config.GID}`,
+    }
+    if (!this.existingImages[payload.image]) {
+      const images = await this.dockerode.listImages({ filters: { reference: [payload.image] } })
+      if (images.length === 0) {
+        await this.dockerode.pull(payload.image)
+        this.existingImages[payload.image] = true
+      }
     }
     this.logger(`docker command: \ndocker run ${createOptions.HostConfig?.AutoRemove ? '--rm ' : ''} -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`)
     const startOptions: DockerStartOptionsType = payload.startOptions || {} as DockerStartOptionsType
