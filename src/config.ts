@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { spawnSync } from 'child_process'
+import os from 'os'
 
 const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk`
 dotenv.config({ path: `${bdkPath}/.env` })
@@ -101,8 +101,8 @@ const config: Config = {
     explorer: '1.1.3',
     explorerDb: '1.1.3',
   },
-  UID: parseInt(process.env.UID === undefined ? spawnSync('id', ['-u']).stdout.toString() : process.env.UID, 10),
-  GID: parseInt(process.env.GID === undefined ? spawnSync('id', ['-g']).stdout.toString() : process.env.GID, 10),
+  UID: process.env.UID === undefined ? os.userInfo().uid : parseInt(process.env.UID, 10),
+  GID: process.env.GID === undefined ? os.userInfo().gid : parseInt(process.env.GID, 10),
 }
 
 export default config

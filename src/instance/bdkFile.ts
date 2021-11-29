@@ -286,6 +286,10 @@ export default class BdkFile {
       `${this.orgPath}/orderers/${ordererName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/keystore`)}`,
       `${this.orgPath}/orderers/${ordererName}/tls/server.key`,
     )
+    fs.copyFileSync(
+      `${this.orgPath}/orderers/${ordererName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/keystore`)}`,
+      `${this.orgPath}/orderers/${ordererName}/tls/keystore/priv_sk`,
+    )
 
     const userList = fs.existsSync(`${this.orgPath}/users/`) ? fs.readdirSync(`${this.orgPath}/users/`) : []
     userList.forEach((user) => {
@@ -298,7 +302,7 @@ export default class BdkFile {
     })
   }
 
-  public caFormatPeer(orgName: string, peerName: string, hostname: string) {
+  public caFormatPeer (orgName: string, peerName: string, hostname: string) {
     this.setOrgPath(hostname, 'peer')
 
     fs.mkdirSync(`${this.orgPath}/peers/${peerName}/msp/admincerts`, { recursive: true })
@@ -335,6 +339,10 @@ export default class BdkFile {
     fs.copyFileSync(
       `${this.orgPath}/peers/${peerName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/keystore`)}`,
       `${this.orgPath}/peers/${peerName}/tls/server.key`,
+    )
+    fs.copyFileSync(
+      `${this.orgPath}/peers/${peerName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/keystore`)}`,
+      `${this.orgPath}/peers/${peerName}/tls/keystore/priv_sk`,
     )
 
     const userList = fs.existsSync(`${this.orgPath}/users/`) ? fs.readdirSync(`${this.orgPath}/users/`) : []
