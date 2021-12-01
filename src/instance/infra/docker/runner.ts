@@ -41,11 +41,16 @@ export class Runner implements InfraRunner<DockerResultType> {
       },
       User: `${config.UID}:${config.GID}`,
     }
-    if (!this.existingImages[payload.image]) {
-      const images = await this.dockerode.listImages({ filters: { reference: [payload.image] } })
+    if (!this.existingImages[`${image}:${tag}`]) {
+      const images = await this.dockerode.listImages({ filters: { reference: [`${image}:${tag}`] } })
       if (images.length === 0) {
-        await this.dockerode.pull(payload.image)
-        this.existingImages[payload.image] = true
+        await this.dockerode.pull(`${image}:${tag}`)
+        while (true) {
+          const images = await this.dockerode.listImages({ filters: { reference: [`${image}:${tag}`] } })
+          if (images.length !== 0) break
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+        this.existingImages[`${image}:${tag}`] = true
       }
     }
     this.logger(`docker command: \ndocker run ${createOptions.HostConfig?.AutoRemove ? '--rm ' : ''} -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`)
