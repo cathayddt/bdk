@@ -1,5 +1,5 @@
 import fs from 'fs'
-import YAML from 'yaml'
+import YAML from 'js-yaml'
 import { WritableStream } from 'memory-streams'
 import { spawnSync } from 'child_process'
 import Dockerode from 'dockerode'
@@ -8,6 +8,7 @@ import { DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType }
 import config from '../../../config'
 import { DockerError, FabricContainerError } from '../../../util/error'
 import { DockerResultType, InfraRunner } from '../InfraRunner.interface'
+import { DockerComposeYamlInterface } from '../../../model/yaml/docker-compose/dockerComposeYaml'
 
 export class Runner implements InfraRunner<DockerResultType> {
   private dockerode: Dockerode
@@ -92,7 +93,7 @@ export class Runner implements InfraRunner<DockerResultType> {
   }
 
   public upInBackground = async (dockerComposeFile: string) => {
-    const networks = YAML.parse(fs.readFileSync(dockerComposeFile).toString()).networks
+    const networks = (YAML.load(fs.readFileSync(dockerComposeFile).toString()) as DockerComposeYamlInterface).networks
     for (const network in networks) {
       if (networks[network]?.external) {
         await this.checkAndCreateNetwork(network)

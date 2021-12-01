@@ -49,7 +49,7 @@ interface NetworkInterface {
   name?: string
 }
 
-interface DockerComposeYamlInterface {
+export interface DockerComposeYamlInterface {
   version: string
   services: {
     [serviceName: string]: ServiceInterface

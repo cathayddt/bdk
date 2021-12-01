@@ -1,4 +1,4 @@
-import YAML from 'yaml'
+import YAML from 'js-yaml'
 
 class BdkYaml<T> {
   public value: T
@@ -8,7 +8,7 @@ class BdkYaml<T> {
   }
 
   public getYamlString () {
-    return YAML.stringify(this.value)
+    return YAML.dump(this.value, { forceQuotes: true })
   }
 
   public getJsonString () {
