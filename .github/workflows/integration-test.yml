@@ -16,9 +16,7 @@ jobs:
         node-version-file: '.nvmrc'
     - run: npm ci
     - run: npm run build:console
-    - run: sudo npm link
-    - run: docker pull hyperledger/fabric-tools:2.2.1
-    - run: sudo ./cicd/test_script/crypto-gen.sh
+    - run: ./cicd/test_script/crypto-gen.sh
   test-ca:
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +26,5 @@ jobs:
         node-version-file: '.nvmrc'
     - run: npm ci
     - run: npm run build:console
-    - run: sudo npm link
-    - run: docker pull hyperledger/fabric-tools:2.2.1
-    - run: sudo ./cicd/test_script/ca-gen.sh
+    - run: ./cicd/test_script/ca-gen.sh
 

@@ -1,4 +1,4 @@
-#!/bin/bash -vxe
+#!/bin/bash -ve
 
 export NODE_ENV=development # testing  development  production
 export BDK_NETWORK_NAME=shell-network-ca
@@ -29,9 +29,6 @@ export_env() {
   export BDK_ORG_DOMAIN=$3
   export BDK_HOSTNAME=$4
 }
-
-bdk network delete -f
-docker run --rm -v $HOME/.bdk:/tmp/.bdk alpine:latest sh -c 'rm -rf /tmp/.bdk/'${BDK_NETWORK_NAME}'/* | true'
 
 # RCA
 bdk ca up -n rca -p 7054 --rca-cn rca --rca-hosts rca --rca-expiry 87600h --rca-pathlength 1
