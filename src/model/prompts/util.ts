@@ -45,20 +45,36 @@ export const getChaincodeList = (config: Config): {name: string; version: number
 }
 
 const getConfigtxOrgsJson = (config: Config): ConfigtxOrgs => {
-  const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
-  return fs.existsSync(`${hostBasePath}/config-yaml/configtxOrgs.json`) ? JSON.parse(fs.readFileSync(`${hostBasePath}/config-yaml/configtxOrgs.json`).toString()) : { ordererOrgs: {}, peerOrgs: {} }
+  try {
+    const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
+    return fs.existsSync(`${hostBasePath}/config-yaml/configtxOrgs.json`) ? JSON.parse(fs.readFileSync(`${hostBasePath}/config-yaml/configtxOrgs.json`).toString()) : { ordererOrgs: {}, peerOrgs: {} }
+  } catch {
+    return { ordererOrgs: {}, peerOrgs: {} }
+  }
 }
 export const getOrdererList = (config: Config): string[] => {
-  const configtxOrgsJson = getConfigtxOrgsJson(config)
-  return Object.values(configtxOrgsJson.ordererOrgs).map(x => x.OrdererEndpoints).reduce((prev, curr) => (prev.concat(curr)), [])
+  try {
+    const configtxOrgsJson = getConfigtxOrgsJson(config)
+    return Object.values(configtxOrgsJson.ordererOrgs).map(x => x.OrdererEndpoints).reduce((prev, curr) => (prev.concat(curr)), [])
+  } catch {
+    return []
+  }
 }
 
 export const getChannelList = (config: Config): string[] => {
-  const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
-  return fs.readdirSync(`${hostBasePath}/config-yaml`).filter(x => /Channel$/.test(x)).map(x => x.replace(/Channel$/, ''))
+  try {
+    const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
+    return fs.readdirSync(`${hostBasePath}/config-yaml`).filter(x => /Channel$/.test(x)).map(x => x.replace(/Channel$/, ''))
+  } catch {
+    return []
+  }
 }
 
 export const getOrgNames = (config: Config): string[] => {
-  const configtxOrgsJson = getConfigtxOrgsJson(config)
-  return Object.keys(configtxOrgsJson.peerOrgs)
+  try {
+    const configtxOrgsJson = getConfigtxOrgsJson(config)
+    return Object.keys(configtxOrgsJson.peerOrgs)
+  } catch {
+    return []
+  }
 }
