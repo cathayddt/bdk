@@ -1,0 +1,30 @@
+name: integration-test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test-cryptogen:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version-file: '.nvmrc'
+    - run: npm ci
+    - run: npm run build:console
+    - run: ./cicd/test_script/crypto-gen.sh
+  test-ca:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version-file: '.nvmrc'
+    - run: npm ci
+    - run: npm run build:console
+    - run: ./cicd/test_script/ca-gen.sh
+
