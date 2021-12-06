@@ -180,19 +180,19 @@ export default class Channel extends AbstractService {
         const { orderer, outputFileName, orgType, channelName } = data
 
         this.bdkFile.createChannelArtifact(channelName)
-        return await (new FabricInstance(this.config, this.infra)).fetchChannelNewestBlock(orderer, channelName, outputFileName, orgType || this.config.orgType)
+        return await (new FabricInstance(this.config, this.infra)).fetchChannelNewestBlock(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
       fetchChannelGenesisBlock: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
         const { orderer, outputFileName, channelName, orgType } = data
 
         this.bdkFile.createChannelArtifact(channelName)
-        return await (new FabricInstance(this.config, this.infra)).fetchChannelBlock0(orderer, channelName, outputFileName, orgType || this.config.orgType)
+        return await (new FabricInstance(this.config, this.infra)).fetchChannelBlock0(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
       fetchChannelConfig: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
-        const { channelName, outputFileName, orgType } = data
+        const { orderer, channelName, outputFileName, orgType } = data
 
         this.bdkFile.createChannelArtifact(channelName)
-        return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, outputFileName, 'block', undefined, orgType || this.config.orgType)
+        return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
     }
   }

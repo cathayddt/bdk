@@ -104,35 +104,6 @@ export default class FabricInstance extends AbstractInstance {
       options)
   }
 
-  // * get AnchorPeers and Orderer of a channel
-  public async fetchChannelConfig (
-    channelName: string,
-    outputFileName: string,
-    outputExtension: 'pb' | 'block',
-    orderer: string | undefined,
-    signType: OrgTypeEnum,
-    options?: OptionsType,
-  ): Promise<InfraRunnerResultType> {
-    return await this.infraRunCommand(
-      [
-        'peer', 'channel', 'fetch', 'config',
-        `${this.dockerPath}/channel-artifacts/${channelName}/${outputFileName}.${outputExtension}`,
-        '--channelID', channelName,
-      ].concat(
-        orderer
-          ? [
-            '--orderer', orderer,
-            '--ordererTLSHostnameOverride', orderer.split(':')[0],
-            '--tls', '--cafile', `${this.dockerPath}/tlsca/${orderer.split(':')[0]}/ca.crt`,
-          ]
-          : [],
-      ),
-      signType,
-      undefined,
-      undefined,
-      options)
-  }
-
   public async signConfigTx (
     signType: OrgTypeEnum,
     channelName: string,
@@ -335,21 +306,57 @@ export default class FabricInstance extends AbstractInstance {
       options)
   }
 
+  // * get AnchorPeers and Orderer of a channel
+  public async fetchChannelConfig (
+    channelName: string,
+    outputFileName: string,
+    outputExtension: 'pb' | 'block' = 'block',
+    orderer: string | undefined,
+    signType: OrgTypeEnum,
+    options?: OptionsType,
+  ): Promise<InfraRunnerResultType> {
+    return await this.infraRunCommand(
+      [
+        'peer', 'channel', 'fetch', 'config',
+        `${this.dockerPath}/channel-artifacts/${channelName}/${outputFileName}.${outputExtension}`,
+        '--channelID', channelName,
+      ].concat(
+        orderer
+          ? [
+            '--orderer', orderer,
+            '--ordererTLSHostnameOverride', orderer.split(':')[0],
+            '--tls', '--cafile', `${this.dockerPath}/tlsca/${orderer.split(':')[0]}/ca.crt`,
+          ]
+          : [],
+      ),
+      signType,
+      undefined,
+      undefined,
+      options)
+  }
+
   // * get channel block 0
-  public async fetchChannelBlock0 (orderer: string,
+  public async fetchChannelBlock0 (
     channelName: string,
     fileName: string,
+    outputExtension: 'pb' | 'block' = 'block',
+    orderer: string | undefined,
     signType: OrgTypeEnum,
     options?: OptionsType): Promise<InfraRunnerResultType> {
     return await this.infraRunCommand(
       [
         'peer', 'channel', 'fetch', '0',
-        `${this.dockerPath}/channel-artifacts/${channelName}/${fileName}.block`,
+        `${this.dockerPath}/channel-artifacts/${channelName}/${fileName}.${outputExtension}`,
         '--channelID', channelName,
-        '--orderer', orderer,
-        '--ordererTLSHostnameOverride', orderer.split(':')[0],
-        '--tls', '--cafile', `${this.dockerPath}/tlsca/${orderer.split(':')[0]}/ca.crt`,
-      ],
+      ].concat(
+        orderer
+          ? [
+            '--orderer', orderer,
+            '--ordererTLSHostnameOverride', orderer.split(':')[0],
+            '--tls', '--cafile', `${this.dockerPath}/tlsca/${orderer.split(':')[0]}/ca.crt`,
+          ]
+          : [],
+      ),
       signType,
       undefined,
       undefined,
@@ -357,20 +364,27 @@ export default class FabricInstance extends AbstractInstance {
   }
 
   // * fetch channel newest block
-  public async fetchChannelNewestBlock (orderer: string,
+  public async fetchChannelNewestBlock (
     channelName: string,
-    outputFileName: string,
+    fileName: string,
+    outputExtension: 'pb' | 'block' = 'block',
+    orderer: string | undefined,
     signType: OrgTypeEnum,
     options?: OptionsType): Promise<InfraRunnerResultType> {
     return await this.infraRunCommand(
       [
         'peer', 'channel', 'fetch', 'newest',
-        `${this.dockerPath}/channel-artifacts/${channelName}/${outputFileName}.block`,
+        `${this.dockerPath}/channel-artifacts/${channelName}/${fileName}.${outputExtension}`,
         '--channelID', channelName,
-        '--orderer', orderer,
-        '--ordererTLSHostnameOverride', orderer.split(':')[0],
-        '--tls', '--cafile', `${this.dockerPath}/tlsca/${orderer.split(':')[0]}/ca.crt`,
-      ],
+      ].concat(
+        orderer
+          ? [
+            '--orderer', orderer,
+            '--ordererTLSHostnameOverride', orderer.split(':')[0],
+            '--tls', '--cafile', `${this.dockerPath}/tlsca/${orderer.split(':')[0]}/ca.crt`,
+          ]
+          : [],
+      ),
       signType,
       undefined,
       undefined,
