@@ -4,9 +4,9 @@
 ## Index
 - [Create a Blockchain Network](#create-a-blockchain-network)
 - [Deploy Chaincode](#deploy-chaincode)
-- [加入新建 Channel](#加入新建-channel)
-- [加入新 Peer org](#加入新-peer-org)
-- [加入新 Orderer org](#加入新-orderer-org)
+- [Add New Channel](#add-new-channel)
+- [Add New Peer Org](#add-new-peer-org)
+- [Add New Orderer Org](#add-new-orderer-org)
 
 ## Create a Blockchain Network
 
@@ -17,27 +17,27 @@ First of all, you'll need to prepare the file *network-create.json*, and insert 
 Variables required by *network-create.json* are defined in the files *configtx.yaml*, *crypto-config.yaml*, and *docker-compose.yaml*. They can be categorized as variables either for orderer organizations or peer organizations. Please move these files under *~/.bdk* directory after they have been modified.
 
 #### `ordererOrgs`: Settings concerning the initial orderer organization on this blockchain network
-- `name` Organization name of the orderer org
-- `domain` Domain name of the orderer organization
-- `enableNodeOUs` Whether to define memberships explicitly (3 member types: `admin`, `orderer`, `client` instead of the original 2: `admin` and `member`)
-- `hostname` Number of orderers and the hostname of each orderer
-- `ports` Port settings of each orderer in this orderer organization
-  - `port` Opened port of the orderer
-  - `isPublishPort` Whether to publish the opened port from the Docker container
-  - `operationPort` Port used to check the heartbeat of the instance
-  - `isPublishOperationPort` Whether to publish the health-check port from the Docker container
+- `name` organization name of the orderer org
+- `domain` domain name of the orderer organization
+- `enableNodeOUs` whether to define memberships explicitly (3 member types: `admin`, `orderer`, `client` instead of the original 2: `admin` and `member`)
+- `hostname` number of orderers and the hostname of each orderer
+- `ports` port settings of each orderer in this orderer organization
+  - `port` opened port of the orderer
+  - `isPublishPort` whether to publish the opened port from the Docker container
+  - `operationPort` port used to check the heartbeat of the instance
+  - `isPublishOperationPort` whether to publish the health-check port from the Docker container
 
 #### `peerOrgs`: Settings concerning the initial peer organization on this blockchain network
-- `name` Organization name of the peer org
-- `domain` Domain name of the peer organization
-- `enableNodeOUs` Whether to define memberships explicitly (3 member types: `admin`, `orderer`, `client` instead of the original 2: `admin` and `member`)
-- `peerCount` Number of peers in this peer organization
-- `userCount` Number of user identities in this peer organization
-- `ports` Port settings of each peer in this peer organization
-  - `port` Opened port of the peer
-  - `isPublishPort` Whether to publish the opened port from the Docker container
-  - `operationPort` Port used to check the heartbeat of the instance
-  - `isPublishOperationPort` Whether to publish the health-check port from the Docker container
+- `name` organization name of the peer org
+- `domain` domain name of the peer organization
+- `enableNodeOUs` whether to define memberships explicitly (3 member types: `admin`, `orderer`, `client` instead of the original 2: `admin` and `member`)
+- `peerCount` number of peers in this peer organization
+- `userCount` number of user identities in this peer organization
+- `ports` port settings of each peer in this peer organization
+  - `port` opened port of the peer
+  - `isPublishPort` whether to publish the opened port from the Docker container
+  - `operationPort` port used to check the heartbeat of the instance
+  - `isPublishOperationPort` whether to publish the health-check port from the Docker container
 
 ```json
  {
@@ -301,95 +301,97 @@ bdk chaincode query -C test -n fabcar -f QueryCar -a CAR_ORG2_PEER0
 =================================
  -->
 
-## 加入新建 Channel
+## Add New Channel
 
-### Step 1：建立 Channel
+### Step 1：Create channel
 
-首先更改在 *~/.bdk/.env* 組織的名稱 *BDK_ORG_NAME* 與 Domain 名稱 *BDK_ORG_DOMAIN* 設定，再來建立一個名稱為 *test* 的 [Application Channel](https://hyperledger-fabric.readthedocs.io/en/release-2.2/create_channel/create_channel_overview.html?highlight=channel)，可以使用 `--channelAdminPolicyStyle` 選擇基本的選項 `All-Initial-Member`
+First, we edit the organization name *BDK_ORG_NAME* and domain name *BDK_ORG_DOMAIN* set in the file *~/.bdk/.env*. We then create an [application channel](https://hyperledger-fabric.readthedocs.io/en/release-2.2/create_channel/create_channel_overview.html?highlight=channel) named *test*, note that we set the flag `--channelAdminPolicyStyle` as `All-Initial-Member`.
 
 ```bash
 # export BDK_ORG_NAME='Org1'
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# Org1 的 peer0 建立新的 channel
+# Create new channel for peer0 in Org1
 bdk channel create -n test --orderer orderer0.example.com:7050 -o Or1 -o Org2
 ```
 
-### Step 2：Org1 和 Org2 加入 Channel
+### Step 2：Add Org1 and Org2 to channel
 
-Org1 和 Org2 加入名稱為 *test* 的 Application Channel，由於加入 Application Chanel 是以 Peer 單位加入，所以每次加入都要記得更改在 *~/.bdk/.env* 的 *BDK_ORG_NAME 、 BDK_ORG_DOMAIN* 、 *BDK_HOSTNAME* 的設定
+Add Org1 and Org2 to the application channel named *test*. Since the application channel is joined with each peer individually, we need to edit the variables *BDK_ORG_NAME*, *BDK_ORG_DOMAIN*, and *BDK_HOSTNAME* set in *~/.bdk/.env* every time.
 
 ```bash
 # export BDK_ORG_NAME='Org1'
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# Org1 的 peer0 加入 channel
+# Add peer0 of Org1 to channel
 bdk channel join -n test --orderer orderer0.example:7050
 
 # export BDK_ORG_NAME='Org1'
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer1'
 
-# Org1 的 peer1 加入 channel
+# Add peer1 of Org1 to channel
 bdk channel join -n test --orderer orderer0.example:7050
 
 # export BDK_ORG_NAME='Org2'
 # export BDK_ORG_DOMAIN='org2.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# Org2 的 peer0 加入 channel
+# Add peer0 of Org2 to channel
 bdk channel join -n test --orderer orderer0.example.com:7050
 ```
 
-### Step 3：Org1 和 Org2 更新在 Channel 上的 Anchor peer 設定
+### Step 3：Update anchor peer settings on channel for Org1 and Org2
 
-更新 Org1 和 Org2 在名稱為 *test* 的 Application Channel 上的設定，注意更新時，要記得更改在 *~/.bdk/.env* 的 *BDK_ORG_NAME 、 BDK_ORG_DOMAIN* 的設定
+Update settings for Org1 and Org2 on the application channel named *test*. Note that when updating the settings in *~/.bdk/.env*, *BDK_ORG_NAME* and *BDK_ORG_DOMAIN* have to be editted as well.
+
 
 ```bash
 # export BDK_ORG_NAME='Org1'
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# 更新 Org1 的 anchor peer
+# Update anchor peer for Org1
 bdk channel update-anchorpeer -n test --orderer orderer1.example.com:7050
 
 # export BDK_ORG_NAME='Org2'
 # export BDK_ORG_DOMAIN='org2.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# Org2 的 peer0 加入 channel
+# Update anchor peer for Org2
 bdk channel update-anchorpeer -n test --orderer orderer0.example.com:7050
 ```
 
-## 加入新 Peer org
+## Add new peer org
 
-首先要準備檔案 *org-peer-create.json*，將所需要的參數放入到 *org-peer-create.json* 中，之後使用 `cryptogen` 的方式產生憑證和私鑰，準備 Peer 的組織所需要的相關文件，之後將 Org3 的資訊加入到 Application channel 設定檔中，啟動新組織 Org3 的 Peer 並且把他加入到名稱為 `test` 的 Channel 中，再測試以 Org3 發起交易和查詢交易資訊
+First, we need to prepare a file named *org-peer-create.json*, with the required variables. We then use `cryptogen` to generate the certificates and keys required for the peer organization. Next, we add the Org3(the new peer org) to the settings file for the application channel. Last, we start the peers in Org3 and add it to the `test` channel. Test transactions and queries should be successful at this point.
 
-### 預先準備的檔案
 
- *org-peer-create.json* 檔案中是 *configtx.yaml* 、 *crypto-config.yaml* 、 *docker-compose.yaml* 所需要的參數，將檔案放在當前目錄下
+### Prepare settings files
 
-`**name**` Peer 的組織名稱
+ *org-peer-create.json* contains parameters required for generating *configtx.yaml*, *crypto-config.yaml*, and *docker-compose.yaml*. Place the file in the current working directory.
 
-`**domain**` Peer 組織的 domain 名稱
+`**name**` organization name for the peer organization
 
-`**enableNodeOUs**` 在此 Peer 組織中是否要細分身份，原先只分為 `admin` 和 `member` ，細分後會為 `admin` 、 `peer` 和 `client`
+`**domain**` domain name for the peer organization
 
-`**peerCount**` Peer 組織中 Peer 的個數
+`**enableNodeOUs**` whether or not to declare different identities in the organization, available identities are `admin` and `member` with `members` having subcategories of `peer` and `client`.
 
-`**userCount**` Peer 組織中 user 身份的個數
+`**peerCount**` number of peers in the peer organization
 
-`**ports**` Peer 組織中 Peer 的 port 設置
+`**userCount**` number of users in the peer organization
 
-|— `**port**` 架設 Peer 的 port
+`**ports**` individual port settings for each peer in the peer organization
 
-|— `**isPublishPort**` 架設 Peer 的 port 是否要從 docker container 對外開放
+|— `**port**` main peer port
 
-|— `**operationPort**` 測試 Peer heart beat 的 port
+|— `**isPublishPort**` whether or not to publish the port outside of the docker overlay network
 
-|__ `**isPublishOperationPort**` 測試 Peer heart beat 的 port 是否要從 docker container 對外開放
+|— `**operationPort**` port used for health checks
+
+|__ `**isPublishOperationPort**` whether or not to publish the health check port outside of the docker overlay network
 
 ```json
 [
@@ -423,17 +425,17 @@ bdk channel update-anchorpeer -n test --orderer orderer0.example.com:7050
   ]
 ```
 
-### Step 1：建立名稱為 Org3 的 Peer org
+### Step 1：Create a peer organization named Org3
 
-產生 *crypto-config.yaml* 讓 `cryptogen` 指令產生 Peer 的憑證和私鑰，將其 TLS Ca 憑證複製到 Blockchain network 資料夾下的 *tlsca* 資料夾中，並且產生 *configtx.yaml* 使用 `configtxgen` 指令產生 Peer org 的 json 設定檔，之後建立 Peer 的連線的設定檔案和 Peer 和 *docker-compose.yaml* 檔案
+Create *crypto-config.yaml* for `cryptogen` to generate the certificates and keys required by the peer organization. We then copy the TLS CA certificates to the *tlsca* directory under the blockchain network and use *configtx.yaml* with `configtxgen` to generate the json settings file for the peer organization. Last, we generate the connection profile for the peer organization and *docker-compose.yaml* for it.
 
 ```bash
 bdk org peer create -f ./org-peer-create.json --create-full
 ```
 
-### Step 2：Org1 將 Org3 加入 Channel 中
+### Step 2：Add Org1 and Org3 to channel
 
-由 Org1 組織身份將 Org3 加入 Application Channel
+Add Org3 to application channel with Org1
 
 ```bash
 # export BDK_ORG_NAME='Org1'
@@ -443,9 +445,9 @@ bdk org peer create -f ./org-peer-create.json --create-full
 bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Eric
 ```
 
-### Step 3：啟動 Org3 機器
+### Step 3：Start Org3 containers
 
-啟動 Org3 的 Peer 機器
+Start Org3 peer containers
 
 ```bash
 # export BDK_ORG_NAME='Org3'
@@ -455,9 +457,9 @@ bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Eric
 bdk peer up -n peer0.org3.example.com -n peer1.org3.example.com
 ```
 
-### Step 4：Org3 加入 Channel
+### Step 4：Add Org3 to channel
 
-Org1 加入名稱為 *test* 的 Application Channel，由於加入 Application Chanel 是以 Peer 單位加入，所以每次加入都要記得更改在 *~/.bdk/.env* 的 *BDK_ORG_NAME 、 BDK_ORG_DOMAIN* 、 *BDK_HOSTNAME* 的設定
+Add Org3 to the application channel named *test*. Since each peer is added individually to the application channel, changes to variables *BDK_ORG_NAME*, *BDK_ORG_DOMAIN*, and *BDK_HOSTNAME* in *~/.bdk/.env* are required every time.
 
 ```bash
 # export BDK_ORG_NAME='Org3'
@@ -473,61 +475,61 @@ bdk channel join -n test --orderer orderer0.example.com:7050
 bdk channel join -n test --orderer orderer0.example.com:7050
 ```
 
-### Step 5：Org3 部署 Chaincode
+### Step 5：Deploy chaincode on Org3
 
-安裝並且同意標籤名稱為 fabcar_1 的 Chaincode，由於使用前面的 Blockchain network，所以此次只做到 `peer chaincode lifecycle approveformyorg`，使用 `-a` 來限制 Lifecycle chaincode 的部署 Chaincode 步驟只做到 `peer chaincode lifecycle approveformyorg` ，使用 `-I` 來標示此次 Chaincode 需要初始化才能使用，之後在 Org3 的 peer1 安裝名稱為 fabcar_1 的 Chaincode
+Install and approve the chaincode named fabcar_1. Since we are using the blockchain network from before, we only need to do `peer chaincode lifecycle approveformyorg` up to this step. We can use the `-a` parameter to restrict the deployment of the chaincode lifecycle, and require the chaincode to be initialized with parameter ``-I`. We then install the chaincode named fabcar_1 on peer1 of Org3.
 
 ```bash
 # export BDK_ORG_NAME='Org3'
 # export BDK_ORG_DOMAIN='org3.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# Org3 的 peer0 安裝、同意 Chaincode
+# Install and approve chaincode on peer0 of Org3
 bdk chaincode deploy -C test -l fabcar_1 -I -a --orderer orderer0.example.com:7050
 
 # export BDK_ORG_NAME='Org3'
 # export BDK_ORG_DOMAIN='org3.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# Org3 的 peer1 安裝 Chaincode
+# Install chaincode on peer1 of Org3
 bdk chaincode install -l fabcar_1
 ```
 
-### Step 6：Org3 發起交易且查詢
+### Step 6：Initiate and query a transaction on Org3
 
-使用 `bdk chaincode invoke` 和名稱為 fabcar_1 的 Chaincode 發起交易，使用 `-f` 選擇 Chaincode 上初始化的 function，使用 `-a` 輸入 Chainocde function 所需要的參數，之後可以使用 `bdk chaincode query` 和 Chaincode 查詢資訊
+Initiate a chaincode transaction on fabcar_1 with `bdk chaincode invoke`. We use the `-f` parameter to select the function used to initialize the chaincode, and `-a` parameter to pass in the variables for the chaincode function. We can then query the chaincode with `bdk chaincode query`.
 
 ```bash
 # export BDK_ORG_NAME='Org3'
 # export BDK_ORG_DOMAIN='org3.example.com'
 # export BDK_HOSTNAME='peer0'
 
-# 發起交易
+# Initiate transaction
 bdk chaincode invoke -C test -n fabcar -f CreateCar -a CAR_ORG3_PEER0 -a BMW -a X6 -a blue -a Org3 --orderer orderer0.example.com:7050 --peer-addresses peer0.org1.example.com:7051 --peer-addresses peer0.org2.example.com:7151 --peer-addresses peer0.org3.example.com:7251
 
-# 查詢資訊
+# Query chaincode information
 bdk chaincode query -C test -n fabcar -f QueryCar -a CAR_ORG3_PEER0
 
 # export BDK_ORG_NAME='Org3'
 # export BDK_ORG_DOMAIN='org3.example.com'
 # export BDK_HOSTNAME='peer1'
 
-# 發起交易
+# Initiate transaction
 bdk chaincode invoke -C test -n fabcar -f CreateCar -a CAR_ORG3_PEER1 -a BMW -a X6 -a blue -a Org3 --orderer orderer0.example.com:7050 --peer-addresses peer0.org1.example.com:7051 --peer-addresses peer0.org2.example.com:7151 --peer-addresses peer1.org3.example.com:7251
 
-# 查詢資訊
+# Query chaincode information
 bdk chaincode query -C test -n fabcar -f QueryCar -a CAR_ORG3_PEER1
 ```
 
-## 加入新 Orderer org
+## Add New Orderer Org
 
-### Step 1：建立新的 Orderer org
+### Step 1 Create new orderer org
 
 ```bash
 bdk org orderer create --interactive
 ```
 
-### Step 2：Orderer org 加入 system channel
+### Step 2：Add orderer org to system channel
 
 ```bash
 # export BDK_ORG_NAME='OrdererOrg'
@@ -537,7 +539,7 @@ bdk org orderer create --interactive
 bdk org orderer add system --interactive
 ```
 
-### Step 3：Orderer org 加入 channel
+### Step 3：Add orderer org to channel
 
 ```bash
 # export BDK_ORG_NAME='OrdererOrg'
