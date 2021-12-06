@@ -202,17 +202,14 @@ export default class Peer extends AbstractService {
   public addOrgToChannelSteps () {
     return {
       fetchChannelConfig: async (dto: PeerAddOrgToChannelType): Promise<InfraRunnerResultType> => {
-        const { channelName, orgName } = dto
-        logger.info(`[*] Org Peer Add: add ${orgName} in ${channelName} step 1`)
-        return await (new Channel(this.config, this.infra)).fetchChannelConfig(channelName, this.config.orgType)
+        logger.info('[*] add org to channel step1 (fetchChannelConfig)')
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType)
       },
       computeUpdateConfigTx: async (dto: PeerAddOrgToChannelType) => {
+        logger.info('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
-        logger.info(`[*] Org Peer Add: add ${orgName} in ${channelName} step 2`)
-
-        await (new Channel(this.config, this.infra)).decodeChannelConfig(channelName, Channel.channelConfigFileName(channelName).originalFileName, 'temp')
-        const configBlock = JSON.parse(this.bdkFile.getChannelConfigString(channelName, 'temp')).data.data[0].payload.data.config
+        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
 
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
