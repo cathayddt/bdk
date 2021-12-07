@@ -67,7 +67,12 @@ export const getChannelList = (config: Config): string[] => {
 export const getOrgNames = (config: Config): string[] => {
   try {
     const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
-    return fs.readdirSync(`${hostBasePath}/config-yaml/orgs`).filter(x => /^peer-.*\.json$/.test(x)).map(x => x.replace(/^peer-/, '').replace(/\.json$/, ''))
+    const orgs: string[] = []
+    fs.readdirSync(`${hostBasePath}/config-yaml/orgs`).forEach(fileName => {
+      const org = fileName.match(/(?<=^peer-).*(?=\.json$)/)?.[0]
+      org && orgs.push(org)
+    })
+    return orgs
   } catch {
     return []
   }

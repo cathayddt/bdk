@@ -105,10 +105,12 @@ export default class BdkFile {
       peerOrgs: {},
     }
     fs.readdirSync(`${this.bdkPath}/config-yaml/orgs`).forEach((filename: string) => {
-      if (/^orderer-.*\.json$/.test(filename)) {
-        configtxOrgs.ordererOrgs[filename.replace(/^orderer-/, '').replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/orgs/${filename}`).toString())
-      } else if (/^peer-.*\.json$/.test(filename)) {
-        configtxOrgs.peerOrgs[filename.replace(/^peer-/, '').replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/orgs/${filename}`).toString())
+      const peerOrg = filename.match(/(?<=^peer-).*(?=\.json$)/)?.[0]
+      const ordererOrg = filename.match(/(?<=^orderer-).*(?=\.json$)/)?.[0]
+      if (ordererOrg) {
+        configtxOrgs.ordererOrgs[ordererOrg] = JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/orgs/${filename}`).toString())
+      } else if (peerOrg) {
+        configtxOrgs.peerOrgs[peerOrg] = JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/orgs/${filename}`).toString())
       }
     },
     )
