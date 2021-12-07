@@ -11,6 +11,7 @@ import { OrdererAddType, ConsenterType, OrdererUpType, OrdererAddOrgToChannelTyp
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgOrdererCreateType } from '../model/type/org.type'
 import { AbstractService } from './Service.abstract'
+import Org from './org'
 
 export default class Orderer extends AbstractService {
   /**
@@ -62,16 +63,17 @@ export default class Orderer extends AbstractService {
 
       const ports = ordererOrg.ports?.map(port => port.port)
 
-      configtxYaml.addOrdererOrg({
+      const newOrg = configtxYaml.addOrdererOrg({
         name: ordererOrg.name,
         mspDir: `${this.config.infraConfig.dockerPath}/ordererOrganizations/${ordererOrg.domain}/msp`,
         domain: ordererOrg.domain,
         hostname: ordererOrg.hostname,
         ports,
       })
+      this.bdkFile.createConfigtxOrdererOrg(newOrg)
+      await (new Org(this.config, this.infra)).createOrgDefinitionJson(ordererOrg.name, configtxYaml)
 
       const ordererOrgConsenter: ConsenterType[] = []
-
       ordererOrg.hostname.forEach((hostname, index) => {
         const serverCertBase64 = this.bdkFile.getOrdererServerCertToBase64(hostname, ordererOrg.domain)
 
@@ -82,11 +84,7 @@ export default class Orderer extends AbstractService {
           serverTlsCert: serverCertBase64,
         })
       })
-
-      this.bdkFile.createConfigtx(configtxYaml)
-      this.bdkFile.createOrdererOrgConsenter(ordererOrg.name, JSON.stringify(ordererOrgConsenter))
-
-      await (new Channel(this.config, this.infra)).createNewOrgConfigTx(ordererOrg.name)
+      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(ordererOrgConsenter))
     }
   }
 

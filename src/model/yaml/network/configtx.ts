@@ -16,7 +16,7 @@ interface OrganizationInterface {
   ID: string // ID to load the MSP definition as
   MSPDir: string // MSPDir is the filesystem path which contains the MSP configuration
 }
-interface OrdererOrganizationInterface extends OrganizationInterface {
+export interface OrdererOrganizationInterface extends OrganizationInterface {
   Policies: { // Policies defines the set of policies at this level of the config tree. For organization policies, their canonical path is usually /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
     Readers: PolicyInterface
     Writers: PolicyInterface
@@ -24,7 +24,7 @@ interface OrdererOrganizationInterface extends OrganizationInterface {
   }
   OrdererEndpoints: string[]
 }
-interface PeerOrganizationInterface extends OrganizationInterface {
+export interface PeerOrganizationInterface extends OrganizationInterface {
   Policies: { // Policies defines the set of policies at this level of the config tree. For organization policies, their canonical path is usually /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
     Readers: PolicyInterface
     Writers: PolicyInterface
@@ -270,6 +270,7 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
 
     this.ordererOrgs[payload.name] = newOrdererOrg
     this.value.Organizations.push(newOrdererOrg)
+    return newOrdererOrg
   }
 
   public addPeerOrg (payload: { name: string; mspDir: string; domain: string; anchorPeers: {hostname: string; port?: number}[]}) {
@@ -281,7 +282,7 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
     // ports -> [7051, 7151]
     const newPeerOrg: PeerOrganizationInterface = {
       Name: payload.name,
-      ID: `${payload.name}`,
+      ID: payload.name,
       MSPDir: payload.mspDir,
       Policies: {
         Readers: {
@@ -306,6 +307,7 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
 
     this.peerOrgs[payload.name] = newPeerOrg
     this.value.Organizations.push(newPeerOrg)
+    return newPeerOrg
   }
 
   public addSystemChannelProfile (payload: { name: string; etcdRaftConsenters: EtcdRaftConsentersInterface[]; ordererOrgs: string[]; consortiums: { [cousortiumName: string]: string[] }; batchTimeout?: string; BatchSize?: BatchSizeInterface }) {
@@ -371,11 +373,6 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
     if ('Application' in profile) {
       profile.Application.Policies[payload.policyKey] = payload.policy
     }
-  }
-
-  public exportOrgs () {
-    const configtxOrgs: ConfigtxOrgs = { ordererOrgs: this.ordererOrgs, peerOrgs: this.peerOrgs }
-    return configtxOrgs
   }
 
   public importOrgs (data: ConfigtxOrgs) {

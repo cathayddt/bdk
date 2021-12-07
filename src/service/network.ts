@@ -200,13 +200,14 @@ export default class Network extends AbstractService {
     const etcdRaftConsenters: { Host: string; Port: number; ClientTLSCert: string; ServerTLSCert: string }[] = []
 
     dto.ordererOrgs.forEach(ordererOrg => {
-      configtxYaml.addOrdererOrg({
+      const newOrg = configtxYaml.addOrdererOrg({
         name: ordererOrg.name,
         mspDir: `${this.config.infraConfig.dockerPath}/ordererOrganizations/${ordererOrg.domain}/msp`,
         domain: ordererOrg.domain,
         hostname: ordererOrg.hostname,
         ports: ordererOrg.ports?.map(x => x.port),
       })
+      this.bdkFile.createConfigtxOrdererOrg(newOrg)
 
       ordererOrg.hostname.forEach((hostname, i) => {
         etcdRaftConsenters.push({
@@ -219,12 +220,13 @@ export default class Network extends AbstractService {
     })
 
     dto.peerOrgs.forEach(peerOrg => {
-      configtxYaml.addPeerOrg({
+      const newOrg = configtxYaml.addPeerOrg({
         name: peerOrg.name,
         mspDir: `${this.config.infraConfig.dockerPath}/peerOrganizations/${peerOrg.domain}/msp`,
         domain: peerOrg.domain,
         anchorPeers: [{ hostname: `peer0.${peerOrg.domain}`, port: peerOrg?.ports?.[0]?.port }],
       })
+      this.bdkFile.createConfigtxPeerOrg(newOrg)
     })
 
     configtxYaml.addSystemChannelProfile({
@@ -237,7 +239,6 @@ export default class Network extends AbstractService {
     })
 
     this.bdkFile.createConfigtx(configtxYaml)
-    this.bdkFile.createConfigtxOrgs(configtxYaml.exportOrgs())
 
     return configtxYaml
   }

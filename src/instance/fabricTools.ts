@@ -126,7 +126,7 @@ export default class FabricTools extends AbstractInstance {
     options)
   }
 
-  public async createNewOrgConfigTx (orgName: string, options?: OptionsType): Promise<DockerResultType> {
+  public async printOrgDefinitionJson (orgName: string, options?: OptionsType): Promise<DockerResultType> {
     const result = await this.infraRunCommand([
       'configtxgen',
       '-printOrg', `${orgName}`,
