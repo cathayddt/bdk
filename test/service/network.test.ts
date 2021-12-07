@@ -35,7 +35,11 @@
 //     await network.create(networkCreateDto)
 //     let files_should_exist = [
 //       'config-yaml/configtx.yaml',
-//       'config-yaml/configtxOrgs.json',
+//       'config-yaml/orgs/peer-Ben.json',
+//       'config-yaml/orgs/peer-Grace.json',
+//       'config-yaml/orgs/peer-Eugene.json',
+//       'config-yaml/orgs/orderer-BenOrderer.json',
+//       'config-yaml/orgs/orderer-GraceOrderer.json',
 //       'config-yaml/crypto-config.yaml',
 //       'docker-compose/docker-compose-orderer-orderer0.ben.cathaybc.com.yaml',
 //       'docker-compose/docker-compose-orderer-orderer1.ben.cathaybc.com.yaml',

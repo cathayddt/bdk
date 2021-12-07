@@ -1,6 +1,8 @@
 import { logger } from '../util'
 import { OrgJsonType } from '../model/type/org.type'
 import { AbstractService } from './Service.abstract'
+import FabricTools from '../instance/fabricTools'
+import ConfigtxYaml from '../model/yaml/network/configtx'
 
 export default class Org extends AbstractService {
   /**
@@ -26,5 +28,20 @@ export default class Org extends AbstractService {
     }
 
     this.bdkFile.createExportOrgConfigJson(exportPeerOrgJson, path)
+  }
+
+  /**
+   * @description 由 config.yaml 建立 peer org 的 json 檔案
+   * @param orgName - peer org 的名稱
+   * @returns 在 blockchain network 資料夾底下 org-json/[peer org 名稱].json 檔案
+   */
+  // create new org configtx yaml
+  public async createNewOrgConfigTx (orgName: string, configtxYaml: ConfigtxYaml) {
+    logger.info(`[*] Generate ${orgName} config json file: configtxgen ${this.config.infraConfig.bdkPath}/${this.config.networkName}/org-json/${orgName}.json`)
+
+    this.bdkFile.createConfigtx(configtxYaml)
+    const orgJson = (await (new FabricTools(this.config, this.infra)).createNewOrgConfigTx(orgName)).stdout.match(/{.*}/s)?.[0] || ''
+
+    this.bdkFile.createOrgConfigJson(orgName, orgJson)
   }
 }

@@ -4,7 +4,7 @@ import YAML from 'js-yaml'
 import { parse, stringify } from 'envfile'
 import CryptoConfigYaml from '../model/yaml/network/cryptoConfigYaml'
 import ConnectionConfigYaml from '../model/yaml/network/connectionConfigYaml'
-import ConfigtxYaml, { ConfigtxOrgs } from '../model/yaml/network/configtx'
+import ConfigtxYaml, { ConfigtxOrgs, OrdererOrganizationInterface, PeerOrganizationInterface } from '../model/yaml/network/configtx'
 import { ConfigEnvType } from '../model/type/config.type'
 import OrdererDockerComposeYaml from '../model/yaml/docker-compose/ordererDockerComposeYaml'
 import PeerDockerComposeYaml from '../model/yaml/docker-compose/peerDockerComposeYaml'
@@ -63,6 +63,10 @@ export default class BdkFile {
     fs.mkdirSync(`${this.bdkPath}/config-yaml`, { recursive: true })
   }
 
+  private createConfigYamlOrgsFolder () {
+    fs.mkdirSync(`${this.bdkPath}/config-yaml/orgs`, { recursive: true })
+  }
+
   private createTlsFolder (orgDomainName: string) {
     fs.mkdirSync(`${this.bdkPath}/tlsca/${orgDomainName}`, { recursive: true })
   }
@@ -81,9 +85,14 @@ export default class BdkFile {
     fs.writeFileSync(`${this.bdkPath}/config-yaml/configtx.yaml`, configtxYaml.getYamlString())
   }
 
-  public createConfigtxOrgs (configtxOrgs: ConfigtxOrgs) {
-    this.createConfigYamlFolder()
-    fs.writeFileSync(`${this.bdkPath}/config-yaml/configtxOrgs.json`, JSON.stringify(configtxOrgs))
+  public createConfigtxPeerOrg (peerOrg: PeerOrganizationInterface) {
+    this.createConfigYamlOrgsFolder()
+    fs.writeFileSync(`${this.bdkPath}/config-yaml/orgs/peer-${peerOrg.Name}.json`, JSON.stringify(peerOrg))
+  }
+
+  public createConfigtxOrdererOrg (OrdererOrg: OrdererOrganizationInterface) {
+    this.createConfigYamlOrgsFolder()
+    fs.writeFileSync(`${this.bdkPath}/config-yaml/orgs/orderer-${OrdererOrg.Name}.json`, JSON.stringify(OrdererOrg))
   }
 
   public getOrdererServerCertToBase64 (hostname: string, domain: string) {
@@ -91,7 +100,19 @@ export default class BdkFile {
   }
 
   public getConfigtxOrgs (): ConfigtxOrgs {
-    return JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/configtxOrgs.json`).toString())
+    const configtxOrgs: ConfigtxOrgs = {
+      ordererOrgs: {},
+      peerOrgs: {},
+    }
+    fs.readdirSync(`${this.bdkPath}/config-yaml/orgs`).forEach((filename: string) => {
+      if (/^orderer-.*\.json$/.test(filename)) {
+        configtxOrgs.ordererOrgs[filename.replace(/^orderer-/, '').replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/orgs/${filename}`).toString())
+      } else if (/^peer-.*\.json$/.test(filename)) {
+        configtxOrgs.peerOrgs[filename.replace(/^peer-/, '').replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(`${this.bdkPath}/config-yaml/orgs/${filename}`).toString())
+      }
+    },
+    )
+    return configtxOrgs
   }
 
   public copyOrdererOrgTLSCa (hostname: string, domain: string) {

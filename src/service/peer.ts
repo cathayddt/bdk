@@ -14,6 +14,7 @@ import { PeerUpType, PeerDownType, PeerAddType, PeerAddOrgToChannelType, PeerApp
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgPeerCreateType } from '../model/type/org.type'
 import { AbstractService } from './Service.abstract'
+import Org from './org'
 
 export default class Peer extends AbstractService {
   /**
@@ -63,16 +64,14 @@ export default class Peer extends AbstractService {
     for (const peerOrg of peerOrgs) {
       logger.info(`[*] Peer create configtx: ${peerOrg.name}`)
 
-      configtxYaml.addPeerOrg({
+      const newOrg = configtxYaml.addPeerOrg({
         name: peerOrg.name,
         mspDir: `${this.config.infraConfig.dockerPath}/peerOrganizations/${peerOrg.domain}/msp`,
         domain: peerOrg.domain,
         anchorPeers: [{ hostname: `${this.config.hostname}.${this.config.orgDomainName}`, port: peerOrg?.ports?.[+(this.config.hostname.slice(4, 0))]?.port }],
       })
-
-      this.bdkFile.createConfigtx(configtxYaml)
-
-      await (new Channel(this.config, this.infra)).createNewOrgConfigTx(peerOrg.name)
+      this.bdkFile.createConfigtxPeerOrg(newOrg)
+      await (new Org(this.config, this.infra)).createNewOrgConfigTx(peerOrg.name, configtxYaml)
     }
   }
 

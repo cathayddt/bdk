@@ -273,20 +273,6 @@ export default class Channel extends AbstractService {
   }
 
   /**
-   * @description 由 config.yaml 建立 peer org 的 json 檔案
-   * @param orgName - peer org 的名稱
-   * @returns 在 blockchain network 資料夾底下 org-json/[peer org 名稱].json 檔案
-   */
-  // create new org configtx yaml
-  public async createNewOrgConfigTx (orgName: string) {
-    logger.info(`[*] Generate ${orgName} config json file: configtxgen ${this.config.infraConfig.bdkPath}/${this.config.networkName}/${orgName}/${orgName}.json`)
-
-    const orgJson = (await (new FabricTools(this.config, this.infra)).createNewOrgConfigTx(orgName)).stdout.match(/{.*}/s)?.[0] || ''
-
-    this.bdkFile.createOrgConfigJson(orgName, orgJson)
-  }
-
-  /**
    * fetch channel config to artifact/${channelName}/${channelName}_config_bock.pb
    */
   public async fetchChannelConfig (channelName: string, signType: OrgTypeEnum, orderer?: string): Promise<InfraRunnerResultType> {

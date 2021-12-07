@@ -4,7 +4,6 @@ import Channel from '../../service/channel'
 import { Config } from '../../config'
 import Chaincode from '../../service/chaincode'
 import { logger } from '../../util'
-import { ConfigtxOrgs } from '../yaml/network/configtx'
 
 export const joinedChannelChoice = async (channel: Channel): Promise<Choice[]> => {
   const listJoinedChannelResult = await channel.listJoinedChannel()
@@ -44,18 +43,13 @@ export const getChaincodeList = (config: Config): {name: string; version: number
     : []
 }
 
-const getConfigtxOrgsJson = (config: Config): ConfigtxOrgs => {
-  try {
-    const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
-    return fs.existsSync(`${hostBasePath}/config-yaml/configtxOrgs.json`) ? JSON.parse(fs.readFileSync(`${hostBasePath}/config-yaml/configtxOrgs.json`).toString()) : { ordererOrgs: {}, peerOrgs: {} }
-  } catch {
-    return { ordererOrgs: {}, peerOrgs: {} }
-  }
-}
 export const getOrdererList = (config: Config): string[] => {
   try {
-    const configtxOrgsJson = getConfigtxOrgsJson(config)
-    return Object.values(configtxOrgsJson.ordererOrgs).map(x => x.OrdererEndpoints).reduce((prev, curr) => (prev.concat(curr)), [])
+    const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
+    const ordererOrgs = fs.readdirSync(`${hostBasePath}/config-yaml/orgs`)
+      .filter((filename: string) => (/^orderer-.*\.json$/.test(filename)))
+      .map((filename: string) => (JSON.parse(fs.readFileSync(`${hostBasePath}/config-yaml/orgs/${filename}`).toString())))
+    return ordererOrgs.map(x => x.OrdererEndpoints).reduce((prev, curr) => (prev.concat(curr)), [])
   } catch {
     return []
   }
@@ -72,8 +66,8 @@ export const getChannelList = (config: Config): string[] => {
 
 export const getOrgNames = (config: Config): string[] => {
   try {
-    const configtxOrgsJson = getConfigtxOrgsJson(config)
-    return Object.keys(configtxOrgsJson.peerOrgs)
+    const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
+    return fs.readdirSync(`${hostBasePath}/config-yaml/orgs`).filter(x => /^peer-.*\.json$/.test(x)).map(x => x.replace(/^peer-/, '').replace(/\.json$/, ''))
   } catch {
     return []
   }
