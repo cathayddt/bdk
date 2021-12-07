@@ -12,7 +12,7 @@ export default class Org extends AbstractService {
     data.forEach(org => {
       logger.info(`[*] Import org config: ${org.name}`)
 
-      this.bdkFile.createOrgConfigJson(org.name, org.json)
+      this.bdkFile.createOrgDefinitionJson(org.name, org.json)
     })
   }
 
@@ -27,7 +27,7 @@ export default class Org extends AbstractService {
       json: orgJson,
     }
 
-    this.bdkFile.createExportOrgConfigJson(exportPeerOrgJson, path)
+    this.bdkFile.createExportOrgDefinitionJson(exportPeerOrgJson, path)
   }
 
   /**
@@ -36,12 +36,12 @@ export default class Org extends AbstractService {
    * @returns 在 blockchain network 資料夾底下 org-json/[peer org 名稱].json 檔案
    */
   // create new org configtx yaml
-  public async createNewOrgConfigTx (orgName: string, configtxYaml: ConfigtxYaml) {
+  public async createOrgDefinitionJson (orgName: string, configtxYaml: ConfigtxYaml) {
     logger.info(`[*] Generate ${orgName} config json file: configtxgen ${this.config.infraConfig.bdkPath}/${this.config.networkName}/org-json/${orgName}.json`)
 
     this.bdkFile.createConfigtx(configtxYaml)
-    const orgJson = (await (new FabricTools(this.config, this.infra)).createNewOrgConfigTx(orgName)).stdout.match(/{.*}/s)?.[0] || ''
+    const orgJson = (await (new FabricTools(this.config, this.infra)).printOrgDefinitionJson(orgName)).stdout.match(/{.*}/s)?.[0] || ''
 
-    this.bdkFile.createOrgConfigJson(orgName, orgJson)
+    this.bdkFile.createOrgDefinitionJson(orgName, orgJson)
   }
 }

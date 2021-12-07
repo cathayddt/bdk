@@ -71,7 +71,7 @@ export default class Orderer extends AbstractService {
         ports,
       })
       this.bdkFile.createConfigtxOrdererOrg(newOrg)
-      await (new Org(this.config, this.infra)).createNewOrgConfigTx(ordererOrg.name, configtxYaml)
+      await (new Org(this.config, this.infra)).createOrgDefinitionJson(ordererOrg.name, configtxYaml)
 
       const ordererOrgConsenter: ConsenterType[] = []
       ordererOrg.hostname.forEach((hostname, index) => {
@@ -84,7 +84,7 @@ export default class Orderer extends AbstractService {
           serverTlsCert: serverCertBase64,
         })
       })
-      this.bdkFile.createOrdererOrgConsenter(ordererOrg.name, JSON.stringify(ordererOrgConsenter))
+      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(ordererOrgConsenter))
     }
   }
 

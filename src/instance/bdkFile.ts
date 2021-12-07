@@ -205,17 +205,17 @@ export default class BdkFile {
     fs.mkdirSync(`${this.bdkPath}/chaincode`, { recursive: true })
   }
 
-  public createOrgConfigJson (name: string, orgJson: string) {
+  public createOrgDefinitionJson (name: string, orgJson: string) {
     fs.mkdirSync(`${this.bdkPath}/org-json`, { recursive: true })
     fs.writeFileSync(`${this.bdkPath}/org-json/${name}.json`, orgJson)
   }
 
-  public createOrdererOrgConsenter (name: string, consenterJson: string) {
+  public createOrdererOrgConsenterJson (name: string, consenterJson: string) {
     fs.mkdirSync(`${this.bdkPath}/org-json`, { recursive: true })
     fs.writeFileSync(`${this.bdkPath}/org-json/${name}-consenter.json`, consenterJson)
   }
 
-  public createExportOrgConfigJson (exportOrgJson: OrgJsonType, file: string) {
+  public createExportOrgDefinitionJson (exportOrgJson: OrgJsonType, file: string) {
     const splitFilePath = file.split('/', 3)
     for (let i = 0; i < splitFilePath.length - 1; i++) {
       fs.mkdirSync(`${splitFilePath[i]}`, { recursive: true })

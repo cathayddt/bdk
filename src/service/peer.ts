@@ -71,7 +71,7 @@ export default class Peer extends AbstractService {
         anchorPeers: [{ hostname: `${this.config.hostname}.${this.config.orgDomainName}`, port: peerOrg?.ports?.[+(this.config.hostname.slice(4, 0))]?.port }],
       })
       this.bdkFile.createConfigtxPeerOrg(newOrg)
-      await (new Org(this.config, this.infra)).createNewOrgConfigTx(peerOrg.name, configtxYaml)
+      await (new Org(this.config, this.infra)).createOrgDefinitionJson(peerOrg.name, configtxYaml)
     }
   }
 
