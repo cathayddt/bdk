@@ -450,7 +450,42 @@ bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Eric
 bdk peer up -n peer0.org3.example.com -n peer1.org3.example.com
 ```
 
-### Step 4：Org3 加入 Channel
+### Step 4:Org3 加入 system-channel
+由 Org1Orderer 組織身份將 Org3 加入 System Channel 並同意
+
+```bash
+# export BDK_ORG_TYPE='orderer'
+# export BDK_ORG_NAME='Org1Orderer'
+# export BDK_ORG_DOMAIN='org1.example.com'
+# export BDK_HOSTNAME='orderer0'
+
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org orderer approve -c system-channel
+```
+
+由 Org2Orderer 組織身份同意 system-channel 的更新
+```bash
+# export BDK_ORG_TYPE='orderer'
+# export BDK_ORG_NAME='Org2Orderer'
+# export BDK_ORG_DOMAIN='org2.example.com'
+# export BDK_HOSTNAME='orderer0'
+
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org orderer approve -c system-channel
+```
+
+由 Org1Orderer 組織身份更新 system-channel
+
+```bash
+# export BDK_ORG_TYPE='orderer'
+# export BDK_ORG_NAME='Org1Orderer'
+# export BDK_ORG_DOMAIN='org1.example.com'
+# export BDK_HOSTNAME='orderer0'
+
+bdk org orderer update -o orderer0.org1.example.com:7050 -c system-channel
+```
+
+### Step 5：Org3 加入 Channel
 
 Org1 加入名稱為 *test* 的 Application Channel，由於加入 Application Chanel 是以 Peer 單位加入，所以每次加入都要記得更改在 *~/.bdk/.env* 的 *BDK_ORG_NAME 、 BDK_ORG_DOMAIN* 、 *BDK_HOSTNAME* 的設定
 
@@ -468,7 +503,7 @@ bdk channel join -n test --orderer orderer0.example.com:7050
 bdk channel join -n test --orderer orderer0.example.com:7050
 ```
 
-### Step 5：Org3 部署 Chaincode
+### Step 6：Org3 部署 Chaincode
 
 安裝並且同意標籤名稱為 fabcar_1 的 Chaincode，由於使用前面的 Blockchain network，所以此次只做到 `peer chaincode lifecycle approveformyorg`，使用 `-a` 來限制 Lifecycle chaincode 的部署 Chaincode 步驟只做到 `peer chaincode lifecycle approveformyorg` ，使用 `-I` 來標示此次 Chaincode 需要初始化才能使用，之後在 Org3 的 peer1 安裝名稱為 fabcar_1 的 Chaincode
 
@@ -488,7 +523,7 @@ bdk chaincode deploy -C test -l fabcar_1 -I -a --orderer orderer0.example.com:70
 bdk chaincode install -l fabcar_1
 ```
 
-### Step 6：Org3 發起交易且查詢
+### Step 7：Org3 發起交易且查詢
 
 使用 `bdk chaincode invoke` 和名稱為 fabcar_1 的 Chaincode 發起交易，使用 `-f` 選擇 Chaincode 上初始化的 function，使用 `-a` 輸入 Chainocde function 所需要的參數，之後可以使用 `bdk chaincode query` 和 Chaincode 查詢資訊
 

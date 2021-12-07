@@ -295,11 +295,6 @@ bdk chaincode invoke -C test -n fabcar -f CreateCar -a CAR_ORG2_PEER0 -a BMW -a 
 # Query data
 bdk chaincode query -C test -n fabcar -f QueryCar -a CAR_ORG2_PEER0
 ```
-<!--
-=================================
-|| Translated Up to This Point ||
-=================================
- -->
 
 ## Add New Channel
 
@@ -347,7 +342,6 @@ bdk channel join -n test --orderer orderer0.example.com:7050
 
 Update settings for Org1 and Org2 on the application channel named *test*. Note that when updating the settings in *~/.bdk/.env*, *BDK_ORG_NAME* and *BDK_ORG_DOMAIN* have to be editted as well.
 
-
 ```bash
 # export BDK_ORG_NAME='Org1'
 # export BDK_ORG_DOMAIN='org1.example.com'
@@ -367,7 +361,6 @@ bdk channel update-anchorpeer -n test --orderer orderer0.example.com:7050
 ## Add new peer org
 
 First, we need to prepare a file named *org-peer-create.json*, with the required variables. We then use `cryptogen` to generate the certificates and keys required for the peer organization. Next, we add the Org3(the new peer org) to the settings file for the application channel. Last, we start the peers in Org3 and add it to the `test` channel. Test transactions and queries should be successful at this point.
-
 
 ### Prepare settings files
 
@@ -457,7 +450,42 @@ Start Org3 peer containers
 bdk peer up -n peer0.org3.example.com -n peer1.org3.example.com
 ```
 
-### Step 4：Add Org3 to channel
+### Step 4: Add Org3 to system-channel
+Add Org3 to system channel with Org1Orderer
+
+```bash
+# export BDK_ORG_TYPE='orderer'
+# export BDK_ORG_NAME='Org1Orderer'
+# export BDK_ORG_DOMAIN='org1.example.com'
+# export BDK_HOSTNAME='orderer0'
+
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org orderer approve -c system-channel
+```
+
+Approve system-channel change with Org1Orderer
+```bash
+# export BDK_ORG_TYPE='orderer'
+# export BDK_ORG_NAME='Org2Orderer'
+# export BDK_ORG_DOMAIN='org2.example.com'
+# export BDK_HOSTNAME='orderer0'
+
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org orderer approve -c system-channel
+```
+
+update system-channel with Org1Orderer
+
+```bash
+# export BDK_ORG_TYPE='orderer'
+# export BDK_ORG_NAME='Org1Orderer'
+# export BDK_ORG_DOMAIN='org1.example.com'
+# export BDK_HOSTNAME='orderer0'
+
+bdk org orderer update -o orderer0.org1.example.com:7050 -c system-channel
+```
+
+### Step 5：Add Org3 to channel
 
 Add Org3 to the application channel named *test*. Since each peer is added individually to the application channel, changes to variables *BDK_ORG_NAME*, *BDK_ORG_DOMAIN*, and *BDK_HOSTNAME* in *~/.bdk/.env* are required every time.
 
@@ -475,7 +503,7 @@ bdk channel join -n test --orderer orderer0.example.com:7050
 bdk channel join -n test --orderer orderer0.example.com:7050
 ```
 
-### Step 5：Deploy chaincode on Org3
+### Step 6：Deploy chaincode on Org3
 
 Install and approve the chaincode named fabcar_1. Since we are using the blockchain network from before, we only need to do `peer chaincode lifecycle approveformyorg` up to this step. We can use the `-a` parameter to restrict the deployment of the chaincode lifecycle, and require the chaincode to be initialized with parameter ``-I`. We then install the chaincode named fabcar_1 on peer1 of Org3.
 
@@ -495,7 +523,7 @@ bdk chaincode deploy -C test -l fabcar_1 -I -a --orderer orderer0.example.com:70
 bdk chaincode install -l fabcar_1
 ```
 
-### Step 6：Initiate and query a transaction on Org3
+### Step 7：Initiate and query a transaction on Org3
 
 Initiate a chaincode transaction on fabcar_1 with `bdk chaincode invoke`. We use the `-f` parameter to select the function used to initialize the chaincode, and `-a` parameter to pass in the variables for the chaincode function. We can then query the chaincode with `bdk chaincode query`.
 
