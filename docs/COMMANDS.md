@@ -287,6 +287,17 @@ Description: 更新 Channel 的設定檔
 | -o, --orderer      | string  | 選擇使用的 Orderer             |          |
 | -c, --channel-name | string  | Channel 的名稱                 |          |
 
+### `bdk channel decode-envelope`
+
+Description: 解析 Approve 或 Update 的信封內容
+
+| Options            |  Type   | Description                    | Required | Default |
+| ------------------ | :-----: | ------------------------------ | :------: | ------- |
+| --help             | boolean | Show help                      |          |
+| --version          | boolean | Show version number            |          |
+| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
+| -c, --channel-name | string  | Channel 的名稱                 |          |
+
 ## Config
 
 ### `bdk config init`
