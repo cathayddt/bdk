@@ -141,7 +141,7 @@ export default class FabricInstance extends AbstractInstance {
   ): Promise<InfraRunnerResultType> {
     return await this.infraRunCommand(
       [
-        OrgTypeEnum.PEER, 'channel', 'signconfigtx',
+        'peer', 'channel', 'signconfigtx',
         '-f', `${this.dockerPath}/channel-artifacts/${channelName}/${input}.pb`,
       ],
       signType,
