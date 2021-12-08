@@ -21,7 +21,7 @@ const ordererList = getOrdererList(config)
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
     .example('bdk org peer update --interactive', 'Cathay BDK 互動式問答')
-    .example('bdk org peer update --peer peer0.example.com:7050 --channel-name test', '使用 peer0.example.com:7050 在名稱 test 的 channel 更新')
+    .example('bdk org peer update --orderer orderer0.example.com:7050 --channel-name test', '使用 orderer0.example.com:7050 在名稱 test 的 channel 更新')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
     .option('orderer', { type: 'string', choices: ordererList, description: '選擇使用的 Orderer', alias: 'o' })
     .option('channel-name', { type: 'string', choices: channelList, description: 'Channel 的名稱', alias: 'c' })

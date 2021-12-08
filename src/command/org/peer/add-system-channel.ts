@@ -20,8 +20,8 @@ const ordererList = getOrdererList(config)
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk org peer add --interactive', 'Cathay BDK 互動式問答')
-    .example('bdk org peer add --channel-name test --peer-org-name Org1', '將 Org1 加入 test 名稱的 Channel')
+    .example('bdk org peer add-system-channel --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk org peer add-system-channel --orderer orderer0.example.com:7050 --peer-org-name Org1', '使用 orderer0.example.com:7050 將 Org1 加入 System channel')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
     .option('peer-org-name', { type: 'string', description: '欲加入 Channel 中 Peer Org 的名稱', alias: 'n' })
     .option('orderer', { type: 'string', choices: ordererList, description: '選擇使用的 Orderer', alias: 'o' })
