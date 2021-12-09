@@ -19,14 +19,14 @@ bdk network create -i
 |-------------------|-------------------|
 | [v1.0.1][v1.0.1]  | [v1.0.1][v1.0.1]  |
 
-[v1.0.1]: link-to-v1.0.1-release
+[v1.0.1]: https://github.com/cathayddt/bdk/releases/tag/v1.0.1
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
 ## 文件 (Documentation)
 
 - 指令文件 CLI Documentation (Work in Progress)
-- [使用範例 (Examples)](EXAMPLE.md)
+- [使用範例 (Examples)](docs/EXAMPLE.md)
 - [核心API文件 (Core API Documentation)](link-to-api-documentation)
 - [開發指南 (Contributing)](CONTRIBUTING.md)
 - [資安通報 (Security Issues)](SECURITY.md)

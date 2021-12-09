@@ -115,7 +115,5 @@ dist
 .DS_Store
 src/command/test.ts
 
-# Doc
-/docs
 
 .scannerwork
