@@ -128,8 +128,12 @@ export default class BdkFile {
   }
 
   public getPeerOrgTlsCertString (number: number, domain: string) {
-    // TODO 確認資料夾只有一個檔案
-    return fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/ca.crt`).toString()
+    // TODO: if ca is more then 2 layer
+    let tlsCert = fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/ca.crt`).toString()
+    if (fs.pathExistsSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts`)) {
+      tlsCert = tlsCert + fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts/${this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts`)}`).toString()
+    }
+    return tlsCert
   }
 
   public getPeerOrgCaCertString (domain: string) {
