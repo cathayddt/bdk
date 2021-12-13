@@ -131,7 +131,7 @@ export default class BdkFile {
     // TODO: if ca is more then 2 layer
     let tlsCert = fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/ca.crt`).toString()
     if (fs.pathExistsSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts`)) {
-      tlsCert = tlsCert + fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts/${this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts`)}`).toString()
+      tlsCert = tlsCert + fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/tlscacerts`)).toString()
     }
     return tlsCert
   }
@@ -267,7 +267,7 @@ export default class BdkFile {
       `${this.orgPath}/msp`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/msp/cacerts/${this.newestFileInFolder(`${this.orgPath}/msp/cacerts`)}`,
+      this.newestFileInFolder(`${this.orgPath}/msp/cacerts`),
       `${this.orgPath}/msp/tlscacerts/tlsca.${hostname}-cert.pem`,
     )
     fs.copySync(
@@ -275,7 +275,7 @@ export default class BdkFile {
       `${this.orgPath}/msp/tlsintermediatecerts`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/msp/intermediatecerts/${this.newestFileInFolder(`${this.orgPath}/msp/intermediatecerts`)}`,
+      this.newestFileInFolder(`${this.orgPath}/msp/intermediatecerts`),
       `${this.orgPath}/ca/ca.${hostname}-cert.pem`,
     )
 
@@ -303,19 +303,19 @@ export default class BdkFile {
     )
     // TODO 實驗能否直接做成 cachain ，加上 rca cert    ../tlscacerts/*.pem
     fs.copyFileSync(
-      `${this.orgPath}/orderers/${ordererName}/tls/tlsintermediatecerts/${this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/tlsintermediatecerts`)}`,
+      this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/tlsintermediatecerts`),
       `${this.orgPath}/orderers/${ordererName}/tls/ca.crt`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/orderers/${ordererName}/tls/signcerts/${this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/signcerts`)}`,
+      this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/signcerts`),
       `${this.orgPath}/orderers/${ordererName}/tls/server.crt`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/orderers/${ordererName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/keystore`)}`,
+      this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/keystore`),
       `${this.orgPath}/orderers/${ordererName}/tls/server.key`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/orderers/${ordererName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/keystore`)}`,
+      this.newestFileInFolder(`${this.orgPath}/orderers/${ordererName}/tls/keystore`),
       `${this.orgPath}/orderers/${ordererName}/tls/keystore/priv_sk`,
     )
 
@@ -344,11 +344,11 @@ export default class BdkFile {
     // TODO GitHub Actions buffer overflow temporary solution
     try {
       fs.copyFileSync(
-        `${this.orgPath}/peers/${peerName}/msp/cacerts/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/msp/cacerts`)}`,
+        this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/msp/cacerts`),
         `${this.orgPath}/peers/${peerName}/msp/tlscacerts/tlsca.${hostname}-cert.pem`)
     } catch {
       fs.copyFileSync(
-        `${this.orgPath}/peers/${peerName}/msp/cacerts/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/msp/cacerts`)}`,
+        this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/msp/cacerts`),
         `${this.orgPath}/peers/${peerName}/msp/tlscacerts/tlsca.${hostname}-cert.pem`)
     }
     fs.copySync(
@@ -357,19 +357,19 @@ export default class BdkFile {
     )
     // TODO 實驗能否直接做成 cachain ，加上 rca cert    ../tlscacerts/*.pem
     fs.copyFileSync(
-      `${this.orgPath}/peers/${peerName}/tls/tlsintermediatecerts/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/tlsintermediatecerts`)}`,
+      this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/tlsintermediatecerts`),
       `${this.orgPath}/peers/${peerName}/tls/ca.crt`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/peers/${peerName}/tls/signcerts/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/signcerts`)}`,
+      this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/signcerts`),
       `${this.orgPath}/peers/${peerName}/tls/server.crt`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/peers/${peerName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/keystore`)}`,
+      this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/keystore`),
       `${this.orgPath}/peers/${peerName}/tls/server.key`,
     )
     fs.copyFileSync(
-      `${this.orgPath}/peers/${peerName}/tls/keystore/${this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/keystore`)}`,
+      this.newestFileInFolder(`${this.orgPath}/peers/${peerName}/tls/keystore`),
       `${this.orgPath}/peers/${peerName}/tls/keystore/priv_sk`,
     )
 
@@ -422,7 +422,7 @@ export default class BdkFile {
         newest.created = stats.ctime
       }
     })
-    return newest.fileName
+    return `${folderName}/${newest.fileName}`
   }
 
   private createPackageIdFolder () {
