@@ -3,32 +3,50 @@ import prompts from 'prompts'
 import { Arguments, Argv } from 'yargs'
 import { onCancel, ParamsError } from '../../../util'
 import Peer from '../../../service/peer'
-import { getChannelList, getOrdererList } from '../../../model/prompts/util'
+import { getOrdererList } from '../../../model/prompts/util'
 
-export const command = 'update'
+export const command = 'add-system-channel'
 
-export const desc = '更新 Channel 的設定檔'
+export const desc = '加入新 Peer org 在 System Channel 中'
 
 interface OptType {
   interactive: boolean
   orderer: string
   channelName: string
+  peerOrgName: string
 }
 
-const channelList = getChannelList(config).concat('system-channel')
 const ordererList = getOrdererList(config)
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk org peer update --interactive', 'Cathay BDK 互動式問答')
-    .example('bdk org peer update --orderer orderer0.example.com:7050 --channel-name test', '使用 orderer0.example.com:7050 在名稱 test 的 channel 更新')
+    .example('bdk org peer add-system-channel --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk org peer add-system-channel --orderer orderer0.example.com:7050 --peer-org-name Org1', '使用 orderer0.example.com:7050 將 Org1 加入 System channel')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
+    .option('peer-org-name', { type: 'string', description: '欲加入 Channel 中 Peer Org 的名稱', alias: 'n' })
     .option('orderer', { type: 'string', choices: ordererList, description: '選擇使用的 Orderer', alias: 'o' })
-    .option('channel-name', { type: 'string', choices: channelList, description: 'Channel 的名稱', alias: 'c' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const peerService = new Peer(config)
+  const peer = new Peer(config)
+
+  const peerOrgName: string = await (async () => {
+    if (argv.interactive) {
+      return (await prompts([
+        {
+          type: 'text',
+          name: 'name',
+          message: 'What is peer org name?',
+          initial: 'Test',
+        },
+      ], { onCancel })).name
+    } else if (argv.peerOrgName) {
+      return argv.peerOrgName
+    } else {
+      throw new ParamsError('Invalid params: Required parameter <peer-org-name> missing')
+    }
+  })()
+
   const orderer: string = await (async () => {
     if (argv.interactive) {
       return (await prompts([
@@ -49,22 +67,5 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
-  const channelName: string = await (async () => {
-    if (argv.interactive) {
-      return (await prompts([
-        {
-          type: 'text',
-          name: 'channelName',
-          message: 'What is your channel name?',
-          initial: 1,
-        },
-      ], { onCancel })).channelName
-    } else if (argv.channelName) {
-      return argv.channelName
-    } else {
-      throw new ParamsError('Invalid params: Required parameter missing <channel-name>')
-    }
-  })()
-
-  await peerService.update({ orderer, channelName })
+  await peer.addOrgToSystemChannel({ channelName: 'system-channel', orgName: peerOrgName, orderer })
 }

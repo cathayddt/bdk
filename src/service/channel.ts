@@ -97,9 +97,7 @@ export default class Channel extends AbstractService {
 
         logger.info(`[*] Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - compute update`)
 
-        await this.decodeChannelConfig(channelName, Channel.channelConfigFileName(channelName).originalFileName, 'temp')
-
-        const configBlock = JSON.parse(this.bdkFile.getChannelConfigString(channelName, 'temp')).data.data[0].payload.data.config
+        const configBlock = await this.getConfigBlock(channelName)
 
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
 
@@ -180,19 +178,19 @@ export default class Channel extends AbstractService {
         const { orderer, outputFileName, orgType, channelName } = data
 
         this.bdkFile.createChannelArtifact(channelName)
-        return await (new FabricInstance(this.config, this.infra)).fetchChannelNewestBlock(orderer, channelName, outputFileName, orgType || this.config.orgType)
+        return await (new FabricInstance(this.config, this.infra)).fetchChannelNewestBlock(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
       fetchChannelGenesisBlock: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
         const { orderer, outputFileName, channelName, orgType } = data
 
         this.bdkFile.createChannelArtifact(channelName)
-        return await (new FabricInstance(this.config, this.infra)).fetchChannelBlock0(orderer, channelName, outputFileName, orgType || this.config.orgType)
+        return await (new FabricInstance(this.config, this.infra)).fetchChannelBlock0(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
       fetchChannelConfig: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
-        const { channelName, outputFileName, orgType } = data
+        const { orderer, channelName, outputFileName, orgType } = data
 
         this.bdkFile.createChannelArtifact(channelName)
-        return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, outputFileName, 'block', undefined, orgType || this.config.orgType)
+        return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
     }
   }
@@ -277,16 +275,23 @@ export default class Channel extends AbstractService {
    */
   public async fetchChannelConfig (channelName: string, signType: OrgTypeEnum, orderer?: string): Promise<InfraRunnerResultType> {
     this.bdkFile.createChannelFolder(channelName)
-    return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, Channel.channelConfigFileName(channelName).originalFileName, 'pb', orderer, signType)
+    return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, Channel.channelConfigFileName(channelName).fetchFileName, 'pb', orderer, signType)
   }
 
   /** @ignore */
-  public async decodeChannelConfig (channelName: string, input: string, output: string) {
+  private async decodeChannelConfig (channelName: string, input: string, output: string) {
     await (new FabricTools(this.config, this.infra)).decodeProto(ConfigtxlatorEnum.BLOCK, channelName, input, output)
+  }
+
+  /** @ignore */
+  public async getConfigBlock (channelName: string) {
+    await this.decodeChannelConfig(channelName, Channel.channelConfigFileName(channelName).fetchFileName, 'temp')
+    return JSON.parse(this.bdkFile.getChannelConfigString(channelName, 'temp')).data.data[0].payload.data.config
   }
 
   public static channelConfigFileName (channelName: string) {
     return {
+      fetchFileName: `${channelName}_fetch`,
       originalFileName: `${channelName}_config_block`,
       modifiedFileName: `${channelName}_modified_config_block`,
       compareUpdatedConfigFileName: `${channelName}_config_update`,

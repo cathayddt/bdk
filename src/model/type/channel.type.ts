@@ -108,10 +108,3 @@ export interface ChannelCreateChannelConfigSignType extends ChannelCreateChannel
 export interface ChannelCreateChannelConfigUpdateType extends ChannelCreateChannelConfigSignType {
   orderer: string
 }
-
-// TODO remove it
-export interface FetchChannelConfigType {
-  orderer: string
-  channelName: string
-  orgType: OrgTypeEnum
-}

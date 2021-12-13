@@ -219,6 +219,35 @@ bdk chaincode query -C ryan -n ${CHAINCODE_NAME} -f QueryCar -a CAR_EUGENE_PEER0
 
 # ==================================================================
 
+# [BenOrderer] Eric org add in system-channel
+export_env 'orderer' 'BenOrderer' ${ORDERER_ORG_DOMAIN_BEN} 'orderer0'
+bdk org peer add-system-channel -o orderer0.${ORDERER_ORG_DOMAIN_BEN}:7050 -n Eric
+sleep 2
+bdk org orderer approve -c ${SYSTEM_CHANNEL_NAME}
+sleep 2
+
+# [GraceOrderer] Orderer org approve in system-channel
+export_env 'orderer' 'GraceOrderer' ${ORDERER_ORG_DOMAIN_GRACE} 'orderer0'
+bdk org orderer approve -c ${SYSTEM_CHANNEL_NAME}
+sleep 2
+
+# [BenOrderer] Orderer org update in system-channel
+export_env 'orderer' 'BenOrderer' ${ORDERER_ORG_DOMAIN_BEN} 'orderer0'
+bdk org orderer update -o orderer0.${ORDERER_ORG_DOMAIN_BEN}:7050 -c ${SYSTEM_CHANNEL_NAME}
+sleep 2
+
+# [Eric] Create channel
+export_env 'peer' 'Eric' ${PEER_ORG_DOMAIN_ERIC} 'peer0'
+bdk channel create -n ryan87 --orderer orderer0.${ORDERER_ORG_DOMAIN_BEN}:7050 -o Ben -o Grace -o Eugene -o Eric --channelAdminPolicyStyle "Any-Member-in-Channel"
+sleep 2
+
+bdk channel join -n ryan87 --orderer orderer1.${ORDERER_ORG_DOMAIN_BEN}:7150
+bdk channel update-anchorpeer -n ryan87 --orderer orderer1.${ORDERER_ORG_DOMAIN_BEN}:7150 -p 7051
+
+# ==================================================================
+
+
+
 # [EricOrderer] Orderer org create
 bdk org orderer create -f cicd/test_script/org-orderer-create.json --genesis-file-name newest_genesis --create-full
 

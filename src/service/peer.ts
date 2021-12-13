@@ -10,7 +10,7 @@ import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import Channel from './channel'
 import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType } from '../model/type/channel.type'
-import { PeerUpType, PeerDownType, PeerAddType, PeerAddOrgToChannelType, PeerApproveType, PeerUpdateType } from '../model/type/peer.type'
+import { PeerUpType, PeerDownType, PeerAddType, PeerAddOrgToChannelType, PeerApproveType, PeerUpdateType, PeerAddOrgToSystemChannelType } from '../model/type/peer.type'
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgPeerCreateType } from '../model/type/org.type'
 import { AbstractService } from './Service.abstract'
@@ -189,7 +189,7 @@ export default class Peer extends AbstractService {
   }
 
   /**
-   * @description 在 channel 中加入 peer org(第一步)
+   * @description 在 channel 中加入 peer org
    */
   public async addOrgToChannel (dto: PeerAddOrgToChannelType): Promise<void> {
     await this.addOrgToChannelSteps().fetchChannelConfig(dto)
@@ -202,23 +202,60 @@ export default class Peer extends AbstractService {
   public addOrgToChannelSteps () {
     return {
       fetchChannelConfig: async (dto: PeerAddOrgToChannelType): Promise<InfraRunnerResultType> => {
-        const { channelName, orgName } = dto
-        logger.info(`[*] Org Peer Add: add ${orgName} in ${channelName} step 1`)
-        return await (new Channel(this.config, this.infra)).fetchChannelConfig(channelName, this.config.orgType)
+        logger.info('[*] add org to channel step1 (fetchChannelConfig)')
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType)
       },
       computeUpdateConfigTx: async (dto: PeerAddOrgToChannelType) => {
+        logger.info('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
-        logger.info(`[*] Org Peer Add: add ${orgName} in ${channelName} step 2`)
-
-        await (new Channel(this.config, this.infra)).decodeChannelConfig(channelName, Channel.channelConfigFileName(channelName).originalFileName, 'temp')
-        const configBlock = JSON.parse(this.bdkFile.getChannelConfigString(channelName, 'temp')).data.data[0].payload.data.config
+        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
 
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
 
         configBlock.channel_group.groups.Application.groups = {
           ...configBlock.channel_group.groups.Application.groups,
+          [orgName]: newOrg,
+        }
+
+        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
+        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigComputeType = {
+          channelName,
+        }
+        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+      },
+    }
+  }
+
+  /**
+   * @description 在 system-channel 中加入 peer org
+   */
+  public async addOrgToSystemChannel (dto: PeerAddOrgToSystemChannelType): Promise<void> {
+    await this.addOrgToSystemChannelSteps().fetchChannelConfig(dto)
+    await this.addOrgToSystemChannelSteps().computeUpdateConfigTx(dto)
+  }
+
+  /**
+   * @ignore
+   */
+  public addOrgToSystemChannelSteps () {
+    return {
+      fetchChannelConfig: async (dto: PeerAddOrgToSystemChannelType): Promise<InfraRunnerResultType> => {
+        logger.info('[*] add org to system channel step1 (fetchChannelConfig)')
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
+      },
+      computeUpdateConfigTx: async (dto: PeerAddOrgToSystemChannelType) => {
+        logger.info('[*] add org to system channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
+        const { channelName, orgName } = dto
+
+        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
+        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
+
+        const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
+
+        configBlock.channel_group.groups.Consortiums.groups.AllOrganizationsConsortium.groups = {
+          ...configBlock.channel_group.groups.Consortiums.groups.AllOrganizationsConsortium.groups,
           [orgName]: newOrg,
         }
 

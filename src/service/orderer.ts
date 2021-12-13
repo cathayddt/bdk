@@ -6,7 +6,7 @@ import OrdererInstance from '../instance/orderer'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import Channel from './channel'
-import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType, FetchChannelConfigType } from '../model/type/channel.type'
+import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType } from '../model/type/channel.type'
 import { OrdererAddType, ConsenterType, OrdererUpType, OrdererAddOrgToChannelType, OrdererAddConsenterToChannelType, OrdererApproveType, OrdererUpdateType } from '../model/type/orderer.type'
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgOrdererCreateType } from '../model/type/org.type'
@@ -187,14 +187,13 @@ export default class Orderer extends AbstractService {
     return {
       fetchChannelConfig: async (dto: OrdererAddOrgToChannelType): Promise<InfraRunnerResultType> => {
         logger.info('[*] add org to channel step1 (fetchChannelConfig)')
-        return await this.fetchChannelConfig({ orderer: dto.orderer, channelName: dto.channelName, orgType: this.config.orgType })
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
       orgConfigComputeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
         logger.info('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
-        await (new Channel(this.config, this.infra)).decodeChannelConfig(channelName, Channel.channelConfigFileName(channelName).originalFileName, 'temp')
-        const configBlock = JSON.parse(this.bdkFile.getChannelConfigString(channelName, 'temp')).data.data[0].payload.data.config
+        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
 
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
@@ -230,7 +229,7 @@ export default class Orderer extends AbstractService {
     return {
       fetchChannelConfig: async (dto: OrdererAddConsenterToChannelType): Promise<InfraRunnerResultType> => {
         logger.info('[*] add consenter to channel step1 (fetchChannelConfig)')
-        return await this.fetchChannelConfig({ orderer: dto.orderer, channelName: dto.channelName, orgType: this.config.orgType })
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
       hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.info('[*] add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
@@ -241,8 +240,7 @@ export default class Orderer extends AbstractService {
         const index = consenters.findIndex((x: ConsenterType) => x.host.split('.')[0] === dto.hostname)
         const consenter = consenters[index]
 
-        await (new Channel(this.config, this.infra)).decodeChannelConfig(channelName, Channel.channelConfigFileName(channelName).originalFileName, 'temp')
-        const configBlock = JSON.parse(this.bdkFile.getChannelConfigString(channelName, 'temp')).data.data[0].payload.data.config
+        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
 
         configBlock.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters.push({
@@ -286,10 +284,5 @@ export default class Orderer extends AbstractService {
       channelName,
     }
     return await (new Channel(this.config, this.infra)).createChannelConfigSteps().updateChannelConfig(channelCreateChannelConfigUpdate)
-  }
-
-  private fetchChannelConfig = async (dto: FetchChannelConfigType): Promise<InfraRunnerResultType> => {
-    const { orderer, channelName, orgType } = dto
-    return await (new Channel(this.config, this.infra)).fetchChannelConfig(channelName, orgType, orderer)
   }
 }
