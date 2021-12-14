@@ -14,7 +14,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 1. 請確保相依模組/套件與建置檔案已經移除，並且檔案配置符合下方專案結構 (Please ensure any install or build dependencies are removed before starting the process and that your code commits adhere to the project structure)
 2. 請更新所有相關的文件檔案，加入程式更新內容，包括新增的環境變數、連接埠、檔案變更及其他參數 (Update the relevant markdown files with details regarding changes to the code, this includes and is not limit to new environment variables, exposed ports, useful file locations and container parameters)
 3. 請更新所有文件中的版號，我們使用[SemVer](http://semver.org/)規範 (Increase the version numbers in any example or markdown files to the new version that this Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/))
-4. 請參考[PR樣板](PULL_REQUEST_TEMPLATE.md)撰寫說明 (Please draft your pull request in accordance to [this template](PULL_REQUEST_TEMPLATE.md))
+4. 請參考[PR樣板](.github/PULL_REQUEST_TEMPLATE.md)撰寫說明 (Please draft your pull request in accordance to [this template](.github/PULL_REQUEST_TEMPLATE.md))
 5. 在兩位開發者同意後可以將 PR 核准，如果您沒有此操作權限，可以請第二位 reviewer 將其核准 (You may merge the Pull Request in once you have the sign-off of two other developers, or if you do not have permission to do that, you may request the second reviewer to merge it for you)
 
 ## 專案結構 (Project Structure)
