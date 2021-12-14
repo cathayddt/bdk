@@ -43,7 +43,7 @@ interface Peer {
   tlsCACerts: { pem: string }
 }
 
-interface ConnectionConfigInterface {
+interface ExplorerConnectionProfileInterface {
   name: string
   version: string
   client: Client
@@ -52,8 +52,8 @@ interface ConnectionConfigInterface {
   peers: {[peerName: string]: Peer}
 }
 
-class ConnectionProfileYaml extends BdkYaml<ConnectionConfigInterface> {
-  constructor (value?: ConnectionConfigInterface) {
+class ExplorerConnectionProfileYaml extends BdkYaml<ExplorerConnectionProfileInterface> {
+  constructor (value?: ExplorerConnectionProfileInterface) {
     super(value)
 
     this.value.version = value?.version || '1.0.0'
@@ -173,4 +173,4 @@ class ConnectionProfileYaml extends BdkYaml<ConnectionConfigInterface> {
   }
 }
 
-export default ConnectionProfileYaml
+export default ExplorerConnectionProfileYaml

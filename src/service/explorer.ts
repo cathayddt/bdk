@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { logger } from '../util/logger'
 import { ExplorerConfigType, ExplorerUpForMyOrgType } from '../model/type/explorer.type'
-import ConnectProfileYaml from '../model/yaml/explorer/connectProfileYaml.ts'
+import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
 import ExplorerConfig from '../model/yaml/explorer/config'
 import DockerComposeYaml from '../model/yaml/docker-compose/dockerComposeYaml'
 import BdkFile from '../instance/bdkFile'
@@ -169,31 +169,31 @@ export default class Explorer extends AbstractService {
   /** @ignore */
   private createConnectProfileYaml (explorerConfig: ExplorerConfigType) {
     const rootFilePath = (new BdkFile(this.config, explorerConfig.networkName)).getRootFilePath()
-    const connectProfileYaml = new ConnectProfileYaml()
+    const explorerConnectProfileYaml = new ExplorerConnectionProfileYaml()
 
-    connectProfileYaml.setName(explorerConfig.networkName)
+    explorerConnectProfileYaml.setName(explorerConfig.networkName)
     Object.keys(explorerConfig.orgs).forEach(org => {
       explorerConfig.orgs[org].peers.forEach(peer => {
-        connectProfileYaml.addPeer(
+        explorerConnectProfileYaml.addPeer(
           org,
           peer.url,
           fs.readFileSync(`${rootFilePath}/tlsca/${peer.url}/ca.crt`).toString(),
           peer.port)
       })
-      connectProfileYaml.setOrgKey(
+      explorerConnectProfileYaml.setOrgKey(
         org,
         fs.readFileSync(`${rootFilePath}/peerOrganizations/${explorerConfig.orgs[org].domain}/users/Admin@${explorerConfig.orgs[org].domain}/msp/keystore/priv_sk`).toString(),
         fs.readFileSync(`${rootFilePath}/peerOrganizations/${explorerConfig.orgs[org].domain}/users/Admin@${explorerConfig.orgs[org].domain}/msp/signcerts/Admin@${explorerConfig.orgs[org].domain}-cert.pem`).toString(),
       )
     })
     Object.keys(explorerConfig.channels).forEach(channel => {
-      connectProfileYaml.addChannel(
+      explorerConnectProfileYaml.addChannel(
         channel,
         explorerConfig.channels[channel].orgs.reduce((accumulator, org) => (accumulator.concat(explorerConfig.orgs[org].peers.map(x => x.url))), [] as string[]),
       )
     })
-    connectProfileYaml.setClientOrganization(explorerConfig.clientOrganization)
-    const networkJSONStr = connectProfileYaml.getJsonString()
+    explorerConnectProfileYaml.setClientOrganization(explorerConfig.clientOrganization)
+    const networkJSONStr = explorerConnectProfileYaml.getJsonString()
     // const networkJSONStrOld = JSON.stringify(networkJson(config))
 
     fs.writeFileSync(
