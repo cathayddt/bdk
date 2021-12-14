@@ -23,6 +23,6 @@ export default class Explorer extends AbstractInstance {
 
   public async restart (): Promise<InfraRunnerResultType> {
     logger.info('[*] Explorer instance restart')
-    return await this.infra.restart(this.dockerComposePath, ['explorer.bdk-network'])
+    return await this.infra.restart(this.dockerComposePath, [`explorer.${this.config.networkName}`])
   }
 }

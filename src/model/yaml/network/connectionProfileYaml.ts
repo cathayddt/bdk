@@ -55,10 +55,10 @@ class ConnectionProfileYaml extends BdkYaml<ConnectionProfileInterface> {
     this.value.name = 'connection-config'
     this.value.version = '1.0.0'
 
-    this.setDefaultClient()
-    this.setDefaultOrganizations()
-    this.setDefaultPeers()
-    this.setDefaultCertificateAuthorities()
+    !value?.client && this.setDefaultClient()
+    !value?.organizations && this.setDefaultOrganizations()
+    !value?.peers && this.setDefaultPeers()
+    !value?.certificateAuthorities && this.setDefaultCertificateAuthorities()
   }
 
   private setDefaultClient () {

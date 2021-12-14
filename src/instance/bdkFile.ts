@@ -13,6 +13,8 @@ import { OrgJsonType } from '../model/type/org.type'
 import { ProcessError } from '../util'
 import { Config } from '../config'
 import { DockerComposeYamlInterface } from '../model/yaml/docker-compose/dockerComposeYaml'
+import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
+import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
 import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 
 export enum InstanceTypeEnum {
@@ -158,11 +160,15 @@ export default class BdkFile {
     fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.yaml`, connectionConfigYaml.getYamlString())
   }
 
+  public getConnectionFile (name: string, domain: string): ConnectionProfileYaml {
+    return new ConnectionProfileYaml(JSON.parse(fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`).toString()))
+  }
+
   public getDockerComposeYamlPath (hostName: string, type: InstanceTypeEnum): string {
     return `${this.bdkPath}/docker-compose/docker-compose-${type}-${hostName}.yaml`
   }
 
-  public getExplorerRootFilePath () {
+  private getExplorerRootFilePath () {
     return `${this.bdkPath}/fabric-explorer`
   }
 
@@ -241,6 +247,24 @@ export default class BdkFile {
 
   public createChannelConfigJson (channelName: string, fileName: string, channelConfigJson: string) {
     fs.writeFileSync(`${this.bdkPath}/channel-artifacts/${channelName}/${fileName}.json`, channelConfigJson)
+  }
+
+  public createExplorerConnectionProfile (networkName: string, explorerConnectionProfileYaml: ExplorerConnectionProfileYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(
+      `${this.getExplorerRootFilePath()}/connection-profile/${networkName}.json`, explorerConnectionProfileYaml.getJsonString(),
+    )
+  }
+
+  public createExplorerConfig (explorerConfig: ExplorerConfigYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(
+      `${this.getExplorerRootFilePath()}/config.json`, explorerConfig.getJsonString(),
+    )
+  }
+
+  public getExplorerConfig (): ExplorerConfigYaml {
+    return new ExplorerConfigYaml(JSON.parse(fs.readFileSync(`${this.getExplorerRootFilePath()}/config.json`).toString()))
   }
 
   public getDockerComposeList (): {peer: string[]; orderer: string[]; ca: string[]} {
