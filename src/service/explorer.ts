@@ -3,13 +3,13 @@ import { logger } from '../util/logger'
 import { ExplorerConfigType, ExplorerUpForMyOrgType } from '../model/type/explorer.type'
 import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
 import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
-import DockerComposeYaml from '../model/yaml/docker-compose/dockerComposeYaml'
 import BdkFile from '../instance/bdkFile'
 import Channel from './channel'
 import ExplorerInstance from '../instance/explorer'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { AbstractService, ParserType } from './Service.abstract'
 import { Config } from '../config'
+import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 
 interface ExplorerParser extends ParserType {
   listJoinedChannel: (result: DockerResultType) => string[]
@@ -83,72 +83,8 @@ export default class Explorer extends AbstractService {
     fs.writeFileSync(`${this.hostBasePath}/config.json`, configJson.getJsonString())
 
     logger.info('[*] Create file: docker-compose.yaml')
-    const dockerComposeYaml = new DockerComposeYaml()
-    dockerComposeYaml.addNetwork(this.dockerNetwork, { name: this.dockerNetwork, external: true })
-    dockerComposeYaml.addVolume(`explorerdb.${this.dockerNetwork}`, {})
-    dockerComposeYaml.addService(
-      `explorerdb.${this.dockerNetwork}`,
-      {
-        image: `hyperledger/explorer-db:${this.fabricExplorerDbVer}`,
-        container_name: `explorerdb.${this.dockerNetwork}`,
-        hostname: `explorerdb.${this.dockerNetwork}`,
-        environment: [
-          'DATABASE_DATABASE=fabricexplorer',
-          'DATABASE_USERNAME=hppoc',
-          'DATABASE_PASSWORD=password',
-        ],
-        healthcheck: {
-          test: 'pg_isready -h localhost -p 5432 -q -U postgres',
-          interval: '30s',
-          timeout: '10s',
-          retries: 5,
-        },
-        volumes: [
-          `explorerdb.${this.dockerNetwork}:/var/lib/postgresql/data`,
-        ],
-        networks: [
-          this.dockerNetwork,
-        ],
-      },
-    )
-    dockerComposeYaml.addService(
-      `explorer.${this.dockerNetwork}`,
-      {
-        image: `hyperledger/explorer:${this.fabricExplorerVer}`,
-        container_name: `explorer.${this.dockerNetwork}`,
-        hostname: `explorer.${this.dockerNetwork}`,
-        environment: [
-          `DATABASE_HOST=explorerdb.${this.dockerNetwork}`,
-          'DATABASE_DATABASE=fabricexplorer',
-          'DATABASE_USERNAME=hppoc',
-          'DATABASE_PASSWD=password',
-          'LOG_LEVEL_APP=debug',
-          'LOG_LEVEL_DB=debug',
-          'LOG_LEVEL_CONSOLE=info',
-          'LOG_CONSOLE_STDOUT=true',
-          'DISCOVERY_AS_LOCALHOST=false',
-        ],
-        volumes: [
-          `${this.hostBasePath}/config.json:/opt/explorer/app/platform/fabric/config.json`,
-          `${this.hostBasePath}/connection-profile:/opt/explorer/app/platform/fabric/connection-profile`,
-        ],
-        ports: [
-          '8080:8080',
-        ],
-        depends_on: {
-          [`explorerdb.${this.dockerNetwork}`]: {
-            condition: 'service_healthy',
-          },
-        },
-        networks: [
-          this.dockerNetwork,
-        ],
-      },
-    )
-    fs.writeFileSync(
-      `${this.hostBasePath}/docker-compose.yaml`,
-      dockerComposeYaml.getYamlString(),
-    )
+    const dockerComposeYaml = new ExplorerDockerComposeYaml(this.config)
+    this.bdkFile.createExplorerDockerComposeYaml(dockerComposeYaml)
 
     logger.info('[*] Starting explorer container')
 

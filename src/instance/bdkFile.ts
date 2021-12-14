@@ -13,6 +13,7 @@ import { OrgJsonType } from '../model/type/org.type'
 import { ProcessError } from '../util'
 import { Config } from '../config'
 import { DockerComposeYamlInterface } from '../model/yaml/docker-compose/dockerComposeYaml'
+import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 
 export enum InstanceTypeEnum {
   ca = 'ca',
@@ -165,6 +166,10 @@ export default class BdkFile {
     return `${this.bdkPath}/fabric-explorer`
   }
 
+  private createExplorerFolder () {
+    fs.mkdirSync(`${this.getExplorerRootFilePath()}/connection-profile`, { recursive: true })
+  }
+
   public getExplorerDockerComposeYamlPath (): string {
     return `${this.getExplorerRootFilePath()}/docker-compose.yaml`
   }
@@ -183,6 +188,11 @@ export default class BdkFile {
 
     fs.mkdirSync(`${this.bdkPath}/docker-compose`, { recursive: true })
     fs.writeFileSync(this.getDockerComposeYamlPath(hostName, type), dockerComposeYaml.getYamlString())
+  }
+
+  public createExplorerDockerComposeYaml (explorerConnectionProfileYaml: ExplorerDockerComposeYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(this.getExplorerDockerComposeYamlPath(), explorerConnectionProfileYaml.getYamlString())
   }
 
   public getDockerComposeYaml (hostName: string, type: InstanceTypeEnum): DockerComposeYamlInterface {
