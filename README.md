@@ -1,6 +1,6 @@
 # Blockchain Deployment Kit
 
-提供指令快速建立、管力、監控 hyperledger fabric blockchain，最大的特色是可以使用互動式的問答，讓使用者可以依續性的問答來完成指令所需要的指令，在每個 BDK 指令的後面，加入 `-i` 或是 `--interactive` 的參數，來使用互動式問答
+提供指令快速建立、管理、監控 hyperledger fabric blockchain，最大的特色是可以使用互動式的問答，讓使用者可以依續性的問答來完成指令所需要的指令，在每個 BDK 指令的後面，加入 `-i` 或是 `--interactive` 的參數，來使用互動式問答
 
 BDK streamlines the normally complicated process of creating a Hyperledger Fabric blockchain with command-line tools and npm packages. Creating, managing, monitoring a blockchain network has never been easier. We support interactive prompts which can be triggered with `-i` or `--interactive` behind all cli commands
 
