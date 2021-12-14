@@ -1,9 +1,9 @@
+import config from '../config'
 import { logger } from '../util/logger'
 
 export const hello = (argv: any) => {
-  // 呼叫 servicer 並使用 logger
-  // console.log()
-  logger.debug(`Hello World! ${argv}`)
-  logger.info(`Hello World! ${argv}`)
-  logger.warn(`Hello World! ${argv}`)
+  logger.debug('[%s] Hello debug! %s', config.environment, argv)
+  logger.info('[%s] Hello info! %s', config.environment, argv)
+  logger.warn('[%s] Hello warn! %s', config.environment, argv)
+  logger.error('[%s] Hello error! %s', config.environment, argv)
 }
