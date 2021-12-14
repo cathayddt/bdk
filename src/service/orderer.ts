@@ -145,7 +145,7 @@ export default class Orderer extends AbstractService {
       ordererDockerComposeYaml.addNetwork(this.config.networkName, { name: this.config.networkName, external: true })
       ordererDockerComposeYaml.addOrderer(this.config, ordererName, ordererDomain, hostname, genesisFileName, ports?.[i].port, ports?.[i].operationPort, ports?.[i].isPublishPort, ports?.[i].isPublishOperationPort)
 
-      this.bdkFile.createDockerComposeYaml(`${hostname}.${ordererDomain}`.toLowerCase(), ordererDockerComposeYaml)
+      this.bdkFile.createDockerComposeYaml(`${hostname}.${ordererDomain}`, ordererDockerComposeYaml)
 
       ordererHostnames.forEach(hostname => {
         this.bdkFile.createOrgConfigEnv(`orderer-${hostname}.${ordererDomain}`, ordererDockerComposeYaml.getOrdererOrgEnv(this.config, ordererName, hostname, ordererDomain, ports?.[0]?.port))

@@ -160,7 +160,7 @@ export default class Peer extends AbstractService {
       peerDockerComposeYaml.addNetwork(this.config.networkName, { name: this.config.networkName, external: true })
       peerDockerComposeYaml.addPeer(this.config, peerName, peerDomain, i, bootstrapPeerNumber, ports?.[bootstrapPeerNumber]?.port, ports?.[i]?.port, ports?.[i]?.operationPort, ports?.[i]?.isPublishPort, ports?.[i]?.isPublishOperationPort)
 
-      this.bdkFile.createDockerComposeYaml(`peer${i}.${peerDomain}`.toLowerCase(), peerDockerComposeYaml)
+      this.bdkFile.createDockerComposeYaml(`peer${i}.${peerDomain}`, peerDockerComposeYaml)
 
       this.bdkFile.createOrgConfigEnv(`peer-peer${i}.${peerDomain}`, peerDockerComposeYaml.getPeerOrgEnv(this.config, peerName, i, peerDomain, ports?.[i]?.port))
     }
@@ -189,7 +189,7 @@ export default class Peer extends AbstractService {
   }
 
   /**
-   * @description 在 channel 中加入 peer org
+   * @description 在 channel 中加入 peer org
    */
   public async addOrgToChannel (dto: PeerAddOrgToChannelType): Promise<void> {
     await this.addOrgToChannelSteps().fetchChannelConfig(dto)
@@ -229,7 +229,7 @@ export default class Peer extends AbstractService {
   }
 
   /**
-   * @description 在 system-channel 中加入 peer org
+   * @description 在 system-channel 中加入 peer org
    */
   public async addOrgToSystemChannel (dto: PeerAddOrgToSystemChannelType): Promise<void> {
     await this.addOrgToSystemChannelSteps().fetchChannelConfig(dto)
