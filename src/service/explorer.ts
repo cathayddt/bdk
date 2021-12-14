@@ -182,8 +182,8 @@ export default class Explorer extends AbstractService {
       })
       explorerConnectProfileYaml.setOrgKey(
         org,
-        fs.readFileSync(`${rootFilePath}/peerOrganizations/${explorerConfig.orgs[org].domain}/users/Admin@${explorerConfig.orgs[org].domain}/msp/keystore/priv_sk`).toString(),
-        fs.readFileSync(`${rootFilePath}/peerOrganizations/${explorerConfig.orgs[org].domain}/users/Admin@${explorerConfig.orgs[org].domain}/msp/signcerts/Admin@${explorerConfig.orgs[org].domain}-cert.pem`).toString(),
+        this.bdkFile.getAdminPrivateKeyPem(explorerConfig.orgs[org].domain),
+        this.bdkFile.getAdminSignCert(explorerConfig.orgs[org].domain),
       )
     })
     Object.keys(explorerConfig.channels).forEach(channel => {

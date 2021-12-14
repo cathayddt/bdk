@@ -444,4 +444,12 @@ export default class BdkFile {
   public getDecodedChannelConfig (channelName: string): any {
     return JSON.parse(fs.readFileSync(`${this.bdkPath}/channel-artifacts/${channelName}/${channelName}.json`).toString())
   }
+
+  public getAdminPrivateKeyPem (domain: string): string {
+    return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/keystore`)).toString()
+  }
+
+  public getAdminSignCert (domain: string): string {
+    return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/signcerts`)).toString()
+  }
 }
