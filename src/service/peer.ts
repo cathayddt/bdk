@@ -111,13 +111,6 @@ export default class Peer extends AbstractService {
         )
       }
 
-      connectionConfigYaml.addCertificateAuthorities(
-        peerOrg.name,
-        `ca.${peerOrg.domain}`,
-        `ca-${peerOrg.name}`,
-        [this.bdkFile.getPeerOrgCaCertString(peerOrg.domain)],
-      )
-
       this.bdkFile.createConnectionFile(peerOrg.name, peerOrg.domain, connectionConfigYaml)
     })
   }
