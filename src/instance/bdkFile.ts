@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import YAML from 'js-yaml'
 import { parse, stringify } from 'envfile'
 import CryptoConfigYaml from '../model/yaml/network/cryptoConfigYaml'
-import ConnectionConfigYaml from '../model/yaml/network/connectionConfigYaml'
+import ConnectionProfileYaml from '../model/yaml/network/connectionProfileYaml'
 import ConfigtxYaml, { ConfigtxOrgs, OrdererOrganizationInterface, PeerOrganizationInterface } from '../model/yaml/network/configtx'
 import { ConfigEnvType } from '../model/type/config.type'
 import OrdererDockerComposeYaml from '../model/yaml/docker-compose/ordererDockerComposeYaml'
@@ -152,7 +152,7 @@ export default class BdkFile {
     return fs.readFileSync(`${this.bdkPath}/org-json/${name}-consenter.json`).toString()
   }
 
-  public createConnectionFile (name: string, domain: string, connectionConfigYaml: ConnectionConfigYaml) {
+  public createConnectionFile (name: string, domain: string, connectionConfigYaml: ConnectionProfileYaml) {
     fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`, connectionConfigYaml.getJsonString())
     fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.yaml`, connectionConfigYaml.getYamlString())
   }

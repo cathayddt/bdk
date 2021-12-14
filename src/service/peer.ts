@@ -4,7 +4,7 @@ import { NetworkCryptoConfigPeerOrgType, NetworkCreatePeerOrgType, NetworkPeerPo
 import CryptoConfigYaml from '../model/yaml/network/cryptoConfigYaml'
 import PeerDockerComposeYaml from '../model/yaml/docker-compose/peerDockerComposeYaml'
 import PeerInstance from '../instance/peer'
-import ConnectionConfigYaml from '../model/yaml/network/connectionConfigYaml'
+import ConnectionProfileYaml from '../model/yaml/network/connectionProfileYaml'
 import { InstanceTypeEnum } from '../instance/bdkFile'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
@@ -97,13 +97,13 @@ export default class Peer extends AbstractService {
     const { peerOrgs } = dto
     peerOrgs.forEach((peerOrg) => {
       logger.info(`[*] Peer create connection config: ${peerOrg.name}`)
-      const connectionConfigYaml = new ConnectionConfigYaml()
+      const connectionProfileYaml = new ConnectionProfileYaml()
 
-      connectionConfigYaml.setName(`${this.config.networkName}-${peerOrg.name}`)
-      connectionConfigYaml.setClientOrganization(peerOrg.name)
+      connectionProfileYaml.setName(`${this.config.networkName}-${peerOrg.name}`)
+      connectionProfileYaml.setClientOrganization(peerOrg.name)
 
       for (let i = 0; i < peerOrg.peerCount; i++) {
-        connectionConfigYaml.addPeer(
+        connectionProfileYaml.addPeer(
           peerOrg.name,
           `peer${i}.${peerOrg.domain}`,
           this.bdkFile.getPeerOrgTlsCertString(i, peerOrg.domain),
@@ -111,7 +111,7 @@ export default class Peer extends AbstractService {
         )
       }
 
-      this.bdkFile.createConnectionFile(peerOrg.name, peerOrg.domain, connectionConfigYaml)
+      this.bdkFile.createConnectionFile(peerOrg.name, peerOrg.domain, connectionProfileYaml)
     })
   }
 

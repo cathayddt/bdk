@@ -39,7 +39,7 @@ interface CertificateAuthorities {
   }
 }
 
-interface ConnectionConfigInterface {
+interface ConnectionProfileInterface {
   name: string
   version: string
   client: Client
@@ -48,8 +48,8 @@ interface ConnectionConfigInterface {
   certificateAuthorities: {[caName: string]: CertificateAuthorities}
 }
 
-class ConnectionConfigYaml extends BdkYaml<ConnectionConfigInterface> {
-  constructor (value?: ConnectionConfigInterface) {
+class ConnectionProfileYaml extends BdkYaml<ConnectionProfileInterface> {
+  constructor (value?: ConnectionProfileInterface) {
     super(value)
 
     this.value.name = 'connection-config'
@@ -158,4 +158,4 @@ class ConnectionConfigYaml extends BdkYaml<ConnectionConfigInterface> {
   }
 }
 
-export default ConnectionConfigYaml
+export default ConnectionProfileYaml
