@@ -2,7 +2,7 @@ import fs from 'fs'
 import { logger } from '../util/logger'
 import { ExplorerConfigType, ExplorerUpForMyOrgType } from '../model/type/explorer.type'
 import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
-import ExplorerConfig from '../model/yaml/explorer/config'
+import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
 import DockerComposeYaml from '../model/yaml/docker-compose/dockerComposeYaml'
 import BdkFile from '../instance/bdkFile'
 import Channel from './channel'
@@ -68,7 +68,7 @@ export default class Explorer extends AbstractService {
   public async up (data: ExplorerConfigType[]): Promise<InfraRunnerResultType> {
     logger.info('[*] Blockchain Explorer up')
 
-    const configJson = new ExplorerConfig()
+    const configJson = new ExplorerConfigYaml()
 
     // * clear config file
     this.initializeFolder()
@@ -158,7 +158,7 @@ export default class Explorer extends AbstractService {
   /** @ignore */
   private updateConfigNetwork (data: ExplorerConfigType) {
     logger.info(`[*] Blockchain Explorer update network ${data.networkName} config`)
-    const configJson = new ExplorerConfig(JSON.parse(fs.readFileSync(`${this.hostBasePath}/config.json`).toString()))
+    const configJson = new ExplorerConfigYaml(JSON.parse(fs.readFileSync(`${this.hostBasePath}/config.json`).toString()))
     if (!configJson.getNetworkList().includes(data.networkName)) {
       configJson.addNetwork(data.networkName)
       fs.writeFileSync(`${this.hostBasePath}/config.json`, configJson.getJsonString())
