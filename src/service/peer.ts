@@ -189,7 +189,7 @@ export default class Peer extends AbstractService {
   }
 
   /**
-   * @description 在 channel 中加入 peer org(第一步)
+   * @description 在 channel 中加入 peer org
    */
   public async addOrgToChannel (dto: PeerAddOrgToChannelType): Promise<void> {
     await this.addOrgToChannelSteps().fetchChannelConfig(dto)
@@ -229,7 +229,7 @@ export default class Peer extends AbstractService {
   }
 
   /**
-   * @description 在 system-channel 中加入 peer org
+   * @description 在 system-channel 中加入 peer org
    */
   public async addOrgToSystemChannel (dto: PeerAddOrgToSystemChannelType): Promise<void> {
     await this.addOrgToSystemChannelSteps().fetchChannelConfig(dto)

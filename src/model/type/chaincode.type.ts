@@ -57,7 +57,7 @@ export interface ChaincodeCommitType {
  * @requires commit - [boolean] 是否只做到發布的步驟
  * @requires initRequired - [boolean] 是否需要初始化 chaincode
  * @requires orderer - [string] orderer 的 address 和 port
- * @requires peerAddresses - [string array] peer address 和 port 的 array
+ * @requires peerAddresses - [string array] peer address 和 port 的 array
  */
 export interface ChaincodeDeployType {
   channelId: string

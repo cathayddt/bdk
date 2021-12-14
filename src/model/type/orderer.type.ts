@@ -40,7 +40,7 @@ export interface ConsenterType {
  * @requires orderer - [string] 使用 orderer 的 address 和 port
  * @requires channelName - [string] channel 的名稱
  * @requires orgName - [string] orderer org 的名稱
- * @requires isUpdate - [boolean] 是否要執行更新 channel 的設定檔
+ * @requires isUpdate - [boolean] 是否要執行更新 channel 的設定檔
  */
 export interface OrdererAddOrgToChannelType {
   orderer: string
