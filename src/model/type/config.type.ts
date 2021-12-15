@@ -7,7 +7,7 @@ import { EnvironmentEnum } from '../../config'
  * @requires BDK_ORG_NAME - [string] org 的名稱
  * @requires BDK_ORG_DOMAIN - [string] org 的 domain 名稱
  * @requires BDK_HOSTNAME - [string] hostname 的名稱
- * @requires DOCKER_LOGGING - [boolean] 是否要顯示 docker log 資訊
+ * @requires LOGGER_SILLY - [boolean] 是否要顯示 silly log 資訊
  */
 export interface ConfigEnvType {
   NODE_ENV: EnvironmentEnum
@@ -16,7 +16,7 @@ export interface ConfigEnvType {
   BDK_ORG_NAME: string
   BDK_ORG_DOMAIN: string
   BDK_HOSTNAME: string
-  DOCKER_LOGGING: boolean
+  LOGGER_SILLY: boolean
   BDK_DOCKER_HOST_PATH?: string
 }
 

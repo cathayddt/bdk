@@ -1,8 +1,7 @@
-#!/bin/bash -ve
+#! /bin/bash -ve
 
-export NODE_ENV=development # testing  development  production
+export NODE_ENV=production # testing  development  production
 export BDK_NETWORK_NAME=shell-network-ca
-export DOCKER_LOGGING=true
 export BDK_ORG_TYPE=peer
 
 ICA_DOMAIN_BEN='ica.ben.cathaybc.com'

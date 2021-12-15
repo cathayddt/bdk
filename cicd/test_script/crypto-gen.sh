@@ -1,8 +1,7 @@
-#!/bin/bash -ve
+#! /bin/bash -ve
 
-export NODE_ENV=development # testing  development  production
+export NODE_ENV=production # testing  development  production
 export BDK_NETWORK_NAME=shell-network-cryptogen
-export DOCKER_LOGGING=true
 export BDK_ORG_TYPE=peer
 
 ORDERER_ORG_DOMAIN_BEN=$(jq --raw-output '.ordererOrgs[0].domain' ./cicd/test_script/network-create.json)

@@ -3,7 +3,7 @@ import { transports, format, createLogger } from 'winston'
 import { LEVEL } from 'triple-beam'
 
 const defaultLoggerConfig = {
-  level: 'debug',
+  level: config.isSillyMode ? 'silly' : 'debug',
   silent: config.isTestMode,
   format: format.combine(
     format.splat(),

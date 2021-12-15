@@ -11,7 +11,7 @@ const defaultEnv: ConfigEnvType = {
   BDK_ORG_NAME: 'Org1',
   BDK_ORG_DOMAIN: 'org1.example.com',
   BDK_HOSTNAME: 'peer0',
-  DOCKER_LOGGING: false,
+  LOGGER_SILLY: false,
 }
 
 export default class Config extends AbstractService {
