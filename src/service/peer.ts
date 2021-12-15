@@ -93,7 +93,7 @@ export default class Peer extends AbstractService {
    * @description 產生 peer org 的連線設定 yaml 檔案
    * @returns peer org 連線設定的 yaml 檔案（在 ~/.bdk/[blockchain network 名稱]/peerOrganizations/[domain 的名稱]/connection-[peer org 的名稱].yaml）
    */
-  public createConnectionConfigYaml (dto: OrgPeerCreateType) {
+  public createConnectionProfileYaml (dto: OrgPeerCreateType) {
     const { peerOrgs } = dto
     peerOrgs.forEach((peerOrg) => {
       logger.info(`[*] Peer create connection config: ${peerOrg.name}`)

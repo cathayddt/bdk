@@ -18,7 +18,7 @@ interface OptType {
   createFull: boolean
   cryptogen: boolean
   configtxJSON: boolean
-  connectionConfig: boolean
+  connectionProfile: boolean
   dockerCompose: boolean
 }
 
@@ -28,14 +28,14 @@ export const builder = (yargs: Argv<OptType>) => {
     .example('bdk org peer create --file ~/.bdk/org-peer-create.json --create-full', '使用在路徑下 json 檔案中的參數，產生 Peer org 所需的相關設定檔案')
     .example('bdk org peer create --file ~/.bdk/org-peer-create.json --cryptogen', '使用在路徑下 json 檔案中的參數和 cryptogen，產生憑證和私鑰')
     .example('bdk org peer create --file ~/.bdk/org-peer-create.json --configtxJSON', '使用在路徑下 json 檔案中的參數和 configtx.yaml 產生 Peer org 的 json 檔案')
-    .example('bdk org peer create --file ~/.bdk/org-peer-create.json --connection-config', '使用在路徑下 json 檔案中的參數，產生 Peer 連接設定檔案')
+    .example('bdk org peer create --file ~/.bdk/org-peer-create.json --connection-profile', '使用在路徑下 json 檔案中的參數，產生 Peer 連接設定檔案')
     .example('bdk org peer create --file ~/.bdk/org-peer-create.json --docker-compose', '使用在路徑下 json 檔案中的參數，產生 Peer docker-compose 檔案')
     .option('file', { type: 'string', description: '需要的參數設定 json 檔案路徑', alias: 'f' })
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
     .option('create-full', { type: 'boolean', description: '是否產生 Hyperledger Fabric 所需要的所有相關設定檔案（包含使用 cryptogen 產生憑證和私鑰、使用 configtx.yaml 產生 Peer org 的 json 檔案、產生 Peer 連接設定檔案、產生 Peer/Orderer docker-compose 檔案）', default: false })
     .option('cryptogen', { type: 'boolean', description: '是否使用 cryptogen 產生憑證和私鑰', default: false })
     .option('configtxJSON', { type: 'boolean', description: '是否使用 configtx.yaml 產生 Peer Org 的 json 檔案', default: false })
-    .option('connection-config', { type: 'boolean', description: '是否產生 Peer 連接設定檔案', default: false })
+    .option('connection-profile', { type: 'boolean', description: '是否產生 Peer 連接設定檔案', default: false })
     .option('docker-compose', { type: 'boolean', description: '是否產生 Peer docker-compose 檔案', default: false })
 }
 
@@ -125,17 +125,17 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
-  const connectionConfig: boolean = await (async () => {
+  const connectionProfile: boolean = await (async () => {
     if (argv.interactive) {
       return (await prompts(
         {
           type: 'confirm',
-          name: 'connectionConfig',
-          message: 'Do you want to generate peer connection config profile?',
+          name: 'connectionProfile',
+          message: 'Do you want to generate peer connection profile?',
           initial: false,
-        }, { onCancel })).connectionConfig
+        }, { onCancel })).connectionProfile
     } else {
-      return argv.connectionConfig
+      return argv.connectionProfile
     }
   })()
 
@@ -163,8 +163,8 @@ export const handler = async (argv: Arguments<OptType>) => {
     await peer.createPeerOrgConfigtxJSON(orgPeerCreate)
   }
 
-  if (connectionConfig || argv.createFull) {
-    peer.createConnectionConfigYaml(orgPeerCreate)
+  if (connectionProfile || argv.createFull) {
+    peer.createConnectionProfileYaml(orgPeerCreate)
   }
 
   if (dockerCompose || argv.createFull) {

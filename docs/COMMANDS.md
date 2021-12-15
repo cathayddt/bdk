@@ -344,7 +344,7 @@ Description: 產生 Blockchain network 所需的相關設定檔案
 | --create-full       | boolean | 是否產生 Blockchain network 所需要的所有相關設定檔案（包含使用 cryptogen 產生憑證和私鑰、產生創始區塊、產生 Peer 連接設定檔案、產生 Peer/Orderer docker-compose 檔案） |          | false   |
 | --cryptogen         | boolean | 是否使用 cryptogen 產生憑證和私鑰                                                                                                                                      |          | false   |
 | --genesis           | boolean | 是否產生創始區塊                                                                                                                                                       |          | false   |
-| --connection-config | boolean | 是否產生 Peer 連接設定檔案                                                                                                                                             |          | false   |
+| --connection-profile | boolean | 是否產生 Peer 連接設定檔案                                                                                                                                             |          | false   |
 | --docker-compose    | boolean | 是否產生 Peer/Orderer docker-compose 檔案                                                                                                                              |          | false   |
 | --test-network      | boolean | 建立測試用的 Blockchain Network                                                                                                                                        |          | false   |
 
@@ -482,7 +482,7 @@ Description: 產生欲加入 Blockchin network 的 Orderer org 所需的相關�
 | --create-full           | boolean | 是否產生 Hyperledger Fabric 所需要的所有相關設定檔案（包含使用 cryptogen 產生憑證和私鑰、使用 configtx.yaml 產生 Orderer org 的 json 檔案、產生 Orderer docker-compose 檔案） |          | false   |
 | --cryptogen             | boolean | 是否使用 cryptogen 產生憑證和私鑰                                                                                                                                             |          | false   |
 | --configtxJSON          | boolean | 是否使用 configtx.yaml 產生 Orderer Org 的 json 檔案                                                                                                                          |          | false   |
-| --connection-config     | boolean | 是否產生 Orderer 連接設定檔案                                                                                                                                                 |          | false   |
+| --connection-profile     | boolean | 是否產生 Orderer 連接設定檔案                                                                                                                                                 |          | false   |
 | --docker-compose        | boolean | 是否產生 Orderer docker-compose 檔案                                                                                                                                          |          | false   |
 
 ### `bdk org orderer update`
@@ -532,7 +532,7 @@ Description: 產生欲加入 Channel 的 Peer org 所需的相關設定檔案
 | --create-full       | boolean | 是否產生 Hyperledger Fabric 所需要的所有相關設定檔案（包含使用 cryptogen 產生憑證和私鑰、使用 configtx.yaml 產生 Peer org 的 json 檔案、產生 Peer 連接設定檔案、產生 Peer/Orderer docker-compose 檔案） |          | false   |
 | --cryptogen         | boolean | 是否使用 cryptogen 產生憑證和私鑰                                                                                                                                                                       |          | false   |
 | --configtxJSON      | boolean | 是否使用 configtx.yaml 產生 Peer Org 的 json 檔案                                                                                                                                                       |          | false   |
-| --connection-config | boolean | 是否產生 Peer 連接設定檔案                                                                                                                                                                              |          | false   |
+| --connection-profile | boolean | 是否產生 Peer 連接設定檔案                                                                                                                                                                              |          | false   |
 | --docker-compose    | boolean | 是否產生 Peer docker-compose 檔案                                                                                                                                                                       |          | false   |
 
 ### `bdk org peer update`

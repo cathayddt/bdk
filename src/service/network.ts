@@ -107,14 +107,14 @@ export default class Network extends AbstractService {
    * @description 產生 blockahin network 的連線設定 yaml 檔案
    * @returns blockchain network 連線設定的 yaml 檔案（在 ~/.bdk/[blockchain network 名稱]/peerOrganizations/[domain 的名稱]/connection-[peer org 的名稱].yaml）
    */
-  public createConnectionConfig (dto: NetworkCreateType) {
+  public createConnectionProfile (dto: NetworkCreateType) {
     logger.info(`[*] Network create connection config profile: ${this.config.networkName}`)
 
     if (dto.peerOrgs === undefined) {
       throw new ParamsError('Invalid params: Required parameter <peerOrgs> missing')
     }
 
-    (new Peer(this.config, this.infra)).createConnectionConfigYaml(dto)
+    (new Peer(this.config, this.infra)).createConnectionProfileYaml(dto)
   }
 
   /**

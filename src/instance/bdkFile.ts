@@ -155,9 +155,9 @@ export default class BdkFile {
     return fs.readFileSync(`${this.bdkPath}/org-json/${name}-consenter.json`).toString()
   }
 
-  public createConnectionFile (name: string, domain: string, connectionConfigYaml: ConnectionProfileYaml) {
-    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`, connectionConfigYaml.getJsonString())
-    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.yaml`, connectionConfigYaml.getYamlString())
+  public createConnectionFile (name: string, domain: string, connectionProfileYaml: ConnectionProfileYaml) {
+    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`, connectionProfileYaml.getJsonString())
+    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.yaml`, connectionProfileYaml.getYamlString())
   }
 
   public getConnectionFile (name: string, domain: string): ConnectionProfileYaml {
