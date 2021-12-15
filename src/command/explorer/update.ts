@@ -1,9 +1,6 @@
 import { Arguments, Argv } from 'yargs'
 import Explorer from '../../service/explorer'
-import prompts from 'prompts'
-import { logger, ParamsError } from '../../util'
-import Peer from '../../service/peer'
-import { ExplorerUpForMyOrgType } from '../../model/type/explorer.type'
+import { logger } from '../../util'
 import config from '../../config'
 
 export const command = 'update'
