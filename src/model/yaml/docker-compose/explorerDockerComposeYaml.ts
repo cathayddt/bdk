@@ -2,7 +2,7 @@ import { Config } from '../../../config'
 import DockerComposeYaml from './dockerComposeYaml'
 
 class ExplorerDockerComposeYaml extends DockerComposeYaml {
-  constructor (config: Config) {
+  constructor (config: Config, port: number = 8080) {
     super()
     this.addNetwork(config.networkName, { name: config.networkName, external: true })
     this.addVolume(`explorerdb.${config.networkName}`, {})
@@ -53,7 +53,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/fabric-explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile`,
         ],
         ports: [
-          '8080:8080',
+          `${port}:8080`,
         ],
         depends_on: {
           [`explorerdb.${config.networkName}`]: {

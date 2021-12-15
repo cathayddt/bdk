@@ -1,5 +1,5 @@
 import { logger } from '../util/logger'
-import { ExplorerUpForMyOrgType } from '../model/type/explorer.type'
+import { ExplorerChannelType, ExplorerUpdateForMyOrgType, ExplorerUpForMyOrgType } from '../model/type/explorer.type'
 import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
 import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
 import Channel from './channel'
@@ -9,7 +9,7 @@ import { AbstractService, ParserType } from './Service.abstract'
 import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 
 interface ExplorerParser extends ParserType {
-  listJoinedChannel: (result: DockerResultType, options: {hostname: string}) => {[channelName: string]: {hostname: string}}
+  listJoinedChannel: (result: DockerResultType, options: {hostname: string}) => ExplorerChannelType
 }
 
 // TODO refactor
@@ -17,7 +17,7 @@ export default class Explorer extends AbstractService {
   static readonly parser: ExplorerParser = {
     listJoinedChannel: (result, options) => {
       const joinedChannel = Channel.parser.listJoinedChannel(result)
-      const channels: {[channelName: string]: {hostname: string}} = {}
+      const channels: ExplorerChannelType = {}
       joinedChannel.forEach(channel => {
         channels[channel] = { hostname: options.hostname }
       })
@@ -26,7 +26,7 @@ export default class Explorer extends AbstractService {
   }
 
   /** @ignore */
-  private createExplorerConfig (data: ExplorerUpForMyOrgType) {
+  private createExplorerConfig (data: ExplorerUpForMyOrgType | ExplorerUpdateForMyOrgType) {
     logger.info(`[*] Create file: ${this.config.networkName}.json`)
     const explorerConnectionProfileYaml = new ExplorerConnectionProfileYaml()
     explorerConnectionProfileYaml.setName(this.config.networkName)
@@ -36,6 +36,9 @@ export default class Explorer extends AbstractService {
       this.bdkFile.getAdminPrivateKeyPem(this.config.orgDomainName),
       this.bdkFile.getAdminSignCert(this.config.orgDomainName),
     )
+    if ('user' in data && 'pass' in data) {
+      explorerConnectionProfileYaml.setAdminCredential(data.user, data.pass)
+    }
     if (data.channels) {
       Object.keys(data.channels).forEach(channel => {
         explorerConnectionProfileYaml.addChannel(
@@ -66,14 +69,14 @@ export default class Explorer extends AbstractService {
   /**
    * @description 啟動 peer org 的 explorer
    */
-  public async upForMyOrg (): Promise<void> {
+  public async upForMyOrg (data: ExplorerUpForMyOrgType): Promise<void> {
     const listJoinedChannelResult = await this.upForMyOrgSteps().listJoinedChannel()
     if (!('stdout' in listJoinedChannelResult)) {
       logger.error('this service only for docker infra')
       throw new Error('this service for docker infra')
     }
     const channels = Explorer.parser.listJoinedChannel(listJoinedChannelResult, { hostname: this.config.hostname })
-    await this.upForMyOrgSteps().up({ channels })
+    await this.upForMyOrgSteps().up({ ...data, channels })
   }
 
   /**
@@ -88,7 +91,7 @@ export default class Explorer extends AbstractService {
       up: async (payload: ExplorerUpForMyOrgType): Promise<InfraRunnerResultType> => {
         logger.info('[*] up explorer for my org step 2 (start explorer)')
         this.createExplorerConfig(payload)
-        const dockerComposeYaml = new ExplorerDockerComposeYaml(this.config)
+        const dockerComposeYaml = new ExplorerDockerComposeYaml(this.config, payload.port)
         this.bdkFile.createExplorerDockerComposeYaml(dockerComposeYaml)
         logger.info('[*] Starting explorer container')
         return await (new ExplorerInstance(this.config, this.infra)).up()
@@ -118,9 +121,9 @@ export default class Explorer extends AbstractService {
         logger.info('[*] update explorer for my org step 1 (fetch joined channel)')
         return await (new Channel(this.config, this.infra)).listJoinedChannel()
       },
-      restart: async (payload: ExplorerUpForMyOrgType): Promise<InfraRunnerResultType> => {
+      restart: async (payload: ExplorerUpdateForMyOrgType): Promise<InfraRunnerResultType> => {
         logger.info('[*] update explorer for my org step 2 (restart explorer)')
-        this.createExplorerConfig(payload)
+        this.createExplorerConfig(payload.channels || {})
         return await (new ExplorerInstance(this.config, this.infra)).restart()
       },
     }
