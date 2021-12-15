@@ -69,7 +69,12 @@ bdk channel join -n ${CHANNEL_NAME} --orderer orderer0.${ORDERER_ORG_DOMAIN_GRAC
 export_env 'peer' 'Eugene' ${PEER_ORG_DOMAIN_EUGENE} 'peer0'
 bdk channel join -n ${CHANNEL_NAME} --orderer orderer1.${ORDERER_ORG_DOMAIN_BEN}:7150
 bdk channel update-anchorpeer -n ${CHANNEL_NAME} --orderer orderer0.${ORDERER_ORG_DOMAIN_GRACE}:7250 -p 7251
-
+# ==========================================================================================
+# explorer
+export_env 'peer' 'Ben' ${PEER_ORG_DOMAIN_BEN} 'peer0'
+bdk explorer up
+sleep 2
+curl http://localhost:8080
 # ==========================================================================================
 # package
 bdk chaincode package -n ${CHAINCODE_NAME} -v 1 -p ./chaincode/fabcar/go
