@@ -3,6 +3,9 @@ export interface ExplorerChannelType {
 }
 
 /**
+ * @requires user - explorer 的預設使用者
+ * @requires pass - explorer 的預設密碼
+ * @requires port - explorer 的 port
  * @requires channels - channel 與 加入此 Channel 的 hostname
  */
 export interface ExplorerUpForMyOrgType{
