@@ -25,10 +25,6 @@ export class Runner implements InfraRunner<DockerResultType> {
       })
   }
 
-  private logger = (content: string) => {
-    config.dockerLogging && logger.debug(content)
-  }
-
   public runCommand = async (payload: DockerRunCommandType): Promise<DockerResultType> => {
     await this.checkAndCreateNetwork(payload.network)
     const { image, tag, commands } = payload
@@ -53,7 +49,7 @@ export class Runner implements InfraRunner<DockerResultType> {
         this.existingImages[`${image}:${tag}`] = true
       }
     }
-    this.logger(`docker command: \ndocker run ${createOptions.HostConfig?.AutoRemove ? '--rm ' : ''} -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`)
+    logger.silly(`docker command: \ndocker run ${createOptions.HostConfig?.AutoRemove ? '--rm ' : ''} -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`)
     const startOptions: DockerStartOptionsType = payload.startOptions || {} as DockerStartOptionsType
     try {
       const stdout = new WritableStream()
@@ -63,7 +59,7 @@ export class Runner implements InfraRunner<DockerResultType> {
         stdout,
         createOptions,
         startOptions)
-      this.logger(`run command output: \n${stdout.toString()}`)
+      logger.silly(`run command output: \n${stdout.toString()}`)
       logger.debug(`docker run\n  image: ${image}\n  commands: ${commands.join(' ')}`)
       if (dockerRunResult[0].StatusCode !== 0) {
         throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.toString().split('\r\n').filter(x => x.match(/error/i))}`, stdout.toString())
@@ -93,7 +89,7 @@ export class Runner implements InfraRunner<DockerResultType> {
     if (spawnReturn.error) {
       throw new DockerError(`[x] command [docker-compose]: ${spawnReturn.error.message}`)
     }
-    this.logger(spawnReturn.output.join('\n'))
+    logger.silly(spawnReturn.output.join('\n'))
     return spawnReturn.output.join('\n')
   }
 

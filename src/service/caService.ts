@@ -64,7 +64,7 @@ export default class Ca extends AbstractService {
   public enrollSteps () {
     return {
       enrollMsp: async (arg: CaEnrollType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] enroll step 1 (msp)')
+        logger.debug('[*] enroll step 1 (msp)')
         if (arg.type === CaEnrollCommandTypeEnum.orderer) {
           return await (new FabricCa(this.config, this.infra)).enroll(
             CaEnrollTypeEnum.msp,
@@ -102,7 +102,7 @@ export default class Ca extends AbstractService {
         }
       },
       enrollTls: async (arg: CaEnrollType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] enroll step 2 (tls)')
+        logger.debug('[*] enroll step 2 (tls)')
         if (arg.type === CaEnrollCommandTypeEnum.orderer) {
           return await (new FabricCa(this.config, this.infra)).enroll(
             CaEnrollTypeEnum.tls,
@@ -124,7 +124,7 @@ export default class Ca extends AbstractService {
         }
       },
       format: (arg: CaEnrollType) => {
-        logger.info('[*] enroll step 3 (format)')
+        logger.debug('[*] enroll step 3 (format)')
         if (arg.type === CaEnrollCommandTypeEnum.orderer) {
           this.bdkFile.caFormatOrderer(arg.upstream, arg.clientId, arg.orgHostname)
         } else if (arg.type === CaEnrollCommandTypeEnum.peer) {

@@ -27,7 +27,7 @@ export default class Explorer extends AbstractService {
 
   /** @ignore */
   private createExplorerConfig (data: ExplorerUpForMyOrgType | ExplorerUpdateForMyOrgType) {
-    logger.info(`[*] Create file: ${this.config.networkName}.json`)
+    logger.debug(`Create file: ${this.config.networkName}.json`)
     const explorerConnectionProfileYaml = new ExplorerConnectionProfileYaml()
     explorerConnectionProfileYaml.setName(this.config.networkName)
     explorerConnectionProfileYaml.loadFromPeerConnectionProfile(this.bdkFile.getConnectionFile(this.config.orgName, this.config.orgDomainName))
@@ -50,11 +50,11 @@ export default class Explorer extends AbstractService {
     explorerConnectionProfileYaml.setClientOrganization(this.config.orgName)
     this.bdkFile.createExplorerConnectionProfile(this.config.networkName, explorerConnectionProfileYaml)
 
-    logger.info(`[*] Blockchain Explorer create network ${this.config.networkName} config`)
+    logger.debug(`Blockchain Explorer create network ${this.config.networkName} config`)
     const explorerConfigYaml = new ExplorerConfigYaml()
     explorerConfigYaml.addNetwork(this.config.networkName)
 
-    logger.info('[*] Create file: config.json')
+    logger.debug('Create file: config.json')
     this.bdkFile.createExplorerConfig(explorerConfigYaml)
   }
 
@@ -62,7 +62,7 @@ export default class Explorer extends AbstractService {
    * @description 關閉 explorer
    */
   public async down (): Promise<InfraRunnerResultType> {
-    logger.info('[*] Explorer down')
+    logger.debug('Explorer down')
     return await (new ExplorerInstance(this.config, this.infra)).down()
   }
 
@@ -85,15 +85,15 @@ export default class Explorer extends AbstractService {
   public upForMyOrgSteps () {
     return {
       listJoinedChannel: async (): Promise<InfraRunnerResultType> => {
-        logger.info('[*] up explorer for my org step 1 (fetch joined channel)')
+        logger.debug('up explorer for my org step 1 (fetch joined channel)')
         return await (new Channel(this.config)).listJoinedChannel()
       },
       up: async (payload: ExplorerUpForMyOrgType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] up explorer for my org step 2 (start explorer)')
+        logger.debug('up explorer for my org step 2 (start explorer)')
         this.createExplorerConfig(payload)
         const dockerComposeYaml = new ExplorerDockerComposeYaml(this.config, payload.port)
         this.bdkFile.createExplorerDockerComposeYaml(dockerComposeYaml)
-        logger.info('[*] Starting explorer container')
+        logger.debug('Starting explorer container')
         return await (new ExplorerInstance(this.config, this.infra)).up()
       },
     }
@@ -118,11 +118,11 @@ export default class Explorer extends AbstractService {
   public updateForMyOrgSteps () {
     return {
       listJoinedChannel: async (): Promise<InfraRunnerResultType> => {
-        logger.info('[*] update explorer for my org step 1 (fetch joined channel)')
+        logger.debug('update explorer for my org step 1 (fetch joined channel)')
         return await (new Channel(this.config, this.infra)).listJoinedChannel()
       },
       restart: async (payload: ExplorerUpdateForMyOrgType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] update explorer for my org step 2 (restart explorer)')
+        logger.debug('update explorer for my org step 2 (restart explorer)')
         this.createExplorerConfig(payload.channels || {})
         return await (new ExplorerInstance(this.config, this.infra)).restart()
       },

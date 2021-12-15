@@ -25,12 +25,12 @@ export const onCancel = (prompt: prompts.PromptObject<string>, answers: any) => 
 export const errorHandler = (err: Error) => {
   if (err instanceof FabricContainerError) {
     logger.error(err.message)
-    config.isDevMode && console.error(err.stdout)
   } else if (err instanceof BdkError) {
     logger.error(err.message)
   } else {
     logger.error('Unexpected error.\n')
+    logger.error(err.message)
   }
 
-  config.isDevMode && console.error(err)
+  config.isDevMode && logger.error(err.stack)
 }

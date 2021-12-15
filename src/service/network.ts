@@ -38,7 +38,7 @@ export default class Network extends AbstractService {
    * @param networkName blockchain network 的名稱
    */
   public async delete (networkName: string) {
-    logger.info(`Delete network ${networkName}`)
+    logger.debug(`Delete network ${networkName}`)
 
     const hostNames = this.bdkFile.getDockerComposeList()
 
@@ -66,7 +66,7 @@ export default class Network extends AbstractService {
    * @returns 憑證和私鑰
    */
   public async cryptogen (dto: NetworkCreateType) {
-    logger.info(`[*] Network create cryptogen: ${this.config.networkName}`)
+    logger.debug(`[*] Network create cryptogen: ${this.config.networkName}`)
 
     const cryptoConfigYaml = this.createCryptoConfigYaml(dto)
     await this.cryptogenGenerate(cryptoConfigYaml)
@@ -77,7 +77,7 @@ export default class Network extends AbstractService {
    * @returns 複製 TLS CA 到 blockchain network 底下的資料夾 tlsca/[peer hostname 的名稱].[domain 的名稱]/ca.crt
    */
   public copyTLSCa (dto: NetworkCreateType) {
-    logger.info(`[*] Network create copyTLSCa: ${this.config.networkName}`)
+    logger.debug(`[*] Network create copyTLSCa: ${this.config.networkName}`)
 
     dto.ordererOrgs && dto.ordererOrgs.forEach((ordererOrg: NetworkCreateOrdererOrgType) => {
       for (let i = 0; i < ordererOrg.hostname.length; i++) {
@@ -97,7 +97,7 @@ export default class Network extends AbstractService {
    * @returns 創始區塊檔案（～/.bdk/bdk/channel-artifacts/system-channel/genesis.block）
    */
   public async createGenesisBlock (dto: NetworkCreateType) {
-    logger.info(`[*] Network create genesis.block: ${this.config.networkName}`)
+    logger.debug(`[*] Network create genesis.block: ${this.config.networkName}`)
 
     this.createGenesisConfigtxYaml(dto)
     await (new FabricTools(this.config, this.infra)).cryptogenGenerateGenesisBlock(this.profileName)
@@ -108,7 +108,7 @@ export default class Network extends AbstractService {
    * @returns blockchain network 連線設定的 yaml 檔案（在 ~/.bdk/[blockchain network 名稱]/peerOrganizations/[domain 的名稱]/connection-[peer org 的名稱].yaml）
    */
   public createConnectionProfile (dto: NetworkCreateType) {
-    logger.info(`[*] Network create connection config profile: ${this.config.networkName}`)
+    logger.debug(`[*] Network create connection config profile: ${this.config.networkName}`)
 
     if (dto.peerOrgs === undefined) {
       throw new ParamsError('Invalid params: Required parameter <peerOrgs> missing')
@@ -122,7 +122,7 @@ export default class Network extends AbstractService {
    * @returns peer org 和 orderer org 的 docker compose yaml 檔案
    */
   public createDockerCompose (dto: NetworkCreateType) {
-    logger.info(`[*] Network create docker-compose-{ordererOrgName/peerOrgName}.yaml: ${this.config.networkName}`)
+    logger.debug(`[*] Network create docker-compose-{ordererOrgName/peerOrgName}.yaml: ${this.config.networkName}`)
 
     dto.ordererOrgs && dto.ordererOrgs.forEach((ordererOrg: NetworkCreateOrdererOrgType) => {
       (new Orderer(this.config, this.infra)).add({
@@ -146,7 +146,7 @@ export default class Network extends AbstractService {
 
   /** @ignore */
   private createCryptoConfigYaml (dto: NetworkCreateType): CryptoConfigYaml {
-    logger.info('[*] Create crypto-config.yaml')
+    logger.debug('[*] Create crypto-config.yaml')
 
     const cryptoConfigYaml = new CryptoConfigYaml()
 
@@ -166,7 +166,7 @@ export default class Network extends AbstractService {
 
   /** @ignore */
   private async cryptogenGenerate (cryptoConfigYaml: CryptoConfigYaml) {
-    logger.info('[*] Create configtx.yaml by cryptogen')
+    logger.debug('[*] Create configtx.yaml by cryptogen')
 
     this.bdkFile.createCryptoConfigYaml(cryptoConfigYaml)
 
@@ -175,7 +175,7 @@ export default class Network extends AbstractService {
 
   /** @ignore */
   private createGenesisConfigtxYaml (dto: NetworkCreateType): ConfigtxYaml {
-    logger.info('[*] Create genesis.block')
+    logger.debug('[*] Create genesis.block')
 
     if (dto.ordererOrgs === undefined) throw new ParamsError('Invalid params: Required parameter <ordererOrgs> missing')
     if (dto.peerOrgs === undefined) throw new ParamsError('Invalid params: Required parameter <peerOrgs> missing')

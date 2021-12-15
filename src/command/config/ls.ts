@@ -15,5 +15,5 @@ export const handler = () => {
 
   const envConfig = configService.ls()
 
-  logger.info(`current .env config =>\n${JSON.stringify(envConfig)}`)
+  logger.info(`${JSON.stringify(envConfig)}`)
 }

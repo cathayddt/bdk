@@ -18,7 +18,7 @@ export default class Orderer extends AbstractService {
    * @description 啟動 orderer org 的機器
    */
   public async up (dto: OrdererUpType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Orderer up: ${dto.ordererHostname}`)
+    logger.debug(`[*] Orderer up: ${dto.ordererHostname}`)
     return await new OrdererInstance(dto.ordererHostname, this.config, this.infra).up()
   }
 
@@ -26,7 +26,7 @@ export default class Orderer extends AbstractService {
    * @description 關閉 orderer org 的機器並且刪除其 volume 資料
    */
   public async down (dto: OrdererUpType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Orderer down: ${dto.ordererHostname}`)
+    logger.debug(`[*] Orderer down: ${dto.ordererHostname}`)
     return await new OrdererInstance(dto.ordererHostname, this.config, this.infra).down()
   }
 
@@ -36,7 +36,7 @@ export default class Orderer extends AbstractService {
    */
   public async cryptogen (dto: OrgOrdererCreateType) {
     const { ordererOrgs } = dto
-    logger.info('[*] Orderer create cryptogen')
+    logger.debug('[*] Orderer create cryptogen')
 
     const cryptoConfigYaml = new CryptoConfigYaml()
     const ordererOrgCryptoConfigYaml = this.createCryptoConfigYaml(ordererOrgs)
@@ -59,7 +59,7 @@ export default class Orderer extends AbstractService {
     const configtxYaml = new ConfigtxYaml()
 
     for (const ordererOrg of ordererOrgs) {
-      logger.info(`[*] Orderer create configtx: ${ordererOrg.name}`)
+      logger.debug(`[*] Orderer create configtx: ${ordererOrg.name}`)
 
       const ports = ordererOrg.ports?.map(port => port.port)
 
@@ -95,7 +95,7 @@ export default class Orderer extends AbstractService {
   public copyTLSCa (dto: OrgOrdererCreateType) {
     const { ordererOrgs } = dto
     ordererOrgs.forEach((ordererOrg: NetworkCreateOrdererOrgType) => {
-      logger.info(`[*] Orderer create copyTLSCa: ${ordererOrg.name}`)
+      logger.debug(`[*] Orderer create copyTLSCa: ${ordererOrg.name}`)
       for (const ordererHostname of ordererOrg.hostname) {
         this.bdkFile.copyOrdererOrgTLSCa(ordererHostname, ordererOrg.domain)
       }
@@ -107,7 +107,7 @@ export default class Orderer extends AbstractService {
    * @returns  orderer org 的 docker compose yaml 檔案（在 ~/.bdk/[blockchain network 名稱]/docker-compose/[domain 的名稱]/docker-compose-orderer-[orderer 的 hostname].[orderer org 的名稱].yaml）
    */
   public add (dto: OrdererAddType) { // if port[i] is not undefine, use this port and publish a container's port to the host. else use default port.
-    logger.info('[*] Orderer add')
+    logger.debug('[*] Orderer add')
 
     this.createOrdererOrgDockerComposeYaml(dto.orgName || this.config.orgName, dto.orgDomain || this.config.orgDomainName, dto.ordererHostnames, dto.genesisFileName, dto.ports)
   }
@@ -124,7 +124,7 @@ export default class Orderer extends AbstractService {
     }
 
     ordererOrgs.forEach((ordererOrg) => {
-      logger.info(`[*] Orderer create docker-compose: ${ordererOrg.name}`)
+      logger.debug(`[*] Orderer create docker-compose: ${ordererOrg.name}`)
       this.createOrdererOrgDockerComposeYaml(ordererOrg.name, ordererOrg.domain, ordererOrg.hostname, genesisFileName, ordererOrg.ports)
     })
   }
@@ -174,7 +174,7 @@ export default class Orderer extends AbstractService {
    * @description 將 orderer org 資訊加入到 channel 設定檔中
    */
   public async addOrgToChannel (dto: OrdererAddOrgToChannelType): Promise<void> {
-    logger.info(`[*] Org Orderer Add Org: add ${dto.orgName} in ${dto.channelName}`)
+    logger.debug(`[*] Org Orderer Add Org: add ${dto.orgName} in ${dto.channelName}`)
 
     await this.addOrgToChannelSteps().fetchChannelConfig(dto)
     await this.addOrgToChannelSteps().orgConfigComputeUpdateConfigTx(dto)
@@ -186,11 +186,11 @@ export default class Orderer extends AbstractService {
   public addOrgToChannelSteps () {
     return {
       fetchChannelConfig: async (dto: OrdererAddOrgToChannelType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] add org to channel step1 (fetchChannelConfig)')
+        logger.debug('[*] add org to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
       orgConfigComputeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
-        logger.info('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
+        logger.debug('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
         const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
@@ -216,7 +216,7 @@ export default class Orderer extends AbstractService {
    * @description 將 orderer consenter 資訊加入到 channel 設定檔中
    */
   public async addConsenterToChannel (dto: OrdererAddConsenterToChannelType): Promise<void> {
-    logger.info(`[*] Org Orderer Add Consenter: add ${dto.hostname} of ${dto.orgName} in ${dto.channelName}`)
+    logger.debug(`[*] Org Orderer Add Consenter: add ${dto.hostname} of ${dto.orgName} in ${dto.channelName}`)
 
     await this.addConsenterToChannelSteps().fetchChannelConfig(dto)
     await this.addConsenterToChannelSteps().hostnameComputeUpdateConfigTx(dto)
@@ -228,11 +228,11 @@ export default class Orderer extends AbstractService {
   public addConsenterToChannelSteps () {
     return {
       fetchChannelConfig: async (dto: OrdererAddConsenterToChannelType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] add consenter to channel step1 (fetchChannelConfig)')
+        logger.debug('[*] add consenter to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
       hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
-        logger.info('[*] add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
+        logger.debug('[*] add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
         const { orderer, channelName } = dto
         const orgType = this.config.orgType
 
@@ -262,7 +262,7 @@ export default class Orderer extends AbstractService {
   }
 
   public async approve (dto: OrdererApproveType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Org Orderer Approve: ${this.config.orgName} sign ${dto.channelName} config update`)
+    logger.debug(`[*] Org Orderer Approve: ${this.config.orgName} sign ${dto.channelName} config update`)
     const { channelName } = dto
 
     const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigSignType = {
@@ -274,7 +274,7 @@ export default class Orderer extends AbstractService {
   }
 
   public async update (dto: OrdererUpdateType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Org Orderer update: ${this.config.orgName} update ${dto.channelName}`)
+    logger.debug(`[*] Org Orderer update: ${this.config.orgName} update ${dto.channelName}`)
     const { orderer, channelName } = dto
     const orgType = this.config.orgType
 

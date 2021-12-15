@@ -21,7 +21,7 @@ export default class Peer extends AbstractService {
    * @description 啟動 peer 的機器
    */
   public async up (dto: PeerUpType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Peer up: ${dto.peerHostname}`)
+    logger.debug(`[*] Peer up: ${dto.peerHostname}`)
     return await (new PeerInstance(dto.peerHostname, this.config, this.infra)).up()
   }
 
@@ -29,7 +29,7 @@ export default class Peer extends AbstractService {
    * @description 關閉 peer 的機器並且刪除其 volume 的資料
    */
   public async down (dto: PeerDownType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Peer down: ${dto.peerHostname}`)
+    logger.debug(`[*] Peer down: ${dto.peerHostname}`)
     return await (new PeerInstance(dto.peerHostname, this.config, this.infra).down())
   }
 
@@ -39,7 +39,7 @@ export default class Peer extends AbstractService {
    */
   public async cryptogen (dto: OrgPeerCreateType) {
     const { peerOrgs } = dto
-    logger.info('[*] Peer create cryptogen')
+    logger.debug('[*] Peer create cryptogen')
 
     const cryptoConfigYaml = new CryptoConfigYaml()
     const peerOrgCryptoConfigYaml = this.createCryptoConfigYaml(peerOrgs)
@@ -62,7 +62,7 @@ export default class Peer extends AbstractService {
     const configtxYaml = new ConfigtxYaml()
 
     for (const peerOrg of peerOrgs) {
-      logger.info(`[*] Peer create configtx: ${peerOrg.name}`)
+      logger.debug(`[*] Peer create configtx: ${peerOrg.name}`)
 
       const newOrg = configtxYaml.addPeerOrg({
         name: peerOrg.name,
@@ -82,7 +82,7 @@ export default class Peer extends AbstractService {
   public copyTLSCa (dto: OrgPeerCreateType) {
     const { peerOrgs } = dto
     peerOrgs.forEach((peerOrg: NetworkCreatePeerOrgType) => {
-      logger.info(`[*] Peer create copyTLSCa: ${peerOrg.name}`)
+      logger.debug(`[*] Peer create copyTLSCa: ${peerOrg.name}`)
       for (let i = 0; i < peerOrg.peerCount; i++) {
         this.bdkFile.copyPeerOrgTLSCa(`peer${i}`, peerOrg.domain)
       }
@@ -96,7 +96,7 @@ export default class Peer extends AbstractService {
   public createConnectionProfileYaml (dto: OrgPeerCreateType) {
     const { peerOrgs } = dto
     peerOrgs.forEach((peerOrg) => {
-      logger.info(`[*] Peer create connection config: ${peerOrg.name}`)
+      logger.debug(`[*] Peer create connection config: ${peerOrg.name}`)
       const connectionProfileYaml = new ConnectionProfileYaml()
 
       connectionProfileYaml.setName(`${this.config.networkName}-${peerOrg.name}`)
@@ -120,7 +120,7 @@ export default class Peer extends AbstractService {
    * @returns  peer org 的 docker compose yaml 檔案（在 ~/.bdk/[blockchain network 名稱]/docker-compose/[domain 的名稱]/docker-compose-peer-[peer 的 hostname].[peer org 的名稱].yaml）
    */
   public add (dto: PeerAddType) { // if port[i] is not undefine, use this port and publish a container's port to the host. else use default port.
-    logger.info('[*] Peer add')
+    logger.debug('[*] Peer add')
 
     this.createPeerOrgDockerComposeYaml(dto.orgName || this.config.orgName, dto.orgDomain || this.config.orgDomainName, dto.peerCount, dto.ports)
   }
@@ -132,7 +132,7 @@ export default class Peer extends AbstractService {
   public createDockerCompose (dto: OrgPeerCreateType) {
     const { peerOrgs } = dto
     peerOrgs.forEach((peerOrg) => {
-      logger.info(`[*] Peer create docker-compose: ${peerOrg.name}`)
+      logger.debug(`[*] Peer create docker-compose: ${peerOrg.name}`)
       this.createPeerOrgDockerComposeYaml(peerOrg.name, peerOrg.domain, peerOrg.peerCount, peerOrg.ports)
     })
   }
@@ -195,11 +195,11 @@ export default class Peer extends AbstractService {
   public addOrgToChannelSteps () {
     return {
       fetchChannelConfig: async (dto: PeerAddOrgToChannelType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] add org to channel step1 (fetchChannelConfig)')
+        logger.debug('[*] add org to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType)
       },
       computeUpdateConfigTx: async (dto: PeerAddOrgToChannelType) => {
-        logger.info('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
+        logger.debug('[*] add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
         const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
@@ -235,11 +235,11 @@ export default class Peer extends AbstractService {
   public addOrgToSystemChannelSteps () {
     return {
       fetchChannelConfig: async (dto: PeerAddOrgToSystemChannelType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] add org to system channel step1 (fetchChannelConfig)')
+        logger.debug('[*] add org to system channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
       computeUpdateConfigTx: async (dto: PeerAddOrgToSystemChannelType) => {
-        logger.info('[*] add org to system channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
+        logger.debug('[*] add org to system channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
         const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
@@ -262,7 +262,7 @@ export default class Peer extends AbstractService {
   }
 
   public async approve (dto: PeerApproveType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Org Peer Approve: ${this.config.orgName} sign ${dto.channelName} config update`)
+    logger.debug(`[*] Org Peer Approve: ${this.config.orgName} sign ${dto.channelName} config update`)
     const { channelName } = dto
 
     const channelCreateChannelConfigSignType: ChannelCreateChannelConfigSignType = {
@@ -273,7 +273,7 @@ export default class Peer extends AbstractService {
   }
 
   public async update (dto: PeerUpdateType): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Org Peer update: ${this.config.orgName} update ${dto.channelName}`)
+    logger.debug(`[*] Org Peer update: ${this.config.orgName} update ${dto.channelName}`)
     const { orderer, channelName } = dto
 
     const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {

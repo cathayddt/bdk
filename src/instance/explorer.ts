@@ -12,17 +12,17 @@ export default class Explorer extends AbstractInstance {
   }
 
   public async up (): Promise<InfraRunnerResultType> {
-    logger.info('[*] Explorer instance up')
+    logger.debug('[*] Explorer instance up')
     return await this.infra.upInBackground(this.dockerComposePath)
   }
 
   public async down (): Promise<InfraRunnerResultType> {
-    logger.info('[*] Explorer instance down')
+    logger.debug('[*] Explorer instance down')
     return await this.infra.downAndRemoveVolumes(this.dockerComposePath)
   }
 
   public async restart (): Promise<InfraRunnerResultType> {
-    logger.info('[*] Explorer instance restart')
+    logger.debug('[*] Explorer instance restart')
     return await this.infra.restart(this.dockerComposePath, [`explorer.${this.config.networkName}`])
   }
 }
