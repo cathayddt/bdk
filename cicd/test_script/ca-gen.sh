@@ -126,7 +126,7 @@ bdk ca enroll -t user -u ${ICA_DOMAIN_EUGENE} -p 10054 --client-id Admin@${PEER_
 # ================================================================================================
 
 # Network create
-bdk network create -f ./cicd/test_script/network-create.json --genesis --connection-config --docker-compose
+bdk network create -f ./cicd/test_script/network-create.json --genesis --connection-profile --docker-compose
 
 bdk orderer up -n orderer0.${ORDERER_ORG_DOMAIN_BEN} -n orderer0.${ORDERER_ORG_DOMAIN_GRACE} -n orderer1.${ORDERER_ORG_DOMAIN_BEN}
 sleep 2
@@ -167,6 +167,12 @@ export_env 'peer' 'Eugene' ${PEER_ORG_DOMAIN_EUGENE} 'peer0'
 bdk channel join -n ryan --orderer orderer1.${ORDERER_ORG_DOMAIN_BEN}:7150
 bdk channel update-anchorpeer -n ryan --orderer orderer0.${ORDERER_ORG_DOMAIN_GRACE}:7250 -p 7251
 
+# ==========================================================================================
+# explorer
+export_env 'peer' 'Ben' ${PEER_ORG_DOMAIN_BEN} 'peer0'
+bdk explorer up
+sleep 5
+curl http://localhost:8080
 # ==========================================================================================
 # package
 bdk chaincode package -n fabcar -v 1 -p ./chaincode/fabcar/go
@@ -267,7 +273,7 @@ bdk ca enroll -t user -u ${ICA_DOMAIN_ERIC} -p 11054 --client-id Admin@${PEER_OR
 
 # ==================================================================
 # [Eric] create new org
-bdk org peer create -f ./cicd/test_script/org-peer-create.json --configtxJSON --connection-config --docker-compose
+bdk org peer create -f ./cicd/test_script/org-peer-create.json --configtxJSON --connection-profile --docker-compose
 
 # [Eric] export & import org json config
 export_env 'peer' 'Eric' ${PEER_ORG_DOMAIN_ERIC} 'peer0'

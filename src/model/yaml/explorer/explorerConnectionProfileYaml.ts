@@ -1,4 +1,5 @@
 import BdkYaml from '../bdkYaml'
+import ConnectionProfileYaml from '../network/connectionProfileYaml'
 
 interface Client {
   tlsEnable: boolean
@@ -43,7 +44,7 @@ interface Peer {
   tlsCACerts: { pem: string }
 }
 
-interface ConnectionConfigInterface {
+interface ExplorerConnectionProfileInterface {
   name: string
   version: string
   client: Client
@@ -52,8 +53,8 @@ interface ConnectionConfigInterface {
   peers: {[peerName: string]: Peer}
 }
 
-class ConnectionProfileYaml extends BdkYaml<ConnectionConfigInterface> {
-  constructor (value?: ConnectionConfigInterface) {
+class ExplorerConnectionProfileYaml extends BdkYaml<ExplorerConnectionProfileInterface> {
+  constructor (value?: ExplorerConnectionProfileInterface) {
     super(value)
 
     this.value.version = value?.version || '1.0.0'
@@ -97,6 +98,17 @@ class ConnectionProfileYaml extends BdkYaml<ConnectionConfigInterface> {
 
   public setAdminCredential (id: string, password: string) {
     this.value.client.adminCredential = { id, password }
+  }
+
+  public loadFromPeerConnectionProfile (peerConnectProfile: ConnectionProfileYaml) {
+    Object.keys(peerConnectProfile.value.organizations).forEach(org => {
+      this.value.organizations[org] = {
+        ...peerConnectProfile.value.organizations[org],
+        adminPrivateKey: { pem: '' },
+        signedCert: { pem: '' },
+      }
+    })
+    this.value.peers = peerConnectProfile.value.peers
   }
 
   private addOrg (org: string) {
@@ -173,4 +185,4 @@ class ConnectionProfileYaml extends BdkYaml<ConnectionConfigInterface> {
   }
 }
 
-export default ConnectionProfileYaml
+export default ExplorerConnectionProfileYaml

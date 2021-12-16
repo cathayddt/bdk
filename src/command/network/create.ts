@@ -21,7 +21,7 @@ interface OptType {
   createFull: boolean
   cryptogen: boolean
   genesis: boolean
-  connectionConfig: boolean
+  connectionProfile: boolean
   dockerCompose: boolean
   testNetwork: boolean
 }
@@ -32,14 +32,14 @@ export const builder = (yargs: Argv<OptType>) => {
     .example('bdk network create --file ~/.bdk/network-create.json --create-full', '使用在路徑下 json 檔案中的參數，產生 Blockchain network 所需的相關設定檔案')
     .example('bdk network create --file ~/.bdk/network-create.json --cryptogen', '使用在路徑下 json 檔案中的參數和 cryptogen，產生憑證和私鑰')
     .example('bdk network create --file ~/.bdk/network-create.json --genesis', '使用在路徑下 json 檔案中的參數，產生創始區塊')
-    .example('bdk network create --file ~/.bdk/network-create.json --connection-config', '使用在路徑下 json 檔案中的參數，產生 Peer 連接設定檔案')
+    .example('bdk network create --file ~/.bdk/network-create.json --connection-profile', '使用在路徑下 json 檔案中的參數，產生 Peer 連接設定檔案')
     .example('bdk network create --file ~/.bdk/network-create.json --docker-compose', '使用在路徑下 json 檔案中的參數，產生 Peer/Orderer docker-compose 檔案')
     .option('file', { type: 'string', description: '需要的參數設定 json 檔案路徑', alias: 'f' })
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i', default: false })
     .option('create-full', { type: 'boolean', description: '是否產生 Blockchain network 所需要的所有相關設定檔案（包含使用 cryptogen 產生憑證和私鑰、產生創始區塊、產生 Peer 連接設定檔案、產生 Peer/Orderer docker-compose 檔案）', default: false })
     .option('cryptogen', { type: 'boolean', description: '是否使用 cryptogen 產生憑證和私鑰', default: false })
     .option('genesis', { type: 'boolean', description: '是否產生創始區塊', default: false })
-    .option('connection-config', { type: 'boolean', description: '是否產生 Peer 連接設定檔案', default: false })
+    .option('connection-profile', { type: 'boolean', description: '是否產生 Peer 連接設定檔案', default: false })
     .option('docker-compose', { type: 'boolean', description: '是否產生 Peer/Orderer docker-compose 檔案', default: false })
     .option('test-network', { type: 'boolean', description: '建立測試用的 Blockchain Network', default: false })
 }
@@ -148,17 +148,17 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
-  const connectionConfig: boolean = await (async () => {
+  const connectionProfile: boolean = await (async () => {
     if (argv.interactive) {
       return (await prompts(
         {
           type: 'confirm',
-          name: 'connectionConfig',
-          message: 'Do you want to generate peer connection config profile?',
+          name: 'connectionProfile',
+          message: 'Do you want to generate peer connection profile?',
           initial: false,
-        }, { onCancel })).connectionConfig
+        }, { onCancel })).connectionProfile
     } else {
-      return argv.connectionConfig
+      return argv.connectionProfile
     }
   })()
 
@@ -188,8 +188,8 @@ export const handler = async (argv: Arguments<OptType>) => {
     await network.createGenesisBlock(networkCreate)
   }
 
-  if (connectionConfig || createFull) {
-    network.createConnectionConfig(networkCreate)
+  if (connectionProfile || createFull) {
+    network.createConnectionProfile(networkCreate)
   }
 
   if (dockerCompose || createFull) {

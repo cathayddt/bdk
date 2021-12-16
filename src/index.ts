@@ -27,7 +27,7 @@ export { ChaincodePackageType, ChaincodeApproveType, ChaincodeCommitType, Chainc
 export { PolicyTypeEnum, PolicyStyleEnum, ChannelPolicyType, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ConfigtxlatorEnum, ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType, ChannelConfigEnum, ChannelFetchBlockType } from './model/type/channel.type'
 export { ConfigEnvType, ConfigSetType } from './model/type/config.type'
 export { DockerHostConfigType, DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType } from './model/type/docker.type'
-export { ExplorerConfigType, ExplorerUpForMyOrgType } from './model/type/explorer.type'
+export { ExplorerUpForMyOrgType, ExplorerUpdateForMyOrgType, ExplorerChannelType } from './model/type/explorer.type'
 export { NetworkCreateType, NetworkCryptoConfigOrdererOrgType, NetworkCryptoConfigPeerOrgType, NetworkCreateOrdererOrgType, NetworkCreatePeerOrgType, NetworkOrdererPortType, NetworkPeerPortType } from './model/type/network.type'
 export { OrgPeerOrgNameAndDomainType, OrgJsonType, OrgOrdererCreateType, OrgPeerCreateType } from './model/type/org.type'
 export { PeerUpType, PeerDownType, PeerAddType, PeerAddOrgToChannelType, PeerApproveType, PeerUpdateType } from './model/type/peer.type'

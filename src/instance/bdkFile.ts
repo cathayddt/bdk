@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import YAML from 'js-yaml'
 import { parse, stringify } from 'envfile'
 import CryptoConfigYaml from '../model/yaml/network/cryptoConfigYaml'
-import ConnectionConfigYaml from '../model/yaml/network/connectionConfigYaml'
+import ConnectionProfileYaml from '../model/yaml/network/connectionProfileYaml'
 import ConfigtxYaml, { ConfigtxOrgs, OrdererOrganizationInterface, PeerOrganizationInterface } from '../model/yaml/network/configtx'
 import { ConfigEnvType } from '../model/type/config.type'
 import OrdererDockerComposeYaml from '../model/yaml/docker-compose/ordererDockerComposeYaml'
@@ -13,6 +13,9 @@ import { OrgJsonType } from '../model/type/org.type'
 import { ProcessError } from '../util'
 import { Config } from '../config'
 import { DockerComposeYamlInterface } from '../model/yaml/docker-compose/dockerComposeYaml'
+import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
+import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
+import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 
 export enum InstanceTypeEnum {
   ca = 'ca',
@@ -152,17 +155,25 @@ export default class BdkFile {
     return fs.readFileSync(`${this.bdkPath}/org-json/${name}-consenter.json`).toString()
   }
 
-  public createConnectionFile (name: string, domain: string, connectionConfigYaml: ConnectionConfigYaml) {
-    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`, connectionConfigYaml.getJsonString())
-    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.yaml`, connectionConfigYaml.getYamlString())
+  public createConnectionFile (name: string, domain: string, connectionProfileYaml: ConnectionProfileYaml) {
+    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`, connectionProfileYaml.getJsonString())
+    fs.writeFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.yaml`, connectionProfileYaml.getYamlString())
+  }
+
+  public getConnectionFile (name: string, domain: string): ConnectionProfileYaml {
+    return new ConnectionProfileYaml(JSON.parse(fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/connection-${name}.json`).toString()))
   }
 
   public getDockerComposeYamlPath (hostName: string, type: InstanceTypeEnum): string {
     return `${this.bdkPath}/docker-compose/docker-compose-${type}-${hostName}.yaml`
   }
 
-  public getExplorerRootFilePath () {
+  private getExplorerRootFilePath () {
     return `${this.bdkPath}/fabric-explorer`
+  }
+
+  private createExplorerFolder () {
+    fs.mkdirSync(`${this.getExplorerRootFilePath()}/connection-profile`, { recursive: true })
   }
 
   public getExplorerDockerComposeYamlPath (): string {
@@ -183,6 +194,11 @@ export default class BdkFile {
 
     fs.mkdirSync(`${this.bdkPath}/docker-compose`, { recursive: true })
     fs.writeFileSync(this.getDockerComposeYamlPath(hostName, type), dockerComposeYaml.getYamlString())
+  }
+
+  public createExplorerDockerComposeYaml (explorerConnectionProfileYaml: ExplorerDockerComposeYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(this.getExplorerDockerComposeYamlPath(), explorerConnectionProfileYaml.getYamlString())
   }
 
   public getDockerComposeYaml (hostName: string, type: InstanceTypeEnum): DockerComposeYamlInterface {
@@ -231,6 +247,24 @@ export default class BdkFile {
 
   public createChannelConfigJson (channelName: string, fileName: string, channelConfigJson: string) {
     fs.writeFileSync(`${this.bdkPath}/channel-artifacts/${channelName}/${fileName}.json`, channelConfigJson)
+  }
+
+  public createExplorerConnectionProfile (networkName: string, explorerConnectionProfileYaml: ExplorerConnectionProfileYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(
+      `${this.getExplorerRootFilePath()}/connection-profile/${networkName}.json`, explorerConnectionProfileYaml.getJsonString(),
+    )
+  }
+
+  public createExplorerConfig (explorerConfig: ExplorerConfigYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(
+      `${this.getExplorerRootFilePath()}/config.json`, explorerConfig.getJsonString(),
+    )
+  }
+
+  public getExplorerConfig (): ExplorerConfigYaml {
+    return new ExplorerConfigYaml(JSON.parse(fs.readFileSync(`${this.getExplorerRootFilePath()}/config.json`).toString()))
   }
 
   public getDockerComposeList (): {peer: string[]; orderer: string[]; ca: string[]} {
@@ -443,5 +477,13 @@ export default class BdkFile {
 
   public getDecodedChannelConfig (channelName: string): any {
     return JSON.parse(fs.readFileSync(`${this.bdkPath}/channel-artifacts/${channelName}/${channelName}.json`).toString())
+  }
+
+  public getAdminPrivateKeyPem (domain: string): string {
+    return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/keystore`)).toString()
+  }
+
+  public getAdminSignCert (domain: string): string {
+    return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/signcerts`)).toString()
   }
 }

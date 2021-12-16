@@ -5,15 +5,15 @@ interface NetworkConfig {
   profile: string
 }
 
-interface Config {
+interface ExplorerConfigInterface {
   'network-configs': {
     [configName: string]: NetworkConfig
   }
   license: string
 }
 
-class ConfigYaml extends BdkYaml<Config> {
-  constructor (value?: Config) {
+class ExplorerConfigYaml extends BdkYaml<ExplorerConfigInterface> {
+  constructor (value?: ExplorerConfigInterface) {
     super(value)
     if (!value) {
       this.value.license = 'Apache-2.0'
@@ -38,4 +38,4 @@ class ConfigYaml extends BdkYaml<Config> {
   }
 }
 
-export default ConfigYaml
+export default ExplorerConfigYaml
