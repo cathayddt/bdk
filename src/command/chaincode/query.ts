@@ -76,8 +76,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
   const queryResult = await chaincode.query(queryChannelInput)
   if (!('stdout' in queryResult)) {
-    logger.error('command only for docker infra')
     throw new Error('command only for docker infra')
   }
-  logger.info(`query result =>\n${JSON.stringify(Chaincode.parser.query(queryResult))}`)
+  logger.info(`${JSON.stringify(Chaincode.parser.query(queryResult))}`)
 }

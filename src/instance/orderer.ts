@@ -15,13 +15,13 @@ export default class Orderer extends AbstractInstance {
   }
 
   public async up (): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Orderer instance up: ${this.ordererOrgName}`)
+    logger.debug(`Orderer instance up: ${this.ordererOrgName}`)
 
     return await this.infra.upInBackground(this.dockerComposePath)
   }
 
   public async down (): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Orderer instance down: ${this.ordererOrgName}`)
+    logger.debug(`Orderer instance down: ${this.ordererOrgName}`)
     return await this.infra.downAndRemoveVolumes(this.dockerComposePath)
   }
 }

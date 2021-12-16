@@ -28,7 +28,7 @@ export default class Chaincode extends AbstractService {
    * @returns 在 ./chaincode 中 [chaincode 的名稱]_[cahincode 的版本].tar
    */
   public async package (payload: ChaincodePackageType) {
-    logger.info('[*] Package chaincode')
+    logger.debug('Package chaincode')
     this.bdkFile.createChaincodeFolder()
     await (new FabricTools(this.config, this.infra)).packageChaincode(payload.name, payload.version, path.resolve(payload.path))
   }
@@ -38,7 +38,7 @@ export default class Chaincode extends AbstractService {
    * @returns 執行 chaincode function 的回覆
    */
   public async invoke (payload: ChaincodeInvokeType): Promise<InfraRunnerResultType> {
-    logger.info('[*] invoke chaincode')
+    logger.debug('invoke chaincode')
     return await (new FabricInstance(this.config, this.infra)).invokeChaincode(payload.channelId, payload.chaincodeName, payload.chaincodeFunction, payload.args, payload.isInit, payload.orderer, payload.peerAddresses)
   }
 
@@ -47,7 +47,7 @@ export default class Chaincode extends AbstractService {
    * @returns 執行 chaincode function 的回覆
    */
   public async query (payload: ChaincodeQueryType): Promise<InfraRunnerResultType> {
-    logger.info('[*] query chaincode')
+    logger.debug('query chaincode')
     return await (new FabricInstance(this.config, this.infra)).queryChaincode(payload.channelId, payload.chaincodeName, payload.chaincodeFunction, payload.args)
   }
 
@@ -70,11 +70,11 @@ export default class Chaincode extends AbstractService {
   public installSteps () {
     return {
       installToPeer: async (dto: ChaincodeInstallType): Promise<InfraRunnerResultType> => {
-        logger.info('[*] install chaincode step 1 (install chaincode)')
+        logger.debug('install chaincode step 1 (install chaincode)')
         return await (new FabricInstance(this.config, this.infra)).installChaincode(dto.chaincodeLabel)
       },
       savePackageId: (dto: ChaincodeInstallType): string => {
-        logger.info('[*] install chaincode step 2 (save package id)')
+        logger.debug('install chaincode step 2 (save package id)')
         this.bdkFile.savePackageId(dto.chaincodeLabel, dto.packageId || '')
         return dto.packageId || ''
       },
@@ -87,7 +87,7 @@ export default class Chaincode extends AbstractService {
    * @returns chaincode 的安裝編號
    */
   public async getChaincodePackageId (): Promise<InfraRunnerResultType> {
-    logger.info('[*] query installed and get package id')
+    logger.debug('query installed and get package id')
     return await (new FabricInstance(this.config, this.infra)).queryInstalledChaincode()
   }
 
@@ -95,7 +95,7 @@ export default class Chaincode extends AbstractService {
    * @description 同意 chaincode
    */
   public async approve (payload: ChaincodeApproveType): Promise<InfraRunnerResultType> {
-    logger.info('[*] approve for my org')
+    logger.debug('approve for my org')
     const packageId = this.bdkFile.getPackageId(`${payload.chaincodeName}_${payload.chaincodeVersion}`)
     return await (new FabricInstance(this.config, this.infra)).approveChaincode(payload.channelId, payload.chaincodeName, payload.chaincodeVersion, packageId, payload.initRequired, payload.orderer)
   }
@@ -104,7 +104,7 @@ export default class Chaincode extends AbstractService {
    * @description 發布 chaincode
    */
   public async commit (payload: ChaincodeCommitType): Promise<InfraRunnerResultType> {
-    logger.info('[*] Commit chaincode definition')
+    logger.debug('Commit chaincode definition')
     return await (new FabricInstance(this.config, this.infra)).commitChaincode(payload.channelId, payload.chaincodeName.replace('_', '-'), payload.chaincodeVersion, payload.initRequired, payload.orderer, payload.peerAddresses)
   }
 
@@ -112,7 +112,7 @@ export default class Chaincode extends AbstractService {
    * @description 查詢已發布的chaincode
    */
   public async getCommittedChaincode (channelId: string): Promise<InfraRunnerResultType> {
-    logger.info('[*] Get committed chaincode')
+    logger.debug('Get committed chaincode')
     return await (new FabricInstance(this.config, this.infra)).queryCommittedChaincode(channelId)
   }
 }

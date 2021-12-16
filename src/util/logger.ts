@@ -1,27 +1,40 @@
 import config from '../config'
 import { transports, format, createLogger } from 'winston'
+import { LEVEL } from 'triple-beam'
 
-// TODO logs to cloudwatch
-// TODO logs for user
-
-const transportsConfig = {
+const defaultLoggerConfig = {
+  level: config.isSillyMode ? 'silly' : 'debug',
+  silent: config.isTestMode,
   format: format.combine(
-    format.colorize(),
+    format.splat(),
     format.timestamp(),
-    format.align(),
+    format.colorize(),
     format.printf(
-      info => `[bdk] ${info.timestamp} - ${info.level}: ${info.message}`,
+      info => {
+        if (info[LEVEL as any] === 'info') {
+          return info.message.trim()
+        } else {
+          return `[bdk] ${info.timestamp} - ${info.level}: ${info.message}`
+        }
+      },
     ),
   ),
+  transports: [new transports.Console({ stderrLevels: ['debug', 'warn', 'error'] })],
 }
 
-const logger = createLogger({
-  level: config.isDevMode ? 'debug' : 'info',
-  silent: config.isTestMode,
-  transports: [
-    // - Write to all logs with specified level to console.
-    new transports.Console(transportsConfig),
-  ],
-})
+const devLoggerConfig = {
+  ...defaultLoggerConfig,
+}
+
+const prodLoggerConfig = {
+  ...defaultLoggerConfig,
+  level: 'info',
+}
+
+const logger = createLogger(
+  config.isDevMode
+    ? devLoggerConfig
+    : prodLoggerConfig,
+)
 
 export { logger }

@@ -10,7 +10,7 @@ export default class Org extends AbstractService {
    */
   public importConfig (data: OrgJsonType[]) {
     data.forEach(org => {
-      logger.info(`[*] Import org config: ${org.name}`)
+      logger.debug(`Import org config: ${org.name}`)
 
       this.bdkFile.createOrgDefinitionJson(org.name, org.json)
     })
@@ -37,7 +37,7 @@ export default class Org extends AbstractService {
    */
   // create new org configtx yaml
   public async createOrgDefinitionJson (orgName: string, configtxYaml: ConfigtxYaml) {
-    logger.info(`[*] Generate ${orgName} config json file: configtxgen ${this.config.infraConfig.bdkPath}/${this.config.networkName}/org-json/${orgName}.json`)
+    logger.debug(`Generate ${orgName} config json file: configtxgen ${this.config.infraConfig.bdkPath}/${this.config.networkName}/org-json/${orgName}.json`)
 
     this.bdkFile.createConfigtx(configtxYaml)
     const orgJson = (await (new FabricTools(this.config, this.infra)).printOrgDefinitionJson(orgName)).stdout.match(/{.*}/s)?.[0] || ''

@@ -124,8 +124,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
   const invokeResult = await chaincode.invoke(invokeChannelInput)
   if (!('stdout' in invokeResult)) {
-    logger.error('command only for docker infra')
     throw new Error('command only for docker infra')
   }
-  logger.info(`invoke result =>\n${JSON.stringify(Chaincode.parser.invoke(invokeResult))}`)
+  logger.info(`${JSON.stringify(Chaincode.parser.invoke(invokeResult))}`)
 }

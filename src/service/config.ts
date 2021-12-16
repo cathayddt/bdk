@@ -11,7 +11,7 @@ const defaultEnv: ConfigEnvType = {
   BDK_ORG_NAME: 'Org1',
   BDK_ORG_DOMAIN: 'org1.example.com',
   BDK_HOSTNAME: 'peer0',
-  DOCKER_LOGGING: false,
+  LOGGER_SILLY: false,
 }
 
 export default class Config extends AbstractService {
@@ -20,7 +20,7 @@ export default class Config extends AbstractService {
    * @returns .env 檔案（在 ~/.bdk 資料夾底下）
    */
   public init (args: ConfigEnvType = defaultEnv) {
-    logger.info('[*] Config init')
+    logger.debug('Config init')
 
     const initEnv = Object.assign({}, defaultEnv, args)
     this.bdkFile.createEnv(initEnv)
@@ -30,7 +30,7 @@ export default class Config extends AbstractService {
    * @description 設定/修改 blockchain network 環境變數設定
    */
   public set (args: ConfigSetType) {
-    logger.info(`[*] Config set: set ${args.key} to ${args.value}`)
+    logger.debug(`Config set: set ${args.key} to ${args.value}`)
 
     const envObj = this.bdkFile.getEnv()
     this.bdkFile.createEnv(Object.assign({}, envObj, { [args.key]: args.value }))
@@ -40,7 +40,7 @@ export default class Config extends AbstractService {
    * @description 在 log 列出 blockchain network 環境變數設定
    */
   public ls () {
-    logger.info('[*] Config ls')
+    logger.debug('Config ls')
 
     return this.bdkFile.getEnv()
   }

@@ -15,12 +15,12 @@ export default class CA extends AbstractInstance {
   }
 
   public async up (): Promise<InfraRunnerResultType> {
-    logger.info(`[*] CA instance up: ${this.caName}`)
+    logger.debug(`CA instance up: ${this.caName}`)
     return await this.infra.upInBackground(this.dockerComposePath)
   }
 
   public async down (): Promise<InfraRunnerResultType> {
-    logger.info(`[*] CA instance down: ${this.caName}`)
+    logger.debug(`CA instance down: ${this.caName}`)
     return await this.infra.downAndRemoveVolumes(this.dockerComposePath)
   }
 }

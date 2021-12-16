@@ -14,7 +14,7 @@ describe('Config service: ', () => {
     BDK_ORG_NAME: 'TestOrg',
     BDK_ORG_DOMAIN: 'test.domain.com',
     BDK_HOSTNAME: 'peer0',
-    DOCKER_LOGGING: true,
+    LOGGER_SILLY: true,
   }
 
   const configSetEnv: ConfigSetType = {
@@ -37,7 +37,7 @@ describe('Config service: ', () => {
       it('.env content and inputs should be the same', () => {
         (new Config(config)).init()
 
-        const checkConfig = 'NODE_ENV=production\nBDK_NETWORK_NAME=bdk-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=Org1\nBDK_ORG_DOMAIN=org1.example.com\nBDK_HOSTNAME=peer0\nDOCKER_LOGGING=false\n'
+        const checkConfig = 'NODE_ENV=production\nBDK_NETWORK_NAME=bdk-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=Org1\nBDK_ORG_DOMAIN=org1.example.com\nBDK_HOSTNAME=peer0\nLOGGER_SILLY=false\n'
 
         assert.strictEqual(fs.readFileSync(`${config.infraConfig.bdkPath}/.env`).toString(), checkConfig)
       })
@@ -57,7 +57,7 @@ describe('Config service: ', () => {
       it('.env content and inputs should be the same', () => {
         (new Config(config)).init(configEnv)
 
-        const checkConfig = 'NODE_ENV=testing\nBDK_NETWORK_NAME=test-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=TestOrg\nBDK_ORG_DOMAIN=test.domain.com\nBDK_HOSTNAME=peer0\nDOCKER_LOGGING=true\n'
+        const checkConfig = 'NODE_ENV=testing\nBDK_NETWORK_NAME=test-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=TestOrg\nBDK_ORG_DOMAIN=test.domain.com\nBDK_HOSTNAME=peer0\nLOGGER_SILLY=true\n'
 
         assert.strictEqual(fs.readFileSync(`${config.infraConfig.bdkPath}/.env`).toString(), checkConfig)
       })
@@ -78,7 +78,7 @@ describe('Config service: ', () => {
       (new Config(config)).init();
       (new Config(config)).set(configSetEnv)
 
-      const checkConfig = 'NODE_ENV=production\nBDK_NETWORK_NAME=bdk-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=Org1\nBDK_ORG_DOMAIN=test.set.domain.com\nBDK_HOSTNAME=peer0\nDOCKER_LOGGING=false\n'
+      const checkConfig = 'NODE_ENV=production\nBDK_NETWORK_NAME=bdk-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=Org1\nBDK_ORG_DOMAIN=test.set.domain.com\nBDK_HOSTNAME=peer0\nLOGGER_SILLY=false\n'
 
       assert.strictEqual(fs.readFileSync(`${config.infraConfig.bdkPath}/.env`).toString(), checkConfig)
     })
@@ -98,7 +98,7 @@ describe('Config service: ', () => {
       (new Config(config)).init();
       (new Config(config)).ls()
 
-      const checkConfig = 'NODE_ENV=production\nBDK_NETWORK_NAME=bdk-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=Org1\nBDK_ORG_DOMAIN=org1.example.com\nBDK_HOSTNAME=peer0\nDOCKER_LOGGING=false\n'
+      const checkConfig = 'NODE_ENV=production\nBDK_NETWORK_NAME=bdk-network\nBDK_ORG_TYPE=peer\nBDK_ORG_NAME=Org1\nBDK_ORG_DOMAIN=org1.example.com\nBDK_HOSTNAME=peer0\nLOGGER_SILLY=false\n'
 
       assert.strictEqual(fs.readFileSync(`${config.infraConfig.bdkPath}/.env`).toString(), checkConfig)
     })

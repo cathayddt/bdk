@@ -43,7 +43,7 @@ export interface Config {
   environment: EnvironmentEnum
   isDevMode: boolean
   isTestMode: boolean
-  dockerLogging: boolean
+  isSillyMode: boolean
   infraConfig: InfraConfig
   networkName: string
   orgName: string
@@ -82,7 +82,7 @@ const config: Config = {
   environment: environment,
   isDevMode: isDevMode,
   isTestMode: isTestMode,
-  dockerLogging: (process.env.DOCKER_LOGGING?.toLowerCase() === 'true') || false,
+  isSillyMode: (process.env.LOGGER_SILLY?.toLowerCase() === 'true') || false,
   infraConfig: {
     bdkPath: bdkPath,
     dockerHostPath: process.env.BDK_DOCKER_HOST_PATH || bdkPath,

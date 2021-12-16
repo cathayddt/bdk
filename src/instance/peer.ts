@@ -15,12 +15,12 @@ export default class Peer extends AbstractInstance {
   }
 
   public async up (): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Peer instance up: ${this.peerOrgName}`)
+    logger.debug(`Peer instance up: ${this.peerOrgName}`)
     return await this.infra.upInBackground(this.dockerComposePath)
   }
 
   public async down (): Promise<InfraRunnerResultType> {
-    logger.info(`[*] Peer instance down: ${this.peerOrgName}`)
+    logger.debug(`Peer instance down: ${this.peerOrgName}`)
     return await this.infra.downAndRemoveVolumes(this.dockerComposePath)
   }
 }
