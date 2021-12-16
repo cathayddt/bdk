@@ -19,7 +19,7 @@ export default class Channel extends AbstractService {
    * @description 建立 channel
    */
   public async create (data: ChannelCreateType): Promise<void> {
-    logger.debug('[*] Channel create')
+    logger.debug('Channel create')
     await this.createSteps().createChannelArtifact(data)
     await this.createSteps().createOnInstance(data)
   }
@@ -44,9 +44,9 @@ export default class Channel extends AbstractService {
    * @description 加入 channel
    */
   public async join (data: ChannelJoinType): Promise<void> {
-    logger.debug('[*] Channel join step 1')
+    logger.debug('Channel join step 1')
     await this.joinSteps().fetchChannelBlock(data)
-    logger.debug('[*] Channel join step 2')
+    logger.debug('Channel join step 2')
     await this.joinSteps().joinOnInstance(data)
   }
 
@@ -68,7 +68,7 @@ export default class Channel extends AbstractService {
    * @description 更新 channel 設定檔上 peer org 的 anchor peer
    */
   public async updateAnchorPeer (data: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> {
-    logger.debug('[*] Channel update anchor peer')
+    logger.debug('Channel update anchor peer')
     await this.updateAnchorPeerSteps().fetchChannelBlock(data)
     await this.updateAnchorPeerSteps().computeUpdateConfigTx(data)
     await this.updateAnchorPeerSteps().signConfigTx(data)
@@ -84,7 +84,7 @@ export default class Channel extends AbstractService {
         const { channelName } = dto
         const signType = this.config.orgType
 
-        logger.debug(`[*] Channel Update Anchor Peer: fetch ${ChannelConfigEnum.CONFIG_BLOCK} block in ${channelName}`)
+        logger.debug(`Channel Update Anchor Peer: fetch ${ChannelConfigEnum.CONFIG_BLOCK} block in ${channelName}`)
 
         this.bdkFile.createChannelArtifact(channelName)
         return await this.fetchChannelConfig(channelName, signType)
@@ -95,7 +95,7 @@ export default class Channel extends AbstractService {
         const orgType = this.config.orgType
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
-        logger.debug(`[*] Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - compute update`)
+        logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - compute update`)
 
         const configBlock = await this.getConfigBlock(channelName)
 
@@ -128,7 +128,7 @@ export default class Channel extends AbstractService {
         const signType = this.config.orgType
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
-        logger.debug(`[*] Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - sign `)
+        logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - sign `)
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
           signType,
           orderer,
@@ -140,7 +140,7 @@ export default class Channel extends AbstractService {
       updateChannelConfig: async (data: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { orderer, channelName } = data
 
-        logger.debug(`[*] Channel Update Anchor Peer: update ${channelName} config`)
+        logger.debug(`Channel Update Anchor Peer: update ${channelName} config`)
         const signType = this.config.orgType
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
           signType,
@@ -156,7 +156,7 @@ export default class Channel extends AbstractService {
    * @description
    */
   public async fetchChannelBlock (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> {
-    logger.debug(`[*] Channel fetch block: fetch ${data.configType} block in ${data.channelName}`)
+    logger.debug(`Channel fetch block: fetch ${data.configType} block in ${data.channelName}`)
     switch (data.configType) {
       case ChannelConfigEnum.LATEST_BLOCK:
         return await this.fetchChannelBlockSteps().fetchChannelNewestBlock(data)
@@ -197,7 +197,7 @@ export default class Channel extends AbstractService {
 
   /** @ignore */
   private generateChannelConfigtxYaml (configtxInput: ChannelCreateType) {
-    logger.debug('[*] Create configtx.yaml')
+    logger.debug('Create configtx.yaml')
 
     const configtx = new ConfigtxYaml()
     configtx.importOrgs(this.bdkFile.getConfigtxOrgs())
@@ -253,11 +253,11 @@ export default class Channel extends AbstractService {
   public getChannelGroupSteps () {
     return {
       fetchChannelConfig: async (channelName: string): Promise<InfraRunnerResultType> => {
-        logger.debug(`[*] Get Channel Group step 1: ${channelName}`)
+        logger.debug(`Get Channel Group step 1: ${channelName}`)
         return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, channelName, 'block', undefined, OrgTypeEnum.PEER)
       },
       decodeFetchedChannelConfig: async (channelName: string): Promise<{ anchorPeer: string[]; orderer: string[] }> => {
-        logger.debug(`[*] Get Channel Group step 2: ${channelName}`)
+        logger.debug(`Get Channel Group step 2: ${channelName}`)
         await (new FabricTools(this.config, this.infra)).decodeChannelConfig(channelName)
         const channelConfigJson = this.bdkFile.getDecodedChannelConfig(channelName)
         const anchorPeer: string[] = []

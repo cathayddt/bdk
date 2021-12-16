@@ -24,7 +24,7 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  logger.debug('[*] exec chaincode install')
+  logger.debug('exec chaincode install')
 
   const chaincode = new Chaincode(config)
 
