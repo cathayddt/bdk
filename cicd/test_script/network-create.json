@@ -1,8 +1,8 @@
 {
   "ordererOrgs": [
     {
-      "name": "BenOrderer",
-      "domain": "orderer.ben.cathaybc.com",
+      "name": "Org0Orderer",
+      "domain": "org0orderer.bdk.example.com",
       "enableNodeOUs": true,
       "hostname": [
         "orderer0",
@@ -24,8 +24,8 @@
       ]
     },
     {
-      "name": "GraceOrderer",
-      "domain": "orderer.grace.cathaybc.com",
+      "name": "Org1Orderer",
+      "domain": "org1orderer.bdk.example.com",
       "enableNodeOUs": true,
       "hostname": [
         "orderer0"
@@ -42,8 +42,8 @@
   ],
   "peerOrgs": [
     {
-      "name": "Ben",
-      "domain": "ben.cathaybc.com",
+      "name": "Org0",
+      "domain": "org0.bdk.example.com",
       "enableNodeOUs": true,
       "peerCount": 3,
       "userCount": 1,
@@ -69,10 +69,10 @@
       ]
     },
     {
-      "name": "Grace",
-      "domain": "grace.cathaybc.com",
+      "name": "Org1",
+      "domain": "org1.bdk.example.com",
       "enableNodeOUs": true,
-      "peerCount": 4,
+      "peerCount": 1,
       "userCount": 1,
       "ports": [
         {
@@ -80,30 +80,12 @@
           "isPublishPort": true,
           "operationPort": 9543,
           "isPublishOperationPort": true
-        },
-        {
-          "port": 7151,
-          "isPublishPort": false,
-          "operationPort": 9543,
-          "isPublishOperationPort": false
-        },
-        {
-          "port": 7151,
-          "isPublishPort": false,
-          "operationPort": 9543,
-          "isPublishOperationPort": false
-        },
-        {
-          "port": 7151,
-          "isPublishPort": false,
-          "operationPort": 9543,
-          "isPublishOperationPort": false
         }
       ]
     },
     {
-      "name": "Eugene",
-      "domain": "eugene.cathaybc.com",
+      "name": "Org2",
+      "domain": "org2.bdk.example.com",
       "enableNodeOUs": true,
       "peerCount": 1,
       "userCount": 1,
