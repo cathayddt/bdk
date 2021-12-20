@@ -16,7 +16,7 @@ jobs:
         node-version-file: '.nvmrc'
     - run: npm ci
     - run: npm run build:console
-    - run: ./cicd/test_script/crypto-gen.sh
+    - run: ./cicd/test_script/cryptogen.sh
   test-ca:
     runs-on: ubuntu-latest
     steps:
@@ -26,5 +26,5 @@ jobs:
         node-version-file: '.nvmrc'
     - run: npm ci
     - run: npm run build:console
-    - run: ./cicd/test_script/ca-gen.sh
+    - run: ./cicd/test_script/ca.sh
 

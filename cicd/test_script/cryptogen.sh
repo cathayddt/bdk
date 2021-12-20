@@ -373,4 +373,4 @@ bdk org orderer update -o orderer0.${ORDERER_ORG_DOMAIN_BEN}:7050 -c ${CHANNEL_N
 sleep 5
 docker ps -a
 
-echo "crypto-gen.sh Done.Good job!"
+echo "cryptogen.sh Done.Good job!"

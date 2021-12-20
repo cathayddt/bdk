@@ -341,4 +341,4 @@ bdk chaincode query -C ryan -n ${CHAINCODE_NAME} -f QueryCar -a CAR_EUGENE_PEER0
 sleep 5
 docker ps -a
 
-echo "ca-gen.sh Done.Good job!"
+echo "ca.sh Done.Good job!"
