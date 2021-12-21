@@ -40,11 +40,11 @@
   - `**isPublishOperationPort**` 測試 Peer heart beat 的 port 是否要從 docker container 對外開放
 
 ```json
- {
+{
   "ordererOrgs": [
     {
-      "name": "BenOrderer",
-      "domain": "orderer.ben.cathaybc.com",
+      "name": "Org0Orderer",
+      "domain": "orderer.org0.example.com",
       "enableNodeOUs": true,
       "hostname": [
         "orderer0",
@@ -68,8 +68,8 @@
   ],
   "peerOrgs": [
     {
-      "name": "Org1",
-      "domain": "org1.example.com",
+      "name": "Org0",
+      "domain": "org0.example.com",
       "enableNodeOUs": true,
       "peerCount": 2,
       "userCount": 1,
@@ -389,8 +389,8 @@ bdk channel update-anchorpeer -n test --orderer orderer0.example.com:7050
 ```json
 [
     {
-      "name": "Eric",
-      "domain": "eric.cathaybc.com",
+      "name": "Orgnew",
+      "domain": "orgnew.example.com",
       "enableNodeOUs": true,
       "peerCount": 3,
       "userCount": 1,
@@ -435,7 +435,7 @@ bdk org peer create -f ./org-peer-create.json --create-full
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer0'
 
-bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Eric
+bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Orgnew
 ```
 
 ### Step 3：啟動 Org3 機器
@@ -459,7 +459,7 @@ bdk peer up -n peer0.org3.example.com -n peer1.org3.example.com
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='orderer0'
 
-bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
 bdk org orderer approve -c system-channel
 ```
 
@@ -470,7 +470,7 @@ bdk org orderer approve -c system-channel
 # export BDK_ORG_DOMAIN='org2.example.com'
 # export BDK_HOSTNAME='orderer0'
 
-bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
 bdk org orderer approve -c system-channel
 ```
 

@@ -242,9 +242,9 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
 
   public addOrdererOrg (payload: { name: string; mspDir: string; domain: string; hostname: string[]; ports?: number[] }) {
     // example:
-    // name -> 'BenOrderer'
-    // mspDir -> '/tmp/organizations/ordererOrganizations/ben.cathaybc.com/msp'
-    // domain -> 'ben.cathaybc.com'
+    // name -> 'Org0Orderer'
+    // mspDir -> '/tmp/organizations/ordererOrganizations/org0.cathaybc.com/msp'
+    // domain -> 'org0.cathaybc.com'
     // hostname -> ['orderer0', 'orderer1']
     // ports -> [7050, 7150]
     const newOrdererOrg: OrdererOrganizationInterface = {
@@ -275,9 +275,9 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
 
   public addPeerOrg (payload: { name: string; mspDir: string; domain: string; anchorPeers: {hostname: string; port?: number}[]}) {
     // example:
-    // name -> 'Ben'
-    // mspDir -> '/tmp/organizations/peerOrganizations/ben.cathaybc.com/msp'
-    // domain -> 'ben.cathaybc.com/msp'
+    // name -> 'Org0'
+    // mspDir -> '/tmp/organizations/peerOrganizations/org0.cathaybc.com/msp'
+    // domain -> 'org0.cathaybc.com/msp'
     // anchorPeersIndexes -> [0, 1]
     // ports -> [7051, 7151]
     const newPeerOrg: PeerOrganizationInterface = {
@@ -313,20 +313,20 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
   public addSystemChannelProfile (payload: { name: string; etcdRaftConsenters: EtcdRaftConsentersInterface[]; ordererOrgs: string[]; consortiums: { [cousortiumName: string]: string[] }; batchTimeout?: string; BatchSize?: BatchSizeInterface }) {
     // example:
     // name -> 'OrdererGenesis'
-    // etcdRaftConsenters -> [{ Host: 'orderer0.ben.cathaybc.com',
+    // etcdRaftConsenters -> [{ Host: 'orderer0.org0.cathaybc.com',
     //                          Port: 7050,
-    //                          ClientTLSCert: '/tmp/organizations/ordererOrganizations/ben.cathaybc.com/orderers/orderer0.ben.cathaybc.com/tls/server.crt',
-    //                          ServerTLSCert: '/tmp/organizations/ordererOrganizations/ben.cathaybc.com/orderers/orderer0.ben.cathaybc.com/tls/server.crt' },
-    //                        { Host: 'orderer1.ben.cathaybc.com',
+    //                          ClientTLSCert: '/tmp/organizations/ordererOrganizations/org0.cathaybc.com/orderers/orderer0.org0.cathaybc.com/tls/server.crt',
+    //                          ServerTLSCert: '/tmp/organizations/ordererOrganizations/org0.cathaybc.com/orderers/orderer0.org0.cathaybc.com/tls/server.crt' },
+    //                        { Host: 'orderer1.org0.cathaybc.com',
     //                          Port: 7050,
-    //                          ClientTLSCert: '/tmp/organizations/ordererOrganizations/ben.cathaybc.com/orderers/orderer1.ben.cathaybc.com/tls/server.crt',
-    //                          ServerTLSCert: '/tmp/organizations/ordererOrganizations/ben.cathaybc.com/orderers/orderer1.ben.cathaybc.com/tls/server.crt' },
-    //                        { Host: 'orderer0.grace.cathaybc.com',
+    //                          ClientTLSCert: '/tmp/organizations/ordererOrganizations/org0.cathaybc.com/orderers/orderer1.org0.cathaybc.com/tls/server.crt',
+    //                          ServerTLSCert: '/tmp/organizations/ordererOrganizations/org0.cathaybc.com/orderers/orderer1.org0.cathaybc.com/tls/server.crt' },
+    //                        { Host: 'orderer0.org1.cathaybc.com',
     //                          Port: 7050,
-    //                          ClientTLSCert: '/tmp/organizations/ordererOrganizations/grace.cathaybc.com/orderers/orderer0.grace.cathaybc.com/tls/server.crt',
-    //                          ServerTLSCert: '/tmp/organizations/ordererOrganizations/grace.cathaybc.com/orderers/orderer0.grace.cathaybc.com/tls/server.crt' }]
-    // ordererOrgs -> ['BenOrderer', 'GraceOrderer']
-    // consortiums -> {TestConsortium: ['Ben', 'Grace']}
+    //                          ClientTLSCert: '/tmp/organizations/ordererOrganizations/org1.cathaybc.com/orderers/orderer0.org1.cathaybc.com/tls/server.crt',
+    //                          ServerTLSCert: '/tmp/organizations/ordererOrganizations/org1.cathaybc.com/orderers/orderer0.org1.cathaybc.com/tls/server.crt' }]
+    // ordererOrgs -> ['Org0Orderer', 'Org1Orderer']
+    // consortiums -> {TestConsortium: ['Org0', 'Org1']}
     // batchTimeout -> '2s'
     // BatchSize -> { MaxMessageCount: 10, AbsoluteMaxBytes: '99 MB', PreferredMaxBytes: '512 KB' }
     const ordererAddresses: string[] = []
@@ -356,7 +356,7 @@ class ConfigtxYaml extends BdkYaml<ConfigtxInterface> {
     // example:
     // name -> 'TestChannel'
     // consortium -> 'TestConsortium'
-    // organizations -> ['Ben', 'Grace']
+    // organizations -> ['Org0', 'Org1']
     const newProfile: ApplicationChannelProfileInterface = {
       ...channelDefaults,
       Consortium: payload.consortium,

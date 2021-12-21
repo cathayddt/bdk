@@ -1,7 +1,7 @@
 [
   {
-    "name": "EricOrderer",
-    "domain": "orderer.eric.cathaybc.com",
+    "name": "OrgNewOrderer",
+    "domain": "orgneworderer.bdk.example.com",
     "enableNodeOUs": true,
     "hostname": [
       "orderer0",

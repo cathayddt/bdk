@@ -40,11 +40,11 @@ Variables required by *network-create.json* are defined in the files *configtx.y
   - `isPublishOperationPort` whether to publish the health-check port from the Docker container
 
 ```json
- {
+{
   "ordererOrgs": [
     {
-      "name": "BenOrderer",
-      "domain": "orderer.ben.cathaybc.com",
+      "name": "Org0Orderer",
+      "domain": "orderer.org0.example.com",
       "enableNodeOUs": true,
       "hostname": [
         "orderer0",
@@ -68,8 +68,8 @@ Variables required by *network-create.json* are defined in the files *configtx.y
   ],
   "peerOrgs": [
     {
-      "name": "Org1",
-      "domain": "org1.example.com",
+      "name": "Org0",
+      "domain": "org0.example.com",
       "enableNodeOUs": true,
       "peerCount": 2,
       "userCount": 1,
@@ -389,8 +389,8 @@ First, we need to prepare a file named *org-peer-create.json*, with the required
 ```json
 [
     {
-      "name": "Eric",
-      "domain": "eric.cathaybc.com",
+      "name": "Orgnew",
+      "domain": "orgnew.example.com",
       "enableNodeOUs": true,
       "peerCount": 3,
       "userCount": 1,
@@ -435,7 +435,7 @@ Add Org3 to application channel with Org1
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer0'
 
-bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Eric
+bdk org peer add -o orderer0.org1.example.com:7050 -c test -n Orgnew
 ```
 
 ### Step 3：Start Org3 containers
@@ -459,7 +459,7 @@ Add Org3 to system channel with Org1Orderer
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='orderer0'
 
-bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
 bdk org orderer approve -c system-channel
 ```
 
@@ -470,7 +470,7 @@ Approve system-channel change with Org1Orderer
 # export BDK_ORG_DOMAIN='org2.example.com'
 # export BDK_HOSTNAME='orderer0'
 
-bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Eric
+bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
 bdk org orderer approve -c system-channel
 ```
 
