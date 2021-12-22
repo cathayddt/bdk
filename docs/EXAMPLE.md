@@ -460,7 +460,7 @@ bdk peer up -n peer0.org3.example.com -n peer1.org3.example.com
 # export BDK_HOSTNAME='orderer0'
 
 bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
-bdk org orderer approve -c system-channel
+bdk channel approve -c system-channel
 ```
 
 由 Org2Orderer 組織身份同意 system-channel 的更新
@@ -471,7 +471,7 @@ bdk org orderer approve -c system-channel
 # export BDK_HOSTNAME='orderer0'
 
 bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
-bdk org orderer approve -c system-channel
+bdk channel approve -c system-channel
 ```
 
 由 Org1Orderer 組織身份更新 system-channel
@@ -482,7 +482,7 @@ bdk org orderer approve -c system-channel
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='orderer0'
 
-bdk org orderer update -o orderer0.org1.example.com:7050 -c system-channel
+bdk channel update -o orderer0.org1.example.com:7050 -c system-channel
 ```
 
 ### Step 5：Org3 加入 Channel

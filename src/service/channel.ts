@@ -1,5 +1,5 @@
 import { logger } from '../util/logger'
-import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigComputeType } from '../model/type/channel.type'
+import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigComputeType, ChannelApproveType, ChannelUpdateType } from '../model/type/channel.type'
 import { OrgTypeEnum } from '../config'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
@@ -92,7 +92,6 @@ export default class Channel extends AbstractService {
       computeUpdateConfigTx: async (dto: ChannelUpdateAnchorPeerType) => {
         const { orderer, channelName, port } = dto
         const orgName = this.config.orgName
-        const orgType = this.config.orgType
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
         logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - compute update`)
@@ -115,7 +114,6 @@ export default class Channel extends AbstractService {
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
 
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType: orgType,
           orderer,
           channelName,
 
@@ -125,12 +123,10 @@ export default class Channel extends AbstractService {
       },
       signConfigTx: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { orderer, channelName } = dto
-        const signType = this.config.orgType
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
         logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - sign `)
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType,
           orderer,
           channelName,
         }
@@ -141,9 +137,7 @@ export default class Channel extends AbstractService {
         const { orderer, channelName } = data
 
         logger.debug(`Channel Update Anchor Peer: update ${channelName} config`)
-        const signType = this.config.orgType
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType,
           orderer,
           channelName,
         }
@@ -332,17 +326,31 @@ export default class Channel extends AbstractService {
         await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.ENVELOPE, channelName, envelopeFileName, envelopeFileName)
       },
       signConfigTx: async (data: ChannelCreateChannelConfigSignType): Promise<InfraRunnerResultType> => {
-        const { signType, channelName } = data
+        const { channelName } = data
         const { envelopeFileName } = Channel.channelConfigFileName(channelName)
 
-        return await (new FabricInstance(this.config, this.infra)).signConfigTx(signType, channelName, envelopeFileName)
+        return await (new FabricInstance(this.config, this.infra)).signConfigTx(this.config.orgType, channelName, envelopeFileName)
       },
       updateChannelConfig: async (data: ChannelCreateChannelConfigUpdateType): Promise<InfraRunnerResultType> => {
-        const { signType, orderer, channelName } = data
+        const { orderer, channelName } = data
         const { envelopeFileName } = Channel.channelConfigFileName(channelName)
-        return await (new FabricInstance(this.config, this.infra)).updateChannelConfig(signType, orderer, channelName, envelopeFileName)
+        return await (new FabricInstance(this.config, this.infra)).updateChannelConfig(this.config.orgType, orderer, channelName, envelopeFileName)
       },
     }
+  }
+
+  /**
+   * @description 簽署信封
+   */
+  public approve = async (data: ChannelApproveType): Promise<InfraRunnerResultType> => {
+    return await this.createChannelConfigSteps().signConfigTx(data)
+  }
+
+  /**
+   * @description 將信封的更動更新到鏈上
+   */
+  public update = async (data: ChannelUpdateType): Promise<InfraRunnerResultType> => {
+    return await this.createChannelConfigSteps().updateChannelConfig(data)
   }
 
   public listJoinedChannel = async (): Promise<InfraRunnerResultType> => {

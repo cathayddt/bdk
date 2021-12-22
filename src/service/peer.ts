@@ -1,4 +1,3 @@
-import { OrgTypeEnum } from '../config'
 import { logger } from '../util'
 import { NetworkCryptoConfigPeerOrgType, NetworkCreatePeerOrgType, NetworkPeerPortType } from '../model/type/network.type'
 import CryptoConfigYaml from '../model/yaml/network/cryptoConfigYaml'
@@ -9,8 +8,8 @@ import { InstanceTypeEnum } from '../instance/bdkFile'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import Channel from './channel'
-import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType } from '../model/type/channel.type'
-import { PeerUpType, PeerDownType, PeerAddType, PeerAddOrgToChannelType, PeerApproveType, PeerUpdateType, PeerAddOrgToSystemChannelType } from '../model/type/peer.type'
+import { ChannelCreateChannelConfigComputeType } from '../model/type/channel.type'
+import { PeerUpType, PeerDownType, PeerAddType, PeerAddOrgToChannelType, PeerAddOrgToSystemChannelType } from '../model/type/peer.type'
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgPeerCreateType } from '../model/type/org.type'
 import { AbstractService } from './Service.abstract'
@@ -259,29 +258,6 @@ export default class Peer extends AbstractService {
         return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
       },
     }
-  }
-
-  public async approve (dto: PeerApproveType): Promise<InfraRunnerResultType> {
-    logger.debug(`Org Peer Approve: ${this.config.orgName} sign ${dto.channelName} config update`)
-    const { channelName } = dto
-
-    const channelCreateChannelConfigSignType: ChannelCreateChannelConfigSignType = {
-      signType: OrgTypeEnum.PEER,
-      channelName,
-    }
-    return await (new Channel(this.config, this.infra)).createChannelConfigSteps().signConfigTx(channelCreateChannelConfigSignType)
-  }
-
-  public async update (dto: PeerUpdateType): Promise<InfraRunnerResultType> {
-    logger.debug(`Org Peer update: ${this.config.orgName} update ${dto.channelName}`)
-    const { orderer, channelName } = dto
-
-    const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-      signType: OrgTypeEnum.PEER,
-      orderer,
-      channelName,
-    }
-    return await (new Channel(this.config, this.infra)).createChannelConfigSteps().updateChannelConfig(channelCreateChannelConfigUpdate)
   }
 
   /**

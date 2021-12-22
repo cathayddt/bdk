@@ -54,14 +54,3 @@ export interface OrdererAddOrgToChannelType {
 export interface OrdererAddConsenterToChannelType extends OrdererAddOrgToChannelType {
   hostname: string
 }
-
-export interface OrgSignEnvelopeType{
-  channelName: string
-}
-
-export interface UpdateEnvelopeType extends OrgSignEnvelopeType{
-  orderer: string
-}
-
-export type OrdererApproveType = OrgSignEnvelopeType
-export type OrdererUpdateType = UpdateEnvelopeType

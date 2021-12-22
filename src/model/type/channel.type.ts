@@ -101,10 +101,26 @@ export interface ChannelCreateChannelConfigComputeType {
   channelName: string
 }
 
-export interface ChannelCreateChannelConfigSignType extends ChannelCreateChannelConfigComputeType {
-  signType: OrgTypeEnum
+export interface ChannelCreateChannelConfigSignType {
+  channelName: string
 }
 
 export interface ChannelCreateChannelConfigUpdateType extends ChannelCreateChannelConfigSignType {
+  orderer: string
+}
+
+/**
+ * @requires channelName - [string] channel 的名稱
+ */
+export interface ChannelApproveType {
+  channelName: string
+}
+
+/**
+ * @requires channelName - [string] channel 的名稱
+ * @requires orderer - [string] orderer 的 address 和 port
+ */
+export interface ChannelUpdateType {
+  channelName: string
   orderer: string
 }
