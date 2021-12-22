@@ -4,7 +4,7 @@ import prompts from 'prompts'
 import { PolicyStyleEnum, ChannelConfigEnum } from '../../model/type/channel.type'
 import config from '../../config'
 import { onCancel, ParamsError } from '../../util'
-import { getChannelList, getOrdererList, joinedChannelChoice } from '../../model/prompts/util'
+import { getOrdererList, joinedChannelChoice } from '../../model/prompts/util'
 
 export const command = 'fetch'
 
@@ -18,7 +18,6 @@ interface OptType {
   outputFileName: string
 }
 
-const channelList = getChannelList(config).concat('system-channel')
 const ordererList = getOrdererList(config)
 
 export const builder = (yargs: Argv<OptType>) => {
@@ -55,8 +54,6 @@ export const handler = async (argv: Arguments<OptType>) => {
   })()
 
   const name: string = await (async () => {
-    if (!channelList.length) throw new ParamsError('Invalid params: Please create blockchain network first')
-
     if (argv.interactive) {
       return (await prompts([
         {
