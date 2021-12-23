@@ -49,7 +49,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
           : [],
       )
       .concat(
-        !upstreamEnabled && csr
+        csr
           ? [
               // CSR (RCA) options
               `FABRIC_CA_SERVER_CSR_CN=${csr.cn}`,
@@ -57,9 +57,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
               `FABRIC_CA_SERVER_CSR_CA_EXPIRY=${csr.expiry}`,
               `FABRIC_CA_SERVER_CSR_CA_PATHLENGTH=${csr.pathlength}`,
           ]
-          : [
-            `FABRIC_CA_SERVER_CSR_HOSTS=${intermediate?.enrollmentHost}`,
-          ],
+          : [],
       )
       .concat(
         upstreamEnabled && intermediate
