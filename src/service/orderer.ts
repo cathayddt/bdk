@@ -6,8 +6,8 @@ import OrdererInstance from '../instance/orderer'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import Channel from './channel'
-import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType } from '../model/type/channel.type'
-import { OrdererAddType, ConsenterType, OrdererUpType, OrdererAddOrgToChannelType, OrdererAddConsenterToChannelType, OrdererApproveType, OrdererUpdateType } from '../model/type/orderer.type'
+import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigUpdateType } from '../model/type/channel.type'
+import { OrdererAddType, ConsenterType, OrdererUpType, OrdererAddOrgToChannelType, OrdererAddConsenterToChannelType } from '../model/type/orderer.type'
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgOrdererCreateType } from '../model/type/org.type'
 import { AbstractService } from './Service.abstract'
@@ -252,37 +252,11 @@ export default class Orderer extends AbstractService {
 
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType: orgType,
           orderer,
           channelName,
         }
         return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
       },
     }
-  }
-
-  public async approve (dto: OrdererApproveType): Promise<InfraRunnerResultType> {
-    logger.debug(`Org Orderer Approve: ${this.config.orgName} sign ${dto.channelName} config update`)
-    const { channelName } = dto
-
-    const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigSignType = {
-      signType: this.config.orgType,
-      channelName,
-    }
-
-    return await (new Channel(this.config, this.infra)).createChannelConfigSteps().signConfigTx(channelCreateChannelConfigUpdate)
-  }
-
-  public async update (dto: OrdererUpdateType): Promise<InfraRunnerResultType> {
-    logger.debug(`Org Orderer update: ${this.config.orgName} update ${dto.channelName}`)
-    const { orderer, channelName } = dto
-    const orgType = this.config.orgType
-
-    const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-      signType: orgType,
-      orderer,
-      channelName,
-    }
-    return await (new Channel(this.config, this.infra)).createChannelConfigSteps().updateChannelConfig(channelCreateChannelConfigUpdate)
   }
 }

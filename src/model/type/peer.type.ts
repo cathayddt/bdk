@@ -42,14 +42,3 @@ export interface PeerAddOrgToChannelType {
 export interface PeerAddOrgToSystemChannelType extends PeerAddOrgToChannelType {
   orderer: string
 }
-
-export interface OrgSignEnvelopeType{
-  channelName: string
-}
-
-export interface UpdateEnvelopeType extends OrgSignEnvelopeType{
-  orderer: string
-}
-
-export type PeerApproveType = OrgSignEnvelopeType
-export type PeerUpdateType = UpdateEnvelopeType

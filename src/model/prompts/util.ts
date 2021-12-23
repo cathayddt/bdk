@@ -64,6 +64,16 @@ export const getChannelList = (config: Config): string[] => {
   }
 }
 
+export const getChannelEnvelopeList = (config: Config): string[] => {
+  try {
+    const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`
+    const channelList = fs.readdirSync(`${hostBasePath}/channel-artifacts`)
+    return channelList.filter(channel => fs.existsSync(`${hostBasePath}/channel-artifacts/${channel}/${Channel.channelConfigFileName(channel).envelopeFileName}.pb`))
+  } catch {
+    return []
+  }
+}
+
 export const getOrgNames = (config: Config): string[] => {
   try {
     const hostBasePath = `${config.infraConfig.bdkPath}/${config.networkName}`

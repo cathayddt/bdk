@@ -22,7 +22,7 @@ export const builder = (yargs: Argv<OptType>) => {
     .example('bdk channel join --interactive', 'Cathay BDK 互動式問答')
     .example('bdk channel join --name test --orderer orderer0.example.com:7050', '使用 orderer0.example.com:7050 加入 test 名稱 Channel')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
-    .option('name', { type: 'string', description: '欲加入 Channel 的名稱', alias: 'n' })
+    .option('name', { type: 'string', choices: channelList, description: '欲加入 Channel 的名稱', alias: 'n' })
     .option('orderer', { type: 'string', choices: ordererList, description: '選擇加入 Channel 使用的 Orderer' })
 }
 

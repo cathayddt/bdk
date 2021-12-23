@@ -460,7 +460,7 @@ Add Org3 to system channel with Org1Orderer
 # export BDK_HOSTNAME='orderer0'
 
 bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
-bdk org orderer approve -c system-channel
+bdk channel approve -c system-channel
 ```
 
 Approve system-channel change with Org1Orderer
@@ -471,7 +471,7 @@ Approve system-channel change with Org1Orderer
 # export BDK_HOSTNAME='orderer0'
 
 bdk org peer add-system-channel -o orderer0.org1.example.com:7050 -n Orgnew
-bdk org orderer approve -c system-channel
+bdk channel approve -c system-channel
 ```
 
 update system-channel with Org1Orderer
@@ -482,7 +482,7 @@ update system-channel with Org1Orderer
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='orderer0'
 
-bdk org orderer update -o orderer0.org1.example.com:7050 -c system-channel
+bdk channel update -o orderer0.org1.example.com:7050 -c system-channel
 ```
 
 ### Step 5：Add Org3 to channel
