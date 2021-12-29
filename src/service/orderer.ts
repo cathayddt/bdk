@@ -56,10 +56,10 @@ export default class Orderer extends AbstractService {
    */
   public async createOrdererOrgConfigtxJSON (dto: OrgOrdererCreateType) {
     const { ordererOrgs } = dto
-    const configtxYaml = new ConfigtxYaml()
 
     for (const ordererOrg of ordererOrgs) {
       logger.debug(`Orderer create configtx: ${ordererOrg.name}`)
+      const configtxYaml = new ConfigtxYaml()
 
       const ports = ordererOrg.ports?.map(port => port.port)
 
