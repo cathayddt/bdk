@@ -15,6 +15,7 @@ import { Config } from './../config'
 import BdkFile from '../instance/bdkFile'
 import FabricTools from '../instance/fabricTools'
 import { AbstractService } from './Service.abstract'
+import Org from './org'
 
 export default class Network extends AbstractService {
   /** @ignore */
@@ -99,7 +100,7 @@ export default class Network extends AbstractService {
   public async createGenesisBlock (dto: NetworkCreateType) {
     logger.debug(`Network create genesis.block: ${this.config.networkName}`)
 
-    this.createGenesisConfigtxYaml(dto)
+    await this.createGenesisConfigtxYaml(dto)
     await (new FabricTools(this.config, this.infra)).cryptogenGenerateGenesisBlock(this.profileName)
   }
 
@@ -174,7 +175,7 @@ export default class Network extends AbstractService {
   }
 
   /** @ignore */
-  private createGenesisConfigtxYaml (dto: NetworkCreateType): ConfigtxYaml {
+  private async createGenesisConfigtxYaml (dto: NetworkCreateType): Promise<ConfigtxYaml> {
     logger.debug('Create genesis.block')
 
     if (dto.ordererOrgs === undefined) throw new ParamsError('Invalid params: Required parameter <ordererOrgs> missing')
@@ -237,6 +238,15 @@ export default class Network extends AbstractService {
         AllOrganizationsConsortium: dto.peerOrgs.map(peerOrg => peerOrg.name),
       },
     })
+
+    for (const ordererOrg of dto.ordererOrgs) {
+      await (new Org(this.config, this.infra)).createOrgDefinitionJson(ordererOrg.name, configtxYaml)
+      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(new Orderer(this.config, this.infra).ordererConsenter(ordererOrg)))
+    }
+
+    for (const peerOrg of dto.peerOrgs) {
+      await (new Org(this.config, this.infra)).createOrgDefinitionJson(peerOrg.name, configtxYaml)
+    }
 
     this.bdkFile.createConfigtx(configtxYaml)
 

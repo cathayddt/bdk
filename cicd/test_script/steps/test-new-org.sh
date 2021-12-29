@@ -23,4 +23,5 @@ bdk channel update -o ${ORDERER_ORG_URL_ORGNEW_ORDERER0} -c "new-channel"
 # [org0] Join new-channel
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer0'
 bdk channel join -n "new-channel" --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0}
+sleep 10
 bdk channel update-anchorpeer -n "new-channel" --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0} -p ${PEER_ORG_PORT_ORG0_PEER0}

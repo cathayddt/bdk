@@ -50,6 +50,22 @@ export default class Orderer extends AbstractService {
     await (new FabricTools(this.config, this.infra)).cryptogenGenerateCryptoConfig()
   }
 
+  public ordererConsenter (ordererOrg: NetworkCreateOrdererOrgType): ConsenterType[] {
+    const ordererOrgConsenter: ConsenterType[] = []
+    const ports = ordererOrg.ports?.map(port => port.port)
+    ordererOrg.hostname.forEach((hostname, index) => {
+      const serverCertBase64 = this.bdkFile.getOrdererServerCertToBase64(hostname, ordererOrg.domain)
+
+      ordererOrgConsenter.push({
+        clientTlsCert: serverCertBase64,
+        host: `${hostname}.${ordererOrg.domain}`,
+        port: ports ? ports[index] : +`7${index}50`,
+        serverTlsCert: serverCertBase64,
+      })
+    })
+    return ordererOrgConsenter
+  }
+
   /**
    * @description 由 orderer org 的 configtx.yaml 產生 orderer org 設定和 consenter 的 json 檔案
    * @returns orderer org 設定和 consenter 的 json 檔案（在 ~/.bdk/[blockchain network 名稱]/org-json）
@@ -72,19 +88,7 @@ export default class Orderer extends AbstractService {
       })
       this.bdkFile.createConfigtxOrdererOrg(newOrg)
       await (new Org(this.config, this.infra)).createOrgDefinitionJson(ordererOrg.name, configtxYaml)
-
-      const ordererOrgConsenter: ConsenterType[] = []
-      ordererOrg.hostname.forEach((hostname, index) => {
-        const serverCertBase64 = this.bdkFile.getOrdererServerCertToBase64(hostname, ordererOrg.domain)
-
-        ordererOrgConsenter.push({
-          clientTlsCert: serverCertBase64,
-          host: `${hostname}.${ordererOrg.domain}`,
-          port: ports ? ports[index] : +`7${index}50`,
-          serverTlsCert: serverCertBase64,
-        })
-      })
-      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(ordererOrgConsenter))
+      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(this.ordererConsenter(ordererOrg)))
     }
   }
 
