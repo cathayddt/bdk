@@ -291,12 +291,13 @@ Description: 更新 Channel 的設定檔
 
 Description: 解析 Approve 或 Update 的信封內容
 
-| Options            |  Type   | Description                    | Required | Default |
+|      Options       |  Type   |          Description           | Required | Default |
 | ------------------ | :-----: | ------------------------------ | :------: | ------- |
-| --help             | boolean | Show help                      |          |
-| --version          | boolean | Show version number            |          |
-| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
-| -c, --channel-name | string  | Channel 的名稱                 |          |
+| --help             | boolean | Show help                      |          |         |
+| --version          | boolean | Show version number            |          |         |
+| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |         |
+| -c, --channel-name | string  | Channel 的名稱                 |          |         |
+| -V, --verify       | boolean | 驗證組織內容的正確性           |          |         |
 
 ## Config
 
