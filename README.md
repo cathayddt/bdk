@@ -19,7 +19,7 @@ bdk network create -i
 |-------------------|-------------------|
 | [v1.0.2][v1.0.2]  | [v1.0.2][v1.0.2]  |
 
-[v1.0.1]: https://github.com/cathayddt/bdk/releases/tag/v1.0.1
+[v1.0.2]: https://github.com/cathayddt/bdk/releases/tag/v1.0.2
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
