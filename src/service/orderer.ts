@@ -238,7 +238,6 @@ export default class Orderer extends AbstractService {
       hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.debug('add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
         const { orderer, channelName } = dto
-        const orgType = this.config.orgType
 
         const consenters = JSON.parse(this.bdkFile.getOrdererOrgConsenter(dto.orgName))
         const index = consenters.findIndex((x: ConsenterType) => x.host.split('.')[0] === dto.hostname)
