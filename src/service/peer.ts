@@ -58,11 +58,10 @@ export default class Peer extends AbstractService {
    */
   public async createPeerOrgConfigtxJSON (dto: OrgPeerCreateType) {
     const { peerOrgs } = dto
-    const configtxYaml = new ConfigtxYaml()
 
     for (const peerOrg of peerOrgs) {
       logger.debug(`Peer create configtx: ${peerOrg.name}`)
-
+      const configtxYaml = new ConfigtxYaml()
       const newOrg = configtxYaml.addPeerOrg({
         name: peerOrg.name,
         mspDir: `${this.config.infraConfig.dockerPath}/peerOrganizations/${peerOrg.domain}/msp`,

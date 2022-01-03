@@ -50,16 +50,32 @@ export default class Orderer extends AbstractService {
     await (new FabricTools(this.config, this.infra)).cryptogenGenerateCryptoConfig()
   }
 
+  public ordererConsenter (ordererOrg: NetworkCreateOrdererOrgType): ConsenterType[] {
+    const ordererOrgConsenter: ConsenterType[] = []
+    const ports = ordererOrg.ports?.map(port => port.port)
+    ordererOrg.hostname.forEach((hostname, index) => {
+      const serverCertBase64 = this.bdkFile.getOrdererServerCertToBase64(hostname, ordererOrg.domain)
+
+      ordererOrgConsenter.push({
+        clientTlsCert: serverCertBase64,
+        host: `${hostname}.${ordererOrg.domain}`,
+        port: ports ? ports[index] : +`7${index}50`,
+        serverTlsCert: serverCertBase64,
+      })
+    })
+    return ordererOrgConsenter
+  }
+
   /**
    * @description 由 orderer org 的 configtx.yaml 產生 orderer org 設定和 consenter 的 json 檔案
    * @returns orderer org 設定和 consenter 的 json 檔案（在 ~/.bdk/[blockchain network 名稱]/org-json）
    */
   public async createOrdererOrgConfigtxJSON (dto: OrgOrdererCreateType) {
     const { ordererOrgs } = dto
-    const configtxYaml = new ConfigtxYaml()
 
     for (const ordererOrg of ordererOrgs) {
       logger.debug(`Orderer create configtx: ${ordererOrg.name}`)
+      const configtxYaml = new ConfigtxYaml()
 
       const ports = ordererOrg.ports?.map(port => port.port)
 
@@ -72,19 +88,7 @@ export default class Orderer extends AbstractService {
       })
       this.bdkFile.createConfigtxOrdererOrg(newOrg)
       await (new Org(this.config, this.infra)).createOrgDefinitionJson(ordererOrg.name, configtxYaml)
-
-      const ordererOrgConsenter: ConsenterType[] = []
-      ordererOrg.hostname.forEach((hostname, index) => {
-        const serverCertBase64 = this.bdkFile.getOrdererServerCertToBase64(hostname, ordererOrg.domain)
-
-        ordererOrgConsenter.push({
-          clientTlsCert: serverCertBase64,
-          host: `${hostname}.${ordererOrg.domain}`,
-          port: ports ? ports[index] : +`7${index}50`,
-          serverTlsCert: serverCertBase64,
-        })
-      })
-      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(ordererOrgConsenter))
+      this.bdkFile.createOrdererOrgConsenterJson(ordererOrg.name, JSON.stringify(this.ordererConsenter(ordererOrg)))
     }
   }
 
@@ -234,7 +238,6 @@ export default class Orderer extends AbstractService {
       hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.debug('add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
         const { orderer, channelName } = dto
-        const orgType = this.config.orgType
 
         const consenters = JSON.parse(this.bdkFile.getOrdererOrgConsenter(dto.orgName))
         const index = consenters.findIndex((x: ConsenterType) => x.host.split('.')[0] === dto.hostname)

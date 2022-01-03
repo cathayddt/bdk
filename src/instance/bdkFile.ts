@@ -93,9 +93,9 @@ export default class BdkFile {
     fs.writeFileSync(`${this.bdkPath}/config-yaml/orgs/peer-${peerOrg.Name}.json`, JSON.stringify(peerOrg))
   }
 
-  public createConfigtxOrdererOrg (OrdererOrg: OrdererOrganizationInterface) {
+  public createConfigtxOrdererOrg (ordererOrg: OrdererOrganizationInterface) {
     this.createConfigYamlOrgsFolder()
-    fs.writeFileSync(`${this.bdkPath}/config-yaml/orgs/orderer-${OrdererOrg.Name}.json`, JSON.stringify(OrdererOrg))
+    fs.writeFileSync(`${this.bdkPath}/config-yaml/orgs/orderer-${ordererOrg.Name}.json`, JSON.stringify(ordererOrg))
   }
 
   public getOrdererServerCertToBase64 (hostname: string, domain: string) {
