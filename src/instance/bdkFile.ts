@@ -486,4 +486,8 @@ export default class BdkFile {
   public getAdminSignCert (domain: string): string {
     return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/signcerts`)).toString()
   }
+
+  public getChannelJson (channel: string, filename: string): string {
+    return fs.readFileSync(`${this.bdkPath}/channel-artifacts/${channel}/${filename}.json`).toString()
+  }
 }
