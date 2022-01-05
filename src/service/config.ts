@@ -1,18 +1,7 @@
-import { EnvironmentEnum } from '../config'
+import { defaultEnv } from '../config'
 import { ConfigSetType, ConfigEnvType } from '../model/type/config.type'
 import { logger } from '../util'
 import { AbstractService } from './Service.abstract'
-
-// TODO refactor config && .env
-const defaultEnv: ConfigEnvType = {
-  NODE_ENV: EnvironmentEnum.production,
-  BDK_NETWORK_NAME: 'bdk-network',
-  BDK_ORG_TYPE: 'peer',
-  BDK_ORG_NAME: 'Org1',
-  BDK_ORG_DOMAIN: 'org1.example.com',
-  BDK_HOSTNAME: 'peer0',
-  LOGGER_SILLY: false,
-}
 
 export default class Config extends AbstractService {
   /**

@@ -1,29 +1,25 @@
 import dotenv from 'dotenv'
 import os from 'os'
+import { ConfigEnvType, EnvironmentEnum, OrgTypeEnum } from './model/type/config.type'
 
 const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk`
 dotenv.config({ path: `${bdkPath}/.env` })
 
-/**
- * @requires development - 開發環境
- * @requires testing - 測試環境
- * @requires production - 正式環境
- */
-export enum EnvironmentEnum {
-  development = 'development',
-  testing = 'testing',
-  production ='production'
+export const defaultEnv: ConfigEnvType = {
+  NODE_ENV: EnvironmentEnum.production,
+  BDK_NETWORK_NAME: 'bdk-network',
+  BDK_ORG_TYPE: 'peer',
+  BDK_ORG_NAME: 'Org1',
+  BDK_ORG_DOMAIN: 'org1.example.com',
+  BDK_HOSTNAME: 'peer0',
+  LOGGER_SILLY: false,
 }
 
 /**
- * @requires ORDERER - 組織為 Orderer 型態
- * @requires PEER - 組織為 Peer 型態
+ * bdkPath: .bdk folder path which save all fabric files
+ * dockerHostPath: Mount docker host path
+ * dockerPath: Mount docker container path
  */
-export enum OrgTypeEnum {
-  ORDERER = 'orderer',
-  PEER = 'peer',
-}
-
 interface InfraConfig {
   bdkPath: string
   dockerHostPath: string

@@ -1,5 +1,4 @@
-import { OrgTypeEnum } from '../../config'
-
+import { OrgTypeEnum } from './config.type'
 /**
  * @requires SIGNATURE - 特定簽名
  * @requires IMPLICITMETA - 任意/過半數/全部 channel 中成員簽名
