@@ -1,11 +1,13 @@
+import { diff, detailedDiff } from 'deep-object-diff'
 import { logger } from '../util/logger'
-import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigComputeType } from '../model/type/channel.type'
+import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigComputeType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, DecodeEnvelopeReturnType, EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../model/type/channel.type'
 import { OrgTypeEnum } from '../config'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import FabricInstance from '../instance/fabricInstance'
 import { AbstractService, ParserType } from './Service.abstract'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
+import { ProcessError } from '../util'
 
 interface ChannelParser extends ParserType {
   listJoinedChannel: (result: DockerResultType) => string[]
@@ -92,7 +94,6 @@ export default class Channel extends AbstractService {
       computeUpdateConfigTx: async (dto: ChannelUpdateAnchorPeerType) => {
         const { orderer, channelName, port } = dto
         const orgName = this.config.orgName
-        const orgType = this.config.orgType
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
         logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - compute update`)
@@ -115,7 +116,6 @@ export default class Channel extends AbstractService {
         this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
 
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType: orgType,
           orderer,
           channelName,
 
@@ -125,12 +125,10 @@ export default class Channel extends AbstractService {
       },
       signConfigTx: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { orderer, channelName } = dto
-        const signType = this.config.orgType
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
         logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - sign `)
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType,
           orderer,
           channelName,
         }
@@ -141,9 +139,7 @@ export default class Channel extends AbstractService {
         const { orderer, channelName } = data
 
         logger.debug(`Channel Update Anchor Peer: update ${channelName} config`)
-        const signType = this.config.orgType
         const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          signType,
           orderer,
           channelName,
         }
@@ -332,16 +328,103 @@ export default class Channel extends AbstractService {
         await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.ENVELOPE, channelName, envelopeFileName, envelopeFileName)
       },
       signConfigTx: async (data: ChannelCreateChannelConfigSignType): Promise<InfraRunnerResultType> => {
-        const { signType, channelName } = data
+        const { channelName } = data
         const { envelopeFileName } = Channel.channelConfigFileName(channelName)
 
-        return await (new FabricInstance(this.config, this.infra)).signConfigTx(signType, channelName, envelopeFileName)
+        return await (new FabricInstance(this.config, this.infra)).signConfigTx(this.config.orgType, channelName, envelopeFileName)
       },
       updateChannelConfig: async (data: ChannelCreateChannelConfigUpdateType): Promise<InfraRunnerResultType> => {
-        const { signType, orderer, channelName } = data
+        const { orderer, channelName } = data
         const { envelopeFileName } = Channel.channelConfigFileName(channelName)
-        return await (new FabricInstance(this.config, this.infra)).updateChannelConfig(signType, orderer, channelName, envelopeFileName)
+        return await (new FabricInstance(this.config, this.infra)).updateChannelConfig(this.config.orgType, orderer, channelName, envelopeFileName)
       },
+    }
+  }
+
+  /**
+   * @description 簽署信封
+   */
+  public approve = async (data: ChannelApproveType): Promise<InfraRunnerResultType> => {
+    return await this.createChannelConfigSteps().signConfigTx(data)
+  }
+
+  /**
+   * @description 將信封的更動更新到鏈上
+   */
+  public update = async (data: ChannelUpdateType): Promise<InfraRunnerResultType> => {
+    return await this.createChannelConfigSteps().updateChannelConfig(data)
+  }
+
+  /**
+   * @description 解析信封
+   */
+  public decodeEnvelope = async (data: DecodeEnvelopeType): Promise<DecodeEnvelopeReturnType> => {
+    const { channelName } = data
+    const { envelopeFileName } = Channel.channelConfigFileName(channelName)
+    await (new FabricTools(this.config, this.infra)).decodeProto(ConfigtxlatorEnum.ENVELOPE, channelName, envelopeFileName, envelopeFileName)
+
+    const envelope = JSON.parse(this.bdkFile.getChannelJson(channelName, envelopeFileName))
+    const approved = envelope.payload.data.signatures.map((signature: any) => signature.signature_header.creator.mspid)
+    const rwsetDiff: any = detailedDiff(envelope.payload.data.config_update.read_set, envelope.payload.data.config_update.write_set)
+
+    const verifyOrg = (org: string, value: any): EnvelopeVerifyEnum => {
+      let orgDefinition
+      try {
+        orgDefinition = JSON.parse(this.bdkFile.getOrgConfigJson(org))
+      } catch (e: any) {
+        if (e.code === 'ENOENT') {
+          return EnvelopeVerifyEnum.NO_FILE
+        }
+        throw e
+      }
+      if (Object.entries(diff(value as object, orgDefinition)).length === 0) {
+        return EnvelopeVerifyEnum.VERIFIED
+      } else {
+        return EnvelopeVerifyEnum.NOT_MATCH
+      }
+    }
+
+    if (Object.keys(rwsetDiff.added?.groups?.Application?.groups || {}).length === 1) {
+      const [org, value] = Object.entries(rwsetDiff.added?.groups?.Application?.groups)[0]
+      if (rwsetDiff.added?.groups?.Application?.groups?.[org]?.values?.AnchorPeers?.value?.anchor_peers?.length) {
+        return {
+          approved,
+          type: EnvelopeTypeEnum.UPDATE_ANCHOR_PEER,
+          org,
+          anchorPeers: (value as any)?.values?.AnchorPeers?.value?.anchor_peers?.map((x: any) => `${x?.host}:${x?.port}`),
+        }
+      } else {
+        return {
+          approved,
+          type: EnvelopeTypeEnum.ADD_PEER_TO_APPLICATION_CHANNEL,
+          org,
+          verify: verifyOrg(org, value),
+        }
+      }
+    } else if (Object.keys(rwsetDiff.added?.groups?.Consortiums?.groups?.AllOrganizationsConsortium?.groups || {}).length === 1) {
+      const [org, value] = Object.entries(rwsetDiff.added?.groups?.Consortiums?.groups?.AllOrganizationsConsortium?.groups)[0]
+      return {
+        approved,
+        type: EnvelopeTypeEnum.ADD_PEER_TO_SYSTEM_CHANNEL,
+        org,
+        verify: verifyOrg(org, value),
+      }
+    } else if (Object.keys(rwsetDiff.added?.groups?.Orderer?.groups || {}).length === 1) {
+      const [org, value] = Object.entries(rwsetDiff.added?.groups?.Orderer?.groups)[0]
+      return {
+        approved,
+        type: EnvelopeTypeEnum.ADD_ORDERER_TO_CHANNEL,
+        org,
+        verify: verifyOrg(org, value),
+      }
+    } else if ((rwsetDiff.added?.groups?.Orderer?.values?.ConsensusType?.value?.metadata?.consenters || [])?.length > 0) {
+      return {
+        approved,
+        type: EnvelopeTypeEnum.ADD_ORDERER_CONSENTER,
+        consensus: rwsetDiff.added?.groups?.Orderer?.values?.ConsensusType?.value?.metadata?.consenters?.map((consenter: any) => (`${consenter?.host}:${consenter?.port}`)),
+      }
+    } else {
+      throw new ProcessError('unknown envelope format')
     }
   }
 

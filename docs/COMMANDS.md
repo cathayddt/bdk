@@ -264,6 +264,41 @@ Description: 更新在 Channel 中 Anchor peer 的資訊
 | --orderer         | string  | 使用 Orderer 更新在 Channel 中 Anchor peer 資訊的 Domain name 和 Port 號碼 |          |
 | -p, --port        | number  | 更新 Peer 的 Port 號碼                                                     |          | 7051    |
 
+### `bdk channel approve`
+
+Description: 代表環境變數中 BDK_ORG_NAME 的 Org 同意設定檔更動並且簽章
+
+| Options            |  Type   | Description                    | Required | Default |
+| ------------------ | :-----: | ------------------------------ | :------: | ------- |
+| --help             | boolean | Show help                      |          |
+| --version          | boolean | Show version number            |          |
+| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
+| -c, --channel-name | string  | Channel 的名稱                 |          |
+
+### `bdk channel update`
+
+Description: 更新 Channel 的設定檔
+
+| Options            |  Type   | Description                    | Required | Default |
+| ------------------ | :-----: | ------------------------------ | :------: | ------- |
+| --help             | boolean | Show help                      |          |
+| --version          | boolean | Show version number            |          |
+| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
+| -o, --orderer      | string  | 選擇使用的 Orderer             |          |
+| -c, --channel-name | string  | Channel 的名稱                 |          |
+
+### `bdk channel decode-envelope`
+
+Description: 解析 Approve 或 Update 的信封內容
+
+|      Options       |  Type   |          Description           | Required | Default |
+| ------------------ | :-----: | ------------------------------ | :------: | ------- |
+| --help             | boolean | Show help                      |          |         |
+| --version          | boolean | Show version number            |          |         |
+| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |         |
+| -c, --channel-name | string  | Channel 的名稱                 |          |         |
+| -V, --verify       | boolean | 驗證組織內容的正確性           |          |         |
+
 ## Config
 
 ### `bdk config init`
@@ -458,15 +493,6 @@ Description: 加入新 Orderer org 在 Channel 中
 | -c, --channel-name | string  | Orderer Org 加入 Channel 的名稱      |          |
 | -n, --org-name     | string  | 欲加入 Channel 中 Orderer Org 的名稱 |          |
 
-### `bdk org orderer approve`
-
-Description: 代表環境變數中 BDK_ORG_NAME 的 Org 同意設定檔更動並且簽章
-
-| Options            |  Type   | Description                    | Required | Default |
-| ------------------ | :-----: | ------------------------------ | :------: | ------- |
-| --version          | boolean | Show version number            |          |
-| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
-| -c, --channel-name | string  | Channel 的名稱                 |          |
 
 ### `bdk org orderer create`
 
@@ -485,18 +511,6 @@ Description: 產生欲加入 Blockchin network 的 Orderer org 所需的相關�
 | --connection-profile     | boolean | 是否產生 Orderer 連接設定檔案                                                                                                                                                 |          | false   |
 | --docker-compose        | boolean | 是否產生 Orderer docker-compose 檔案                                                                                                                                          |          | false   |
 
-### `bdk org orderer update`
-
-Description: 更新 Channel 的設定檔
-
-| Options            |  Type   | Description                    | Required | Default |
-| ------------------ | :-----: | ------------------------------ | :------: | ------- |
-| --help             | boolean | Show help                      |          |
-| --version          | boolean | Show version number            |          |
-| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
-| -o, --orderer      | string  | 選擇使用的 Orderer             |          |
-| -c, --channel-name | string  | Channel 的名稱                 |          |
-
 ### `bdk org peer add`
 
 Description: 加入新 Peer org 在 Channel 中
@@ -507,17 +521,6 @@ Description: 加入新 Peer org 在 Channel 中
 | -i, --interactive   | boolean | 是否使用 Cathay BDK 互動式問答    |          |
 | -c, --channel-name  | string  | Peer Org 加入 Channel 的名稱      |          |
 | -n, --peer-org-name | string  | 欲加入 Channel 中 Peer Org 的名稱 |          |
-
-### `bdk org peer approve`
-
-Description: 代表環境變數中 BDK_ORG_NAME 的 Org 同意設定檔更動並且簽章
-
-| Options            |  Type   | Description                    | Required | Default |
-| ------------------ | :-----: | ------------------------------ | :------: | ------- |
-| --help             | boolean | Show help                      |          |
-| --version          | boolean | Show version number            |          |
-| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
-| -c, --channel-name | string  | Channel 的名稱                 |          |
 
 ### `bdk org peer create`
 
@@ -534,18 +537,6 @@ Description: 產生欲加入 Channel 的 Peer org 所需的相關設定檔案
 | --configtxJSON      | boolean | 是否使用 configtx.yaml 產生 Peer Org 的 json 檔案                                                                                                                                                       |          | false   |
 | --connection-profile | boolean | 是否產生 Peer 連接設定檔案                                                                                                                                                                              |          | false   |
 | --docker-compose    | boolean | 是否產生 Peer docker-compose 檔案                                                                                                                                                                       |          | false   |
-
-### `bdk org peer update`
-
-Description: 更新 Channel 的設定檔
-
-| Options            |  Type   | Description                    | Required | Default |
-| ------------------ | :-----: | ------------------------------ | :------: | ------- |
-| --help             | boolean | Show help                      |          |
-| --version          | boolean | Show version number            |          |
-| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答 |          |
-| -o, --orderer      | string  | 選擇使用的 Orderer             |          |
-| -c, --channel-name | string  | Channel 的名稱                 |          |
 
 ## Peer
 
