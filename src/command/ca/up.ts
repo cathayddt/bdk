@@ -165,27 +165,27 @@ const checkCertKeyPairs = (argv: CaServiceUpParams) => {
 }
 
 const checkCsr = (argv: CaServiceUpParams) => {
-  let rcaCheck: boolean
+  let csrCheck: boolean
   if (
     !!argv.csrCn &&
     !!argv.csrHosts
     // !!argv.rcaExpiry &&
     // !!argv.rcaPathlength
   ) {
-    rcaCheck = true
+    csrCheck = true
   } else if (
     !argv.csrCn &&
     !argv.csrHosts
     // !argv.rcaExpiry &&
     // !argv.rcaPathlength
   ) {
-    rcaCheck = true
+    csrCheck = true
   } else {
     throw new ParamsError(
       'Invalid params: You can only either fill all CSR parameters or leave all parameters blank',
     )
   }
-  return rcaCheck
+  return csrCheck
 }
 
 const checkIca = (argv: CaServiceUpParams) => {
@@ -400,7 +400,7 @@ export const handler = async (argv: CaServiceUpParams) => {
     )
 
     let csr
-    if (settings.caType === 'RCA' || settings.caType === 'ICA') {
+    if (settings.caType === 'RCA') {
       csr = await prompts(
         [
           {
@@ -413,6 +413,24 @@ export const handler = async (argv: CaServiceUpParams) => {
             name: 'hosts',
             message: 'Please specify the CSR host for this CA',
           },
+          {
+            type: 'text',
+            name: 'expiry',
+            message: 'Please specify the CSR expiry for this CA',
+            initial: '131400h',
+          },
+          {
+            type: 'number',
+            name: 'pathlength',
+            message:
+              'Please specify the CSR pathlength for this CA (recommend to use 1 if you wish to establish ICAs )',
+          },
+        ],
+        { onCancel },
+      )
+    } else if (settings.caType === 'ICA') {
+      csr = await prompts(
+        [
           {
             type: 'text',
             name: 'expiry',
