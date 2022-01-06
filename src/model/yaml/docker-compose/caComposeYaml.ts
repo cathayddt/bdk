@@ -50,13 +50,19 @@ class CaDockerComposeYaml extends DockerComposeYaml {
       )
       .concat(
         csr
-          ? [
+          ? csr.cn && csr.hosts
+            ? [
               // CSR (RCA) options
               `FABRIC_CA_SERVER_CSR_CN=${csr.cn}`,
               `FABRIC_CA_SERVER_CSR_HOSTS=${csr.hosts}`,
               `FABRIC_CA_SERVER_CSR_CA_EXPIRY=${csr.expiry}`,
               `FABRIC_CA_SERVER_CSR_CA_PATHLENGTH=${csr.pathlength}`,
-          ]
+            ]
+            : [
+              // CSR (ICA) options
+              `FABRIC_CA_SERVER_CSR_CA_EXPIRY=${csr.expiry}`,
+              `FABRIC_CA_SERVER_CSR_CA_PATHLENGTH=${csr.pathlength}`,
+            ]
           : [],
       )
       .concat(
