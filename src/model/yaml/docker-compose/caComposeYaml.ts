@@ -60,6 +60,7 @@ class CaDockerComposeYaml extends DockerComposeYaml {
             ]
             : [
               // CSR (ICA) options
+              `FABRIC_CA_SERVER_CSR_HOSTS=${intermediate?.enrollmentHost}`,
               `FABRIC_CA_SERVER_CSR_CA_EXPIRY=${csr.expiry}`,
               `FABRIC_CA_SERVER_CSR_CA_PATHLENGTH=${csr.pathlength}`,
             ]
