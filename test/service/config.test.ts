@@ -1,4 +1,4 @@
-/* global describe, it, before, beforeEach */
+/* global describe, it, after, before, beforeEach */
 import fs from 'fs'
 import assert from 'assert'
 import Config from '../../src/service/config'
@@ -9,9 +9,13 @@ import { ProcessError } from '../../src/util'
 import dotenv from 'dotenv'
 
 describe('Config service: ', () => {
-  describe('[init] ', () => {
+  describe('init', () => {
     before(() => {
       (new Config(config)).init()
+    })
+
+    after(() => {
+      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
     })
 
     it('should exist .env file in specified path', () => {
@@ -27,7 +31,7 @@ describe('Config service: ', () => {
     })
   })
 
-  describe('[set]', () => {
+  describe('set', () => {
     const configSetEnv: ConfigSetType = {
       key: 'BDK_ORG_DOMAIN',
       value: 'test.set.domain.com',
@@ -35,6 +39,10 @@ describe('Config service: ', () => {
 
     beforeEach(() => {
       (new Config(config)).init()
+    })
+
+    after(() => {
+      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
     })
 
     it('should throw init first error message', () => {
@@ -56,9 +64,13 @@ describe('Config service: ', () => {
     })
   })
 
-  describe('[ls]', () => {
+  describe('ls', () => {
     before(() => {
       (new Config(config)).init()
+    })
+
+    after(() => {
+      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
     })
 
     it('should return current .env config', () => {
