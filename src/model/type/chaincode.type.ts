@@ -26,11 +26,16 @@ export interface ChaincodeApproveType {
 
 /**
  * @requires chaincodeLabel - [string] chaincode 的名稱
- * @requires packageId - [string] chaincode packate 的 id
  */
 export interface ChaincodeInstallType {
   chaincodeLabel: string
-  packageId?: string
+}
+
+/**
+ * @ignore
+ */
+export interface ChaincodeInstallStepSavePackageIdType extends ChaincodeInstallType {
+  packageId: string
 }
 
 /**

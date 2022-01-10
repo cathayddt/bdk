@@ -1,7 +1,7 @@
 import path from 'path'
 import FabricTools from '../instance/fabricTools'
 import FabricInstance from '../instance/fabricInstance'
-import { ChaincodeApproveType, ChaincodeCommitType, ChaincodeInstallType, ChaincodeInvokeType, ChaincodePackageType, ChaincodeQueryType } from '../model/type/chaincode.type'
+import { ChaincodeApproveType, ChaincodeCommitType, ChaincodeInstallStepSavePackageIdType, ChaincodeInstallType, ChaincodeInvokeType, ChaincodePackageType, ChaincodeQueryType } from '../model/type/chaincode.type'
 import { ParserType, AbstractService } from './Service.abstract'
 import { logger } from '../util/logger'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
@@ -60,8 +60,8 @@ export default class Chaincode extends AbstractService {
       logger.error('this service only for docker infra')
       throw new Error('this service for docker infra')
     }
-    dto.packageId = Chaincode.parser.installToPeer(installToPeerResult, { chaincodeLabel: dto.chaincodeLabel })
-    return this.installSteps().savePackageId(dto)
+    const packageId = Chaincode.parser.installToPeer(installToPeerResult, { chaincodeLabel: dto.chaincodeLabel })
+    return this.installSteps().savePackageId({ ...dto, packageId })
   }
 
   /**
@@ -73,7 +73,7 @@ export default class Chaincode extends AbstractService {
         logger.debug('install chaincode step 1 (install chaincode)')
         return await (new FabricInstance(this.config, this.infra)).installChaincode(dto.chaincodeLabel)
       },
-      savePackageId: (dto: ChaincodeInstallType): string => {
+      savePackageId: (dto: ChaincodeInstallStepSavePackageIdType): string => {
         logger.debug('install chaincode step 2 (save package id)')
         this.bdkFile.savePackageId(dto.chaincodeLabel, dto.packageId || '')
         return dto.packageId || ''
