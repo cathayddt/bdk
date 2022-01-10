@@ -205,9 +205,13 @@ export default class BdkFile {
     return YAML.load(fs.readFileSync(this.getDockerComposeYamlPath(hostName, type)).toString()) as DockerComposeYamlInterface
   }
 
-  public createOrgConfigEnv (address: string, dotEnv: string) {
+  public createOrgConfigEnv (filename: string, dotEnv: string) {
     fs.mkdirSync(`${this.bdkPath}/env`, { recursive: true })
-    fs.writeFileSync(`${this.bdkPath}/env/${address}.env`, dotEnv)
+    fs.writeFileSync(`${this.bdkPath}/env/${filename}.env`, dotEnv)
+  }
+
+  public getOrgConfigEnv (filename: string) {
+    return parse(fs.readFileSync(`${this.bdkPath}/env/${filename}.env`).toString())
   }
 
   private createChannelConfigtxFolder (channelName: string) {
@@ -446,7 +450,7 @@ export default class BdkFile {
     }
   }
 
-  private newestFileInFolder (folderName: string) {
+  public static newestFileName (folderName: string) {
     const files: string[] = fs.readdirSync(folderName)
     const newest = { fileName: 'stub', created: new Date('December 31, 1999 00:00:00') }
     files.forEach(function (file) {
@@ -456,7 +460,11 @@ export default class BdkFile {
         newest.created = stats.ctime
       }
     })
-    return `${folderName}/${newest.fileName}`
+    return newest.fileName
+  }
+
+  private newestFileInFolder (folderName: string) {
+    return `${folderName}/${BdkFile.newestFileName(folderName)}`
   }
 
   private createPackageIdFolder () {
@@ -483,8 +491,16 @@ export default class BdkFile {
     return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/keystore`)).toString()
   }
 
+  public getAdminPrivateKeyFilename (domain: string): string {
+    return BdkFile.newestFileName(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/keystore`)
+  }
+
   public getAdminSignCert (domain: string): string {
     return fs.readFileSync(this.newestFileInFolder(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/signcerts`)).toString()
+  }
+
+  public getAdminSignCertFilename (domain: string): string {
+    return BdkFile.newestFileName(`${this.bdkPath}/peerOrganizations/${domain}/users/Admin@${domain}/msp/signcerts`)
   }
 
   public getChannelJson (channel: string, filename: string): string {

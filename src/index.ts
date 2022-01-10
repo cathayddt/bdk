@@ -2,6 +2,7 @@ import Ca from './service/caService'
 import Chaincode from './service/chaincode'
 import Channel from './service/channel'
 import Config from './service/config'
+import Discover from './service/discover'
 import Explorer from './service/explorer'
 import Network from './service/network'
 import Orderer from './service/orderer'
@@ -13,6 +14,7 @@ export {
   Chaincode,
   Channel,
   Config,
+  Discover,
   Explorer,
   Network,
   Orderer,
@@ -26,6 +28,7 @@ export { CaUpType, CaDownType, CaIntermediateType, CaCsrType, CaEnrollCommandTyp
 export { ChaincodePackageType, ChaincodeApproveType, ChaincodeCommitType, ChaincodeDeployType, ChaincodeQueryType, ChaincodeInvokeType, ChaincodeInstallType } from './model/type/chaincode.type'
 export { PolicyTypeEnum, PolicyStyleEnum, ChannelPolicyType, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ConfigtxlatorEnum, ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType, ChannelConfigEnum, ChannelFetchBlockType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, EnvelopeTypeEnum, EnvelopeVerifyEnum as EnvelopeVerifyENum, DecodeEnvelopeReturnType } from './model/type/channel.type'
 export { ConfigEnvType, ConfigSetType } from './model/type/config.type'
+export { DiscoverPeersType, DiscoverChannelConfigType, DiscoverChaincodeEndorsersType, DiscoverPeersResultType, DiscoverChannelConfigResultType, DiscoverChaincodeEndorsersResultType } from './model/type/discover.type'
 export { DockerHostConfigType, DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType } from './model/type/docker.type'
 export { ExplorerUpForMyOrgType, ExplorerUpdateForMyOrgType, ExplorerChannelType } from './model/type/explorer.type'
 export { NetworkCreateType, NetworkCryptoConfigOrdererOrgType, NetworkCryptoConfigPeerOrgType, NetworkCreateOrdererOrgType, NetworkCreatePeerOrgType, NetworkOrdererPortType, NetworkPeerPortType } from './model/type/network.type'

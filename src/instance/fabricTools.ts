@@ -1,6 +1,6 @@
 import { ConfigtxlatorEnum } from '../model/type/channel.type'
 import { logger } from '../util'
-import { DockerResultType } from './infra/InfraRunner.interface'
+import { DockerResultType, InfraRunnerResultType } from './infra/InfraRunner.interface'
 import { AbstractInstance } from './Instance.abstract'
 
 interface OptionsType {
@@ -154,5 +154,54 @@ export default class FabricTools extends AbstractInstance {
     ['GOCACHE=/tmp/gocache'],
     [`${chaincodePath}:/chaincode`],
     options)
+  }
+
+  public async discoverPeers (channel: string, options?: OptionsType): Promise<InfraRunnerResultType> {
+    const envFile = this.bdkFile.getOrgConfigEnv(`peer-${this.config.hostname}.${this.config.orgDomainName}`)
+    return await this.infraRunCommand([
+      'discover', 'peers',
+      '--peerTLSCA', envFile.CORE_PEER_TLS_ROOTCERT_FILE,
+      '--userKey', `${envFile.CORE_PEER_MSPCONFIGPATH}/keystore/${this.bdkFile.getAdminPrivateKeyFilename(this.config.orgDomainName)}`,
+      '--userCert', `${envFile.CORE_PEER_MSPCONFIGPATH}/signcerts/${this.bdkFile.getAdminSignCertFilename(this.config.orgDomainName)}`,
+      '--MSP', envFile.CORE_PEER_LOCALMSPID,
+      '--server', envFile.CORE_PEER_ADDRESS,
+      '--channel', channel,
+    ],
+    undefined,
+    undefined,
+    { ...options, network: this.config.networkName })
+  }
+
+  public async discoverChannelConfig (channel: string, options?: OptionsType): Promise<InfraRunnerResultType> {
+    const envFile = this.bdkFile.getOrgConfigEnv(`peer-${this.config.hostname}.${this.config.orgDomainName}`)
+    return await this.infraRunCommand([
+      'discover', 'config',
+      '--peerTLSCA', envFile.CORE_PEER_TLS_ROOTCERT_FILE,
+      '--userKey', `${envFile.CORE_PEER_MSPCONFIGPATH}/keystore/${this.bdkFile.getAdminPrivateKeyFilename(this.config.orgDomainName)}`,
+      '--userCert', `${envFile.CORE_PEER_MSPCONFIGPATH}/signcerts/${this.bdkFile.getAdminSignCertFilename(this.config.orgDomainName)}`,
+      '--MSP', envFile.CORE_PEER_LOCALMSPID,
+      '--server', envFile.CORE_PEER_ADDRESS,
+      '--channel', channel,
+    ],
+    undefined,
+    undefined,
+    { ...options, network: this.config.networkName })
+  }
+
+  public async discoverChaincodeEndorsers (channel: string, chaincode: string, options?: OptionsType): Promise<InfraRunnerResultType> {
+    const envFile = this.bdkFile.getOrgConfigEnv(`peer-${this.config.hostname}.${this.config.orgDomainName}`)
+    return await this.infraRunCommand([
+      'discover', 'endorsers',
+      '--peerTLSCA', envFile.CORE_PEER_TLS_ROOTCERT_FILE,
+      '--userKey', `${envFile.CORE_PEER_MSPCONFIGPATH}/keystore/${this.bdkFile.getAdminPrivateKeyFilename(this.config.orgDomainName)}`,
+      '--userCert', `${envFile.CORE_PEER_MSPCONFIGPATH}/signcerts/${this.bdkFile.getAdminSignCertFilename(this.config.orgDomainName)}`,
+      '--MSP', envFile.CORE_PEER_LOCALMSPID,
+      '--server', envFile.CORE_PEER_ADDRESS,
+      '--channel', channel,
+      '--chaincode', chaincode,
+    ],
+    undefined,
+    undefined,
+    { ...options, network: this.config.networkName })
   }
 }
