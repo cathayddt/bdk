@@ -69,7 +69,7 @@ sleep 5
 # [orgnew] deploy chaincode
 export_env 'peer' ${PEER_ORG_NAME_ORGNEW} ${PEER_ORG_DOMAIN_ORGNEW} 'peer0'
 bdk chaincode install -l ${CHAINCODE_LABEL}
-bdk chaincode approve -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0}
+bdk chaincode approve -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I # discover
 
 # [orgnew] install only
 export_env 'peer' ${PEER_ORG_NAME_ORGNEW} ${PEER_ORG_DOMAIN_ORGNEW} 'peer1'

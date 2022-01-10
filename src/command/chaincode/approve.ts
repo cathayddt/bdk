@@ -1,7 +1,7 @@
 import { Arguments, Argv } from 'yargs'
 import prompts from 'prompts'
 import { logger, onCancel } from '../../util'
-import { ChaincodeApproveType } from '../../model/type/chaincode.type'
+import { ChaincodeApproveType, ChaincodeApproveWithoutDiscoverType } from '../../model/type/chaincode.type'
 import Chaincode from '../../service/chaincode'
 import Channel from '../../service/channel'
 import config from '../../config'
@@ -25,12 +25,13 @@ const ordererList = getOrdererList(config)
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
     .example('bdk chaincode approve --interactive', 'Cathay BDK 互動式問答')
-    .example('bdk chaincode approve --channel-id fabcar --chaincode-label test_1 --init-required --orderer orderer0.example.com:7050', '使用 orderer0.example.com:7050 同意名稱為 test 中標籤為 test_1 的 Chaincode，此 Chaincode 需要初始化')
+    .example('bdk chaincode approve --channel-id test --chaincode-label fabcar_1 --init-required', '使用 discover 自動選擇 orderer 同意名稱為 test 的 channel 中標籤為 fabcar_1 的 Chaincode，此 Chaincode 需要初始化')
+    .example('bdk chaincode approve --channel-id test --chaincode-label fabcar_1 --init-required --orderer orderer0.example.com:7050', '使用 orderer0.example.com:7050 同意名稱為 test 的 channel 中標籤為 fabcar_1 的 Chaincode，此 Chaincode 需要初始化')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
     .option('channel-id', { type: 'string', description: '選擇欲同意 Chaincode 在的 Channel 名稱', alias: 'C' })
     .option('chaincode-label', { type: 'string', description: 'Chaincode package 的標籤名稱', alias: 'l', choices: chaincodeList.map(x => `${x.name}_${x.version}`) })
     .option('init-required', { type: 'boolean', description: 'Chaincode 是否需要初始化', alias: 'I' })
-    .option('orderer', { type: 'string', choices: ordererList, description: '選擇 Orderer 同意 Chaincode' })
+    .option('orderer', { type: 'string', choices: ordererList, description: '選擇 Orderer 同意 Chaincode (若未輸入則使用discover)' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
@@ -39,7 +40,7 @@ export const handler = async (argv: Arguments<OptType>) => {
   const chaincode = new Chaincode(config)
   const channel = new Channel(config)
 
-  let approveChannelInput: ChaincodeApproveType
+  let approveChannelInput: ChaincodeApproveType | ChaincodeApproveWithoutDiscoverType
   const chaincodeVersionMap: Map<string, number[]> = new Map()
   chaincodeList.forEach(chaincode => {
     chaincodeVersionMap.set(chaincode.name, [...(chaincodeVersionMap.get(chaincode.name) || []), chaincode.version])
@@ -89,26 +90,45 @@ export const handler = async (argv: Arguments<OptType>) => {
 
       },
     ], { onCancel })
-    const channelGroup = await channel.getChannelGroup(channelId)
-
-    const { orderer } = await prompts([
-      {
-        type: 'select',
-        name: 'orderer',
-        message: 'Ordering service endpoint',
-        choices: channelGroup.orderer.map(x => ({
-          title: x,
-          value: x,
-        })),
-      },
-    ], { onCancel })
 
     approveChannelInput = {
       channelId,
       chaincodeName,
       chaincodeVersion,
       initRequired,
-      orderer,
+    }
+
+    const discoverOrderer = await prompts([
+      {
+        type: 'select',
+        name: 'discoverOrderer',
+        message: 'Set orderer with discover?',
+        choices: [
+          {
+            title: 'Yes',
+            value: true,
+          },
+          {
+            title: 'No',
+            value: false,
+          },
+        ],
+      },
+    ], { onCancel })
+    if (discoverOrderer) {
+      const channelGroup = await channel.getChannelGroup(channelId)
+      const { orderer } = await prompts([
+        {
+          type: 'select',
+          name: 'orderer',
+          message: 'Ordering service endpoint',
+          choices: channelGroup.orderer.map(x => ({
+            title: x,
+            value: x,
+          })),
+        },
+      ], { onCancel })
+      approveChannelInput = { ...approveChannelInput, orderer }
     }
   } else {
     approveChannelInput = {
@@ -116,7 +136,9 @@ export const handler = async (argv: Arguments<OptType>) => {
       chaincodeName: argv.chaincodeLabel.split('_')[0],
       chaincodeVersion: parseInt(argv.chaincodeLabel.split('_')[1]),
       initRequired: argv.initRequired,
-      orderer: argv.orderer,
+    }
+    if (argv.orderer) {
+      approveChannelInput = { ...approveChannelInput, orderer: argv.orderer }
     }
   }
   await chaincode.approve(approveChannelInput)

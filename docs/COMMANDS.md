@@ -97,15 +97,15 @@ Description: Enroll certificates.
 
 Description: 代表環境變數中 BDK_ORG_NAME 的 Peer org 同意 Chaincode
 
-| Options               |  Type   | Description                            | Required | Default |
-| --------------------- | :-----: | -------------------------------------- | :------: | ------- |
-| --help                | boolean | Show help                              |          |
-| --version             |         | boolean Show version number            |          |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答         |          |
-| -C, --channel-id      | string  | 選擇欲同意 Chaincode 在的 Channel 名稱 |          |
-| -l, --chaincode-label | string  | Chaincode package 的標籤名稱           |          |
-| -I, --init-required   | boolean | Chaincode 是否需要初始化               |          |
-| --orderer             | string  | 選擇 Orderer 同意 Chaincode            |          |
+|        Options        |  Type   |                      Description                      | Required | Default |
+| --------------------- | :-----: | ----------------------------------------------------- | :------: | ------- |
+| --help                | boolean | Show help                                             |          |         |
+| --version             |         | boolean Show version number                           |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答                        |          |         |
+| -C, --channel-id      | string  | 選擇欲同意 Chaincode 在的 Channel 名稱                |    V     |         |
+| -l, --chaincode-label | string  | Chaincode package 的標籤名稱                          |    V     |         |
+| -I, --init-required   | boolean | Chaincode 是否需要初始化                              |          |         |
+| --orderer             | string  | 選擇 Orderer 同意 Chaincode  (若未輸入則使用discover) |          |         |
 
 ### `bdk chaincode commit`
 

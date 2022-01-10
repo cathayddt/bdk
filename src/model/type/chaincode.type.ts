@@ -14,13 +14,20 @@ export interface ChaincodePackageType {
  * @requires chaincodeName - [string] chaincode 的名稱
  * @requires chaincodeVersion - [number] chaincode 的版本號碼
  * @requires initRequired - [boolean] 使否需要初始化
- * @requires orderer - [string] orderer 的 address 和 port
  */
 export interface ChaincodeApproveType {
   channelId: string
   chaincodeName: string
   chaincodeVersion: number
   initRequired: boolean
+}
+
+export type ChaincodeApproveWithoutDiscoverType = ChaincodeApproveType & { orderer: string }
+
+/**
+ * @requires orderer - [string] orderer 的 address 和 port
+ */
+export interface ChaincodeApproveStepApproveOnInstanceType extends ChaincodeApproveType {
   orderer: string
 }
 

@@ -21,6 +21,7 @@ export function iterateFormat (
   return item
 }
 
+export const randomFromArray = <T> (x: Array<T>) => x[Math.floor(Math.random() * x.length)]
 // export function iterateObject2 (obj: Map, callback: (x: string) => any) {
 //   for (const key in obj) {
 //     if (typeof obj[key] === 'object') {

@@ -1,10 +1,11 @@
 import path from 'path'
 import FabricTools from '../instance/fabricTools'
 import FabricInstance from '../instance/fabricInstance'
-import { ChaincodeApproveType, ChaincodeCommitType, ChaincodeInstallStepSavePackageIdType, ChaincodeInstallType, ChaincodeInvokeType, ChaincodePackageType, ChaincodeQueryType } from '../model/type/chaincode.type'
+import { ChaincodeApproveStepApproveOnInstanceType, ChaincodeApproveType, ChaincodeApproveWithoutDiscoverType, ChaincodeCommitType, ChaincodeInstallStepSavePackageIdType, ChaincodeInstallType, ChaincodeInvokeType, ChaincodePackageType, ChaincodeQueryType } from '../model/type/chaincode.type'
 import { ParserType, AbstractService } from './Service.abstract'
 import { logger } from '../util/logger'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
+import Discover from './discover'
 
 interface ChaincodeParser extends ParserType {
   installToPeer: (result: DockerResultType, options: {chaincodeLabel: string}) => string
@@ -12,6 +13,7 @@ interface ChaincodeParser extends ParserType {
   query: (result: DockerResultType) => any
   getChaincodePackageId: (result: DockerResultType, options: {chaincodeLabel: string}) => string
   getCommittedChaincode: (result: DockerResultType) => string[]
+  approveStepDiscover: (result: DockerResultType) => string
 }
 
 export default class Chaincode extends AbstractService {
@@ -21,6 +23,7 @@ export default class Chaincode extends AbstractService {
     query: (result) => JSON.parse(result.stdout || '{}'),
     getChaincodePackageId: (result, options: {chaincodeLabel: string}) => result.stdout.match(RegExp(`(?<=Package ID: )${options.chaincodeLabel}:.*(?=, Label: ${options.chaincodeLabel})`))?.[0] || '',
     getCommittedChaincode: (result) => result.stdout.match(/(?<=Name: ).*(?=, Version)/g) || [],
+    approveStepDiscover: (result) => Discover.chooseOneRandomOrderer(Discover.parser.channelConfig(result)),
   }
 
   /**
@@ -94,10 +97,36 @@ export default class Chaincode extends AbstractService {
   /**
    * @description 同意 chaincode
    */
-  public async approve (payload: ChaincodeApproveType): Promise<InfraRunnerResultType> {
-    logger.debug('approve for my org')
-    const packageId = this.bdkFile.getPackageId(`${payload.chaincodeName}_${payload.chaincodeVersion}`)
-    return await (new FabricInstance(this.config, this.infra)).approveChaincode(payload.channelId, payload.chaincodeName, payload.chaincodeVersion, packageId, payload.initRequired, payload.orderer)
+  public async approve (payload: ChaincodeApproveType | ChaincodeApproveWithoutDiscoverType): Promise<InfraRunnerResultType> {
+    let orderer: string
+    if ('orderer' in payload) {
+      orderer = payload.orderer
+    } else {
+      const discoverResult = await this.approveSteps().discover(payload)
+      if (!('stdout' in discoverResult)) {
+        logger.error('this service only for docker infra')
+        throw new Error('this service for docker infra')
+      }
+      orderer = Chaincode.parser.approveStepDiscover(discoverResult)
+    }
+    return await this.approveSteps().approveOnInstance({ ...payload, orderer })
+  }
+
+  /**
+   * @ignore
+   */
+  public approveSteps () {
+    return {
+      discover: async (payload: ChaincodeApproveType): Promise<InfraRunnerResultType> => {
+        logger.debug('approve chaincode step 1 (discover)')
+        return await (new Discover(this.config)).channelConfig({ channel: payload.channelId })
+      },
+      approveOnInstance: async (payload: ChaincodeApproveStepApproveOnInstanceType): Promise<InfraRunnerResultType> => {
+        logger.debug('approve chaincode step 2 (approve)')
+        const packageId = this.bdkFile.getPackageId(`${payload.chaincodeName}_${payload.chaincodeVersion}`)
+        return await (new FabricInstance(this.config, this.infra)).approveChaincode(payload.channelId, payload.chaincodeName, payload.chaincodeVersion, packageId, payload.initRequired, payload.orderer)
+      },
+    }
   }
 
   /**
