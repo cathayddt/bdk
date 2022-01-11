@@ -17,7 +17,7 @@ ICA_DOMAIN_ORGNEW='ica.orgnew.cathaybc.com'
 ICA_PORT_ORGNEW='7454'
 
 # RCA
-bdk ca up -n ${RCA_DOMAIN} -p ${RCA_PORT} --rca-cn ${RCA_DOMAIN} --rca-hosts ${RCA_DOMAIN} --rca-expiry 87600h --rca-pathlength 1
+bdk ca up -n ${RCA_DOMAIN} -p ${RCA_PORT} --csr-cn ${RCA_DOMAIN} --csr-hosts ${RCA_DOMAIN} --csr-expiry 87600h --csr-pathlength 1
 sleep 2
 bdk ca enroll -t client -u ${RCA_DOMAIN} -p ${RCA_PORT} --client-id admin --client-secret adminpw --role rca --org-hostname ${RCA_DOMAIN}
 
