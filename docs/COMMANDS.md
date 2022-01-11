@@ -36,10 +36,10 @@ Description: Bring up CA.
 | --sign-enrollment-expiry | string  | (Signing) Expiry for downstream entity enrollments             |    V     | "8760h"                          |
 | --sign-ca-expiry         | string  | (Signing) Expiry for downstream CA enrollments                 |    V     | "43800h"                         |
 | --sign-tls-expiry        | string  | (Signing) Expiry for downstream TLS enrollments                |    V     | "8760h                           |
-| --rca-cn                 | string  | (RCA) Common name for RCA CSR if this is an RCA                |          |
-| --rca-hosts              | string  | (RCA) Hosts for RCA CSR if this is an RCA                      |          |
-| --rca-expiry             | string  | (RCA) Certificate expiry for RCA CSR if this is an RCA         |          | "131400h"                        |
-| --rca-pathlength         | number  | (RCA) Pathlength for RCA CSR if this is an RCA                 |          | 0                                |
+| --csr-cn                 | string  | (CSR) Common name for CSR if this is an CA                     |          |
+| --csr-hosts              | string  | (CSR) Hosts for CSR if this is an CA                           |          |
+| --csr-expiry             | string  | (CSR) Certificate expiry for CSR if this is an CA              |          | "131400h"                        |
+| --csr-pathlength         | number  | (CSR) Pathlength for CSR if this is an CA                      |          | 0                                |
 | --ica-parentserver-url   | string  | (ICA) Parentserver connection info for ICA if this is an ICA   |          | "https://<id>:<secret>@hostname" |
 | --ica-parentserver-cn    | string  | (ICA) Parentserver CA common name for ICA if this is an ICA    |          |
 | --ica-enrollment-host    | string  | (ICA) Host to enroll certificates for ICA if this is an ICA    |          |

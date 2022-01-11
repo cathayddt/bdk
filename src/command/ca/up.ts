@@ -22,10 +22,10 @@ export interface CaServiceUpParams {
   signEnrollmentExpiry: string
   signCaExpiry: string
   signTlsExpiry: string
-  rcaCn: string | null
-  rcaHosts: string | null
-  rcaExpiry: string | null
-  rcaPathlength: number | null
+  csrCn: string | null
+  csrHosts: string | null
+  csrExpiry: string | null
+  csrPathlength: number | null
   icaParentserverUrl: string | null
   icaParentserverCn: string | null
   icaEnrollmentHost: string | null
@@ -93,21 +93,21 @@ export const builder = (yargs: Argv) => {
       type: 'string',
       default: '8760h',
     },
-    'rca-cn': {
-      describe: '(RCA) Common name for RCA CSR if this is an RCA',
+    'csr-cn': {
+      describe: '(CSR) Common name for CSR if this is an CA',
       type: 'string',
     },
-    'rca-hosts': {
-      describe: '(RCA) Hosts for RCA CSR if this is an RCA',
+    'csr-hosts': {
+      describe: '(CSR) Hosts for CSR if this is an CA',
       type: 'string',
     },
-    'rca-expiry': {
-      describe: '(RCA) Certificate expiry for RCA CSR if this is an RCA',
+    'csr-expiry': {
+      describe: '(CSR) Certificate expiry for CSR if this is an CA',
       type: 'string',
       default: '131400h',
     },
-    'rca-pathlength': {
-      describe: '(RCA) Pathlength for RCA CSR if this is an RCA',
+    'csr-pathlength': {
+      describe: '(CSR) Pathlength for CSR if this is an CA',
       type: 'number',
       default: 0,
     },
@@ -164,28 +164,28 @@ const checkCertKeyPairs = (argv: CaServiceUpParams) => {
   }
 }
 
-const checkRca = (argv: CaServiceUpParams) => {
-  let rcaCheck: boolean
+const checkCsr = (argv: CaServiceUpParams) => {
+  let csrCheck: boolean
   if (
-    !!argv.rcaCn &&
-    !!argv.rcaHosts
+    !!argv.csrCn &&
+    !!argv.csrHosts
     // !!argv.rcaExpiry &&
     // !!argv.rcaPathlength
   ) {
-    rcaCheck = true
+    csrCheck = true
   } else if (
-    !argv.rcaCn &&
-    !argv.rcaHosts
+    !argv.csrCn &&
+    !argv.csrHosts
     // !argv.rcaExpiry &&
     // !argv.rcaPathlength
   ) {
-    rcaCheck = true
+    csrCheck = true
   } else {
     throw new ParamsError(
-      'Invalid params: You can only either fill all RCA parameters or leave all five parameters blank',
+      'Invalid params: You can only either fill all CSR parameters or leave all parameters blank',
     )
   }
-  return rcaCheck
+  return csrCheck
 }
 
 const checkIca = (argv: CaServiceUpParams) => {
@@ -207,7 +207,7 @@ const checkIca = (argv: CaServiceUpParams) => {
     icaCheck = false
   } else {
     throw new ParamsError(
-      'Invalid params: You can only either fill all ICA parameters or leave all five parameters blank',
+      'Invalid params: You can only either fill all ICA parameters or leave all parameters blank',
     )
   }
   return icaCheck
@@ -233,10 +233,10 @@ const transformCaServiceUpObj = (arg: CaServiceUpParams) => {
       profilesTlsExpiry: arg.signTlsExpiry,
     },
     csr: {
-      cn: arg.rcaCn,
-      hosts: arg.rcaHosts,
-      expiry: arg.rcaExpiry,
-      pathlength: arg.rcaPathlength,
+      cn: arg.csrCn,
+      hosts: arg.csrHosts,
+      expiry: arg.csrExpiry,
+      pathlength: arg.csrPathlength,
     },
     intermediate: {
       parentserverUrl: arg.icaParentserverUrl || '',
@@ -400,30 +400,48 @@ export const handler = async (argv: CaServiceUpParams) => {
     )
 
     let csr
-    if (settings.caType !== 'ICA') {
+    if (settings.caType === 'RCA') {
       csr = await prompts(
         [
           {
             type: 'text',
             name: 'cn',
-            message: 'Please specify the CSR common name for this RCA',
+            message: 'Please specify the CSR common name for this CA',
           },
           {
             type: 'text',
             name: 'hosts',
-            message: 'Please specify the CSR host for this RCA',
+            message: 'Please specify the CSR host for this CA',
           },
           {
             type: 'text',
             name: 'expiry',
-            message: 'Please specify the CSR expiry for this RCA',
+            message: 'Please specify the CSR expiry for this CA',
             initial: '131400h',
           },
           {
             type: 'number',
             name: 'pathlength',
             message:
-              'Please specify the CSR pathlength for this RCA (recommend to use 1 if you wish to establish ICAs )',
+              'Please specify the CSR pathlength for this CA (recommend to use 1 if you wish to establish ICAs )',
+          },
+        ],
+        { onCancel },
+      )
+    } else if (settings.caType === 'ICA') {
+      csr = await prompts(
+        [
+          {
+            type: 'text',
+            name: 'expiry',
+            message: 'Please specify the CSR expiry for this CA',
+            initial: '131400h',
+          },
+          {
+            type: 'number',
+            name: 'pathlength',
+            message:
+              'Please specify the CSR pathlength for this CA (recommend to use 1 if you wish to establish ICAs )',
           },
         ],
         { onCancel },
@@ -497,7 +515,7 @@ export const handler = async (argv: CaServiceUpParams) => {
   } else {
     checkRequired(argv)
     checkCertKeyPairs(argv)
-    checkRca(argv)
+    checkCsr(argv)
     await ca.up(transformCaServiceUpObj(argv))
   }
 }
