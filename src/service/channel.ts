@@ -344,14 +344,14 @@ export default class Channel extends AbstractService {
   /**
    * @description 簽署信封
    */
-  public approve = async (data: ChannelApproveType): Promise<InfraRunnerResultType> => {
+  public async approve (data: ChannelApproveType): Promise<InfraRunnerResultType> {
     return await this.createChannelConfigSteps().signConfigTx(data)
   }
 
   /**
    * @description 將信封的更動更新到鏈上
    */
-  public update = async (data: ChannelUpdateType): Promise<InfraRunnerResultType> => {
+  public async update (data: ChannelUpdateType): Promise<InfraRunnerResultType> {
     return await this.createChannelConfigSteps().updateChannelConfig(data)
   }
 
