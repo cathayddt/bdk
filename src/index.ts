@@ -25,7 +25,7 @@ export {
 export { AbstractService, ParserType } from './service/Service.abstract'
 
 export { CaUpType, CaDownType, CaIntermediateType, CaCsrType, CaEnrollCommandTypeEnum, CaEnrollTypeEnum, CaRegisterTypeEnum, CaEnrollType, CaRegisterType, CaBasicType, CaCryptoType, CaSigningType } from './model/type/caService.type'
-export { ChaincodePackageType, ChaincodeApproveType, ChaincodeCommitType, ChaincodeDeployType, ChaincodeQueryType, ChaincodeInvokeType, ChaincodeInstallType } from './model/type/chaincode.type'
+export { ChaincodePackageType, ChaincodeApproveType, ChaincodeCommitType, ChaincodeQueryType, ChaincodeInvokeType, ChaincodeInstallType } from './model/type/chaincode.type'
 export { PolicyTypeEnum, PolicyStyleEnum, ChannelPolicyType, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ConfigtxlatorEnum, ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigUpdateType, ChannelConfigEnum, ChannelFetchBlockType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, EnvelopeTypeEnum, EnvelopeVerifyEnum as EnvelopeVerifyENum, DecodeEnvelopeReturnType } from './model/type/channel.type'
 export { ConfigEnvType, ConfigSetType } from './model/type/config.type'
 export { DiscoverPeersType, DiscoverChannelConfigType, DiscoverChaincodeEndorsersType, DiscoverPeersResultType, DiscoverChannelConfigResultType, DiscoverChaincodeEndorsersResultType } from './model/type/discover.type'

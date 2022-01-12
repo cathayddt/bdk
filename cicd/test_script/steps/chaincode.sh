@@ -3,14 +3,16 @@ bdk chaincode package -n fabcar -v 1 -p ./chaincode/fabcar/go
 
 # deploy
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer0'
-bdk chaincode deploy -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I -a --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0}
+bdk chaincode install -l ${CHAINCODE_LABEL}
+bdk chaincode approve -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0}
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer1'
 bdk chaincode install -l ${CHAINCODE_LABEL}
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer2'
 bdk chaincode install -l ${CHAINCODE_LABEL}
 
 export_env 'peer' ${PEER_ORG_NAME_ORG1} ${PEER_ORG_DOMAIN_ORG1} 'peer0'
-bdk chaincode deploy -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I -a --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0}
+bdk chaincode install -l ${CHAINCODE_LABEL}
+bdk chaincode approve -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0}
 
 export_env 'peer' ${PEER_ORG_NAME_ORG2} ${PEER_ORG_DOMAIN_ORG2} 'peer0'
 bdk chaincode install -l ${CHAINCODE_LABEL}

@@ -213,14 +213,16 @@ bdk chaincode package -n fabcar -v 1 -p ./chaincode/fabcar/go
 # export BDK_HOSTNAME='peer0'
 
 # Org1 的 peer0 安裝、同意 Chaincode
-bdk chaincode deploy -C test -l fabcar_1 -I -a --orderer orderer0.example.com:7050
+bdk chaincode install -l fabcar_1
+bdk chaincode approve -C test -l fabcar_1 -I --orderer orderer0.example.com:7050
 
 # export BDK_ORG_NAME='Org2'
 # export BDK_ORG_DOMAIN='org2.example.com'
 # export BDK_HOSTNAME='peer0'
 
 # Org2 的 peer0 安裝、同意 Chaincode
-bdk chaincode deploy -C test -l fabcar_1 -I -a --orderer orderer0.example.com:7050
+bdk chaincode install -l fabcar_1
+bdk chaincode approve -C test -l fabcar_1 -I --orderer orderer0.example.com:7050
 ```
 
 ### Step 3：Org1 的 peer1 安裝 Chaincode
@@ -245,7 +247,7 @@ bdk chaincode install -l fabcar_1
 # export BDK_ORG_DOMAIN='org1.example.com'
 # export BDK_HOSTNAME='peer0'
 
-bdk chaincode deploy -C test -l fabcar_1 -I -c --orderer orderer0.example.com:7050 --peer-addresses peer0.org1.example.com:7051 --peer-addresses peer0.org2.example.com:7151
+bdk chaincode commit -C test -l fabcar_1 -I --orderer orderer0.example.com:7050 --peer-addresses peer0.org1.example.com:7051 --peer-addresses peer0.org2.example.com:7151
 ```
 
 ### Step 5：Org1 初始化 Chaincode
@@ -513,7 +515,8 @@ bdk channel join -n test --orderer orderer0.example.com:7050
 # export BDK_HOSTNAME='peer0'
 
 # Org3 的 peer0 安裝、同意 Chaincode
-bdk chaincode deploy -C test -l fabcar_1 -I -a --orderer orderer0.example.com:7050
+bdk chaincode install -l fabcar_1
+bdk chaincode approve -C test -l fabcar_1 -I --orderer orderer0.example.com:7050
 
 # export BDK_ORG_NAME='Org3'
 # export BDK_ORG_DOMAIN='org3.example.com'

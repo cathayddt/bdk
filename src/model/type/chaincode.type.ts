@@ -52,26 +52,6 @@ export interface ChaincodeCommitType {
 
 /**
  * @requires channelId - [string] channel 的名稱
- * @requires label - [string] chaincode 的標籤名稱
- * @requires approve - [boolean] 是否只做到同意的步驟
- * @requires commit - [boolean] 是否只做到發布的步驟
- * @requires initRequired - [boolean] 是否需要初始化 chaincode
- * @requires orderer - [string] orderer 的 address 和 port
- * @requires peerAddresses - [string array] peer address 和 port 的 array
- */
-export interface ChaincodeDeployType {
-  channelId: string
-  chaincodeName: string
-  chaincodeVersion: number
-  approve: boolean
-  commit: boolean
-  initRequired: boolean
-  orderer: string
-  peerAddresses?: string[]
-}
-
-/**
- * @requires channelId - [string] channel 的名稱
  * @requires chaincodeName - [string] chaincode 的名稱
  * @requires chaincodeFunction - [string] chaincode function 的名稱
  * @requires args - [any array] chaincode function 需要的參數
