@@ -50,14 +50,21 @@ export interface ChaincodeInstallStepSavePackageIdType extends ChaincodeInstallT
  * @requires chaincodeName - [string] chaincode 的名稱
  * @requires chaincodeVersion - [number] chaincode 的版本號碼
  * @requires initRequired - [boolean] 使否需要初始化
- * @requires orderer - [string] orderer 的 address 和 port
- * @requires peerAddresses - [string array] peer address 和 port 的 array
  */
 export interface ChaincodeCommitType {
   channelId: string
   chaincodeName: string
   chaincodeVersion: number
   initRequired: boolean
+}
+
+export type ChaincodeCommitWithoutDiscoverType = ChaincodeApproveType & ({ orderer: string } | { peerAddresses: string[] })
+
+/**
+ * @requires orderer - [string] orderer 的 address 和 port
+ * @requires peerAddresses - [string array] peer address 和 port 的 array
+ */
+export interface ChaincodeCommitStepCommitOnInstanceType extends ChaincodeApproveType {
   orderer: string
   peerAddresses: string[]
 }

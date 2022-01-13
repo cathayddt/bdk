@@ -111,16 +111,16 @@ Description: 代表環境變數中 BDK_ORG_NAME 的 Peer org 同意 Chaincode
 
 Description: 代表環境變數中 BDK_ORG_NAME 的 Peer org 發布 Chaincode
 
-| Options               |  Type   | Description                            | Required | Default |
-| --------------------- | :-----: | -------------------------------------- | :------: | ------- |
-| --help                | boolean | Show help                              |          |
-| --version             | boolean | Show version number                    |          |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答         |          |
-| -C, --channel-id      | string  | 選擇欲發布 Chaincode 在的 Channel 名稱 |          |
-| -l, --chaincode-label | string  | Chaincode package 的標籤名稱           |          |
-| -I, --init-required   | boolean | Chaincode 是否需要初始化               |          |
-| --orderer             | string  | 選擇 Orderer 同意 Chaincode            |          |
-| --peer-addresses      |  array  | 需要簽名的 Peer address                |          |
+|        Options        |  Type   |                     Description                      | Required | Default |
+| --------------------- | :-----: | ---------------------------------------------------- | :------: | ------- |
+| --help                | boolean | Show help                                            |          |         |
+| --version             | boolean | Show version number                                  |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答                       |          |         |
+| -C, --channel-id      | string  | 選擇欲發布 Chaincode 在的 Channel 名稱               |          |         |
+| -l, --chaincode-label | string  | Chaincode package 的標籤名稱                         |          |         |
+| -I, --init-required   | boolean | Chaincode 是否需要初始化                             |          |         |
+| --orderer             | string  | 選擇 Orderer 同意 Chaincode (若未輸入則使用discover) |          |         |
+| --peer-addresses      |  array  | 需要簽名的 Peer address (若未輸入則使用discover)     |          |         |
 
 ### `bdk chaincode install`
 

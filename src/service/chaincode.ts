@@ -1,7 +1,7 @@
 import path from 'path'
 import FabricTools from '../instance/fabricTools'
 import FabricInstance from '../instance/fabricInstance'
-import { ChaincodeApproveStepApproveOnInstanceType, ChaincodeApproveType, ChaincodeApproveWithoutDiscoverType, ChaincodeCommitType, ChaincodeInstallStepSavePackageIdType, ChaincodeInstallType, ChaincodeInvokeType, ChaincodePackageType, ChaincodeQueryType } from '../model/type/chaincode.type'
+import { ChaincodeApproveStepApproveOnInstanceType, ChaincodeApproveType, ChaincodeCommitStepCommitOnInstanceType, ChaincodeApproveWithoutDiscoverType, ChaincodeCommitType, ChaincodeInstallStepSavePackageIdType, ChaincodeInstallType, ChaincodeInvokeType, ChaincodePackageType, ChaincodeQueryType, ChaincodeCommitWithoutDiscoverType } from '../model/type/chaincode.type'
 import { ParserType, AbstractService } from './Service.abstract'
 import { logger } from '../util/logger'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
@@ -14,6 +14,8 @@ interface ChaincodeParser extends ParserType {
   getChaincodePackageId: (result: DockerResultType, options: {chaincodeLabel: string}) => string
   getCommittedChaincode: (result: DockerResultType) => string[]
   approveStepDiscover: (result: DockerResultType) => string
+  commitStepDiscoverChannelConfig: (result: DockerResultType) => string
+  commitStepDiscoverPeers: (result: DockerResultType) => string[]
 }
 
 export default class Chaincode extends AbstractService {
@@ -24,6 +26,20 @@ export default class Chaincode extends AbstractService {
     getChaincodePackageId: (result, options: {chaincodeLabel: string}) => result.stdout.match(RegExp(`(?<=Package ID: )${options.chaincodeLabel}:.*(?=, Label: ${options.chaincodeLabel})`))?.[0] || '',
     getCommittedChaincode: (result) => result.stdout.match(/(?<=Name: ).*(?=, Version)/g) || [],
     approveStepDiscover: (result) => Discover.chooseOneRandomOrderer(Discover.parser.channelConfig(result)),
+    commitStepDiscoverChannelConfig: (result) => Discover.chooseOneRandomOrderer(Discover.parser.channelConfig(result)),
+    commitStepDiscoverPeers: (result) => {
+      const peerDiscoverResult = Discover.parser.peers(result)
+      const peerList: Map<string, string[]> = new Map()
+      peerDiscoverResult.forEach(peer => {
+        peerList.has(peer.MSPID) ? peerList.get(peer.MSPID)?.push(peer.Endpoint) : peerList.set(peer.MSPID, [peer.Endpoint])
+      })
+      const peers: string[] = []
+      Array.from(peerList.keys()).forEach(org => {
+        const peersOfOrg = peerList.get(org) || []
+        peers.push(randomFromArray(peersOfOrg))
+      })
+      return peers
+    },
   }
 
   /**
@@ -132,9 +148,53 @@ export default class Chaincode extends AbstractService {
   /**
    * @description 發布 chaincode
    */
-  public async commit (payload: ChaincodeCommitType): Promise<InfraRunnerResultType> {
-    logger.debug('Commit chaincode definition')
-    return await (new FabricInstance(this.config, this.infra)).commitChaincode(payload.channelId, payload.chaincodeName.replace('_', '-'), payload.chaincodeVersion, payload.initRequired, payload.orderer, payload.peerAddresses)
+  public async commit (payload: ChaincodeCommitType | ChaincodeCommitWithoutDiscoverType): Promise<InfraRunnerResultType> {
+    let orderer: string
+    let peerAddresses: string[]
+
+    if ('orderer' in payload) {
+      orderer = payload.orderer
+    } else {
+      const discoverChannelConfigResult = await this.commitSteps().discoverChannelConfig(payload)
+      if (!('stdout' in discoverChannelConfigResult)) {
+        logger.error('this service only for docker infra')
+        throw new Error('this service for docker infra')
+      }
+      orderer = Chaincode.parser.commitStepDiscoverChannelConfig(discoverChannelConfigResult)
+    }
+
+    if ('peerAddresses' in payload) {
+      peerAddresses = payload.peerAddresses
+    } else {
+      const discoverPeersResult = await this.commitSteps().discoverPeers(payload)
+      if (!('stdout' in discoverPeersResult)) {
+        logger.error('this service only for docker infra')
+        throw new Error('this service for docker infra')
+      }
+      peerAddresses = Chaincode.parser.commitStepDiscoverPeers(discoverPeersResult)
+    }
+
+    return await this.commitSteps().commitOnInstance({ ...payload, orderer, peerAddresses })
+  }
+
+  /**
+   * @ignore
+   */
+  public commitSteps () {
+    return {
+      discoverPeers: async (payload: ChaincodeCommitType): Promise<InfraRunnerResultType> => {
+        logger.debug('commit chaincode step 1 (discover peers)')
+        return await (new Discover(this.config)).peers({ channel: payload.channelId })
+      },
+      discoverChannelConfig: async (payload: ChaincodeCommitType): Promise<InfraRunnerResultType> => {
+        logger.debug('commit chaincode step 2 (discover channel config)')
+        return await (new Discover(this.config)).channelConfig({ channel: payload.channelId })
+      },
+      commitOnInstance: async (payload: ChaincodeCommitStepCommitOnInstanceType): Promise<InfraRunnerResultType> => {
+        logger.debug('commit chaincode step 3 (commit)')
+        return await (new FabricInstance(this.config, this.infra)).commitChaincode(payload.channelId, payload.chaincodeName.replace('_', '-'), payload.chaincodeVersion, payload.initRequired, payload.orderer, payload.peerAddresses)
+      },
+    }
   }
 
   /**

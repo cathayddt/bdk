@@ -17,7 +17,7 @@ bdk chaincode approve -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I # discover
 export_env 'peer' ${PEER_ORG_NAME_ORG2} ${PEER_ORG_DOMAIN_ORG2} 'peer0'
 bdk chaincode install -l ${CHAINCODE_LABEL}
 bdk chaincode approve -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I # discover
-bdk chaincode commit -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I --orderer ${ORDERER_ORG_URL_ORG0_ORDERER0} --peer-addresses ${PEER_ORG_URL_ORG0_PEER0} --peer-addresses ${PEER_ORG_URL_ORG1_PEER0} --peer-addresses ${PEER_ORG_URL_ORG2_PEER0}
+bdk chaincode commit -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I # discover
 
 # invoke init
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer0'
