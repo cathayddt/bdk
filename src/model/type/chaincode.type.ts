@@ -84,11 +84,18 @@ export interface ChaincodeQueryType {
 
 /**
  * @requires isInit - [boolean] 是否要初始化 chaincode
- * @requires orderer - [string] orderer 的 address 和 port
- * @requires peerAddresses - [string array] peer address 和 port 的 array
  */
 export interface ChaincodeInvokeType extends ChaincodeQueryType {
   isInit: boolean
+}
+
+export type ChaincodeInvokeWithoutDiscoverType = ChaincodeInvokeType & ({ orderer: string } | { peerAddresses: string[] })
+
+/**
+ * @requires orderer - [string] orderer 的 address 和 port
+ * @requires peerAddresses - [string array] peer address 和 port 的 array
+ */
+export interface ChaincodeInvokeStepInvokeOnInstanceType extends ChaincodeInvokeType {
   orderer: string
   peerAddresses: string[]
 }

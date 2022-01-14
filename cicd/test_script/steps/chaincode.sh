@@ -21,7 +21,7 @@ bdk chaincode commit -C ${CHANNEL_NAME} -l ${CHAINCODE_LABEL} -I # discover
 
 # invoke init
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer0'
-bdk chaincode invoke -C ${CHANNEL_NAME} -n ${CHAINCODE_NAME} -I -f InitLedger --orderer ${ORDERER_ORG_URL_ORG1_ORDERER0} --peer-addresses ${PEER_ORG_URL_ORG0_PEER0} --peer-addresses ${PEER_ORG_URL_ORG1_PEER0} --peer-addresses ${PEER_ORG_URL_ORG2_PEER0}
+bdk chaincode invoke -C ${CHANNEL_NAME} -n ${CHAINCODE_NAME} -I -f InitLedger # discover
 
 # [Org0] invoke & query
 export_env 'peer' ${PEER_ORG_NAME_ORG0} ${PEER_ORG_DOMAIN_ORG0} 'peer0'
