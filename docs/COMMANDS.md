@@ -97,47 +97,30 @@ Description: Enroll certificates.
 
 Description: 代表環境變數中 BDK_ORG_NAME 的 Peer org 同意 Chaincode
 
-| Options               |  Type   | Description                            | Required | Default |
-| --------------------- | :-----: | -------------------------------------- | :------: | ------- |
-| --help                | boolean | Show help                              |          |
-| --version             |         | boolean Show version number            |          |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答         |          |
-| -C, --channel-id      | string  | 選擇欲同意 Chaincode 在的 Channel 名稱 |          |
-| -l, --chaincode-label | string  | Chaincode package 的標籤名稱           |          |
-| -I, --init-required   | boolean | Chaincode 是否需要初始化               |          |
-| --orderer             | string  | 選擇 Orderer 同意 Chaincode            |          |
+|        Options        |  Type   |                      Description                      | Required | Default |
+| --------------------- | :-----: | ----------------------------------------------------- | :------: | ------- |
+| --help                | boolean | Show help                                             |          |         |
+| --version             |         | boolean Show version number                           |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答                        |          |         |
+| -C, --channel-id      | string  | 選擇欲同意 Chaincode 在的 Channel 名稱                |    V     |         |
+| -l, --chaincode-label | string  | Chaincode package 的標籤名稱                          |    V     |         |
+| -I, --init-required   | boolean | Chaincode 是否需要初始化                              |          |         |
+| --orderer             | string  | 選擇 Orderer 同意 Chaincode  (若未輸入則使用discover) |          |         |
 
 ### `bdk chaincode commit`
 
 Description: 代表環境變數中 BDK_ORG_NAME 的 Peer org 發布 Chaincode
 
-| Options               |  Type   | Description                            | Required | Default |
-| --------------------- | :-----: | -------------------------------------- | :------: | ------- |
-| --help                | boolean | Show help                              |          |
-| --version             | boolean | Show version number                    |          |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答         |          |
-| -C, --channel-id      | string  | 選擇欲發布 Chaincode 在的 Channel 名稱 |          |
-| -l, --chaincode-label | string  | Chaincode package 的標籤名稱           |          |
-| -I, --init-required   | boolean | Chaincode 是否需要初始化               |          |
-| --orderer             | string  | 選擇 Orderer 同意 Chaincode            |          |
-| --peer-addresses      |  array  | 需要簽名的 Peer address                |          |
-
-### `bdk chaincode deploy`
-
-Description: 部署 / 更新 Chaincode
-
-| Options               |  Type   | Description                            | Required | Default |
-| --------------------- | :-----: | -------------------------------------- | :------: | ------- |
-| --help                | boolean | Show help                              |          |
-| --version             | boolean | Show version number                    |          |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答         |          |
-| -C, --channel-id      | string  | 選擇欲部署 Chaincode 在的 Channel 名稱 |          |
-| -l, --chaincode-label | string  | Chaincode package 的標籤名稱           |          |
-| -a, --approve-only    | boolean | 是否只需要做到同意的步驟               |          |
-| -c, --commit-only     | boolean | 是否只需要做到部署的步驟               |          |
-| -I, --init-required   | boolean | Chaincode 是否需要初始化               |          |
-| --orderer             | string  | 選擇 Orderer 部署 Chaincode            |          |
-| --peer-addresses      |  array  | 需要簽名的 Peer address                |          |
+|        Options        |  Type   |                     Description                      | Required | Default |
+| --------------------- | :-----: | ---------------------------------------------------- | :------: | ------- |
+| --help                | boolean | Show help                                            |          |         |
+| --version             | boolean | Show version number                                  |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答                       |          |         |
+| -C, --channel-id      | string  | 選擇欲發布 Chaincode 在的 Channel 名稱               |          |         |
+| -l, --chaincode-label | string  | Chaincode package 的標籤名稱                         |          |         |
+| -I, --init-required   | boolean | Chaincode 是否需要初始化                             |          |         |
+| --orderer             | string  | 選擇 Orderer 同意 Chaincode (若未輸入則使用discover) |          |         |
+| --peer-addresses      |  array  | 需要簽名的 Peer address (若未輸入則使用discover)     |          |         |
 
 ### `bdk chaincode install`
 
@@ -154,18 +137,18 @@ Description: 安裝 Chaincode
 
 Description: 執行 Chaincode function
 
-| Options                  |  Type   | Description                            | Required | Default |
-| ------------------------ | :-----: | -------------------------------------- | :------: | ------- |
-| --help                   | boolean | Show help                              |          |
-| --version                | boolean | Show version number                    |          |
-| -i, --interactive        | boolean | 是否使用 Cathay BDK 互動式問答         |          |
-| -C, --channel-id         | string  | 選擇欲執行 Chaincode 在的 Channel 名稱 |          |
-| -n, --chaincode-name     | string  | 欲執行 Chaincode 的名稱                |          |
-| -I, --is-init            | boolean | 是否要初始化 Chaincode                 |          | false   |
-| -f, --chaincode-function | string  | 執行 Chaincode 的 function             |          |
-| -a, --args               |  array  | 執行 Chaincode 需要的參數              |          |
-| --orderer                | string  | 選擇 Orderer 執行 Chaincode            |          |
-| --peer-addresses         |  array  | 需要簽名的 Peer address                |          |
+|         Options          |  Type   |                     Description                      | Required | Default |
+| ------------------------ | :-----: | ---------------------------------------------------- | :------: | ------- |
+| --help                   | boolean | Show help                                            |          |         |
+| --version                | boolean | Show version number                                  |          |         |
+| -i, --interactive        | boolean | 是否使用 Cathay BDK 互動式問答                       |          |         |
+| -C, --channel-id         | string  | 選擇欲執行 Chaincode 在的 Channel 名稱               |          |         |
+| -n, --chaincode-name     | string  | 欲執行 Chaincode 的名稱                              |          |         |
+| -I, --is-init            | boolean | 是否要初始化 Chaincode                               |          | false   |
+| -f, --chaincode-function | string  | 執行 Chaincode 的 function                           |          |         |
+| -a, --args               |  array  | 執行 Chaincode 需要的參數                            |          |         |
+| --orderer                | string  | 選擇 Orderer 執行 Chaincode (若未輸入則使用discover) |          |         |
+| --peer-addresses         |  array  | 需要簽名的 Peer address (若未輸入則使用discover)     |          |         |
 
 ### `bdk chaincode package`
 

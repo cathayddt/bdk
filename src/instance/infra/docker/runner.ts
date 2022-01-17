@@ -1,6 +1,6 @@
 import fs from 'fs'
+import stream from 'stream'
 import YAML from 'js-yaml'
-import { WritableStream } from 'memory-streams'
 import { spawnSync } from 'child_process'
 import Dockerode from 'dockerode'
 import { logger } from '../../../util/logger'
@@ -52,19 +52,25 @@ export class Runner implements InfraRunner<DockerResultType> {
     logger.silly(`docker command: \ndocker run ${createOptions.HostConfig?.AutoRemove ? '--rm ' : ''} -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`)
     const startOptions: DockerStartOptionsType = payload.startOptions || {} as DockerStartOptionsType
     try {
-      const stdout = new WritableStream()
+      let stdout = ''
+      const stdoutStream = new stream.Writable({
+        write: function (chunk, encoding, callback) {
+          stdout += chunk.toString()
+          callback()
+        },
+      })
       const dockerRunResult = await this.dockerode.run(
         `${image}:${tag || 'latest'}`,
         commands,
-        stdout,
+        stdoutStream,
         createOptions,
         startOptions)
-      logger.silly(`run command output: \n${stdout.toString()}`)
+      logger.silly(`run command output: \n${stdout}`)
       logger.debug(`docker run\n  image: ${image}\n  commands: ${commands.join(' ')}`)
       if (dockerRunResult[0].StatusCode !== 0) {
-        throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.toString().split('\r\n').filter(x => x.match(/error/i))}`, stdout.toString())
+        throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i))}`, stdout)
       }
-      return { statusCode: dockerRunResult[0].StatusCode, stdout: stdout.toString() }
+      return { statusCode: dockerRunResult[0].StatusCode, stdout }
     } catch (e: any) {
       if (e instanceof FabricContainerError) { throw e }
       throw new DockerError(`[x] command [docker run]:${e.message}`)

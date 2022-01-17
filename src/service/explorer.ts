@@ -1,5 +1,5 @@
 import { logger } from '../util/logger'
-import { ExplorerChannelType, ExplorerUpdateForMyOrgType, ExplorerUpForMyOrgType } from '../model/type/explorer.type'
+import { ExplorerChannelType, ExplorerUpdateForMyOrgStepRestartType, ExplorerUpForMyOrgStepUpType, ExplorerUpForMyOrgType } from '../model/type/explorer.type'
 import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
 import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
 import Channel from './channel'
@@ -26,7 +26,7 @@ export default class Explorer extends AbstractService {
   }
 
   /** @ignore */
-  private createExplorerConfig (data: ExplorerUpForMyOrgType | ExplorerUpdateForMyOrgType) {
+  private createExplorerConfig (data: ExplorerUpForMyOrgStepUpType | ExplorerUpdateForMyOrgStepRestartType) {
     logger.debug(`Create file: ${this.config.networkName}.json`)
     const explorerConnectionProfileYaml = new ExplorerConnectionProfileYaml()
     explorerConnectionProfileYaml.setName(this.config.networkName)
@@ -88,7 +88,7 @@ export default class Explorer extends AbstractService {
         logger.debug('up explorer for my org step 1 (fetch joined channel)')
         return await (new Channel(this.config)).listJoinedChannel()
       },
-      up: async (payload: ExplorerUpForMyOrgType): Promise<InfraRunnerResultType> => {
+      up: async (payload: ExplorerUpForMyOrgStepUpType): Promise<InfraRunnerResultType> => {
         logger.debug('up explorer for my org step 2 (start explorer)')
         this.createExplorerConfig(payload)
         const dockerComposeYaml = new ExplorerDockerComposeYaml(this.config, payload.port)
@@ -121,9 +121,9 @@ export default class Explorer extends AbstractService {
         logger.debug('update explorer for my org step 1 (fetch joined channel)')
         return await (new Channel(this.config, this.infra)).listJoinedChannel()
       },
-      restart: async (payload: ExplorerUpdateForMyOrgType): Promise<InfraRunnerResultType> => {
+      restart: async (payload: ExplorerUpdateForMyOrgStepRestartType): Promise<InfraRunnerResultType> => {
         logger.debug('update explorer for my org step 2 (restart explorer)')
-        this.createExplorerConfig(payload.channels || {})
+        this.createExplorerConfig(payload)
         return await (new ExplorerInstance(this.config, this.infra)).restart()
       },
     }
