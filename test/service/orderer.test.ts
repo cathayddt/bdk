@@ -9,7 +9,7 @@ import Orderer from '../../src/service/orderer'
 import { NetworkCreateType, NetworkCreateOrdererOrgType } from '../../src/model/type/network.type'
 
 describe('Orderer service:', function () {
-  this.timeout(10000)
+  this.timeout(60000)
 
   let networkService: Network
   let networkCreateJson: NetworkCreateType
@@ -151,6 +151,8 @@ describe('Orderer service:', function () {
     })
   })
 
+  // TODO createOrdererOrgConfigtxJSON
+
   describe('createDockerCompose', () => {
     before(async () => {
       (new Config(config)).init()
@@ -183,7 +185,6 @@ describe('Orderer service:', function () {
     // TODO throw new ParamsError('genesisFileName is required')
   })
 
-  // TODO createOrdererOrgConfigtxJSON
   // TODO addOrgToChannel
   // TODO addOrgToChannelSteps
   // TODO addConsenterToChannel
