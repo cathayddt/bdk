@@ -1,4 +1,4 @@
-/* global describe, it, before, after */
+/* global describe, it, before, beforeEach, after */
 import fs from 'fs'
 import assert from 'assert'
 import Network from '../../src/service/network'
@@ -233,6 +233,10 @@ describe('Network service:', function () {
         assert.strictEqual(fs.existsSync(`${filePath}/connection-${peerOrg.name}.yaml`), true)
       })
     })
+
+    it.skip('should throw error when peerOrgs is undefined', () => {
+      // TODO
+    })
   })
 
   describe('createDockerCompose', () => {
@@ -272,6 +276,39 @@ describe('Network service:', function () {
           assert.strictEqual(fs.existsSync(`${dockerEnvPath}/peer-peer${index}.${peerOrg.domain}.env`), true)
         }
       })
+    })
+  })
+
+  describe('delete', () => {
+    beforeEach(() => {
+      (new Config(config)).init()
+      networkService = new Network(config)
+      networkService.createNetworkFolder()
+    })
+
+    after(() => {
+      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
+    })
+
+    it.skip('should shutdown docker container', async () => {
+      await networkService.cryptogen(networkCreateJson)
+      networkService.copyTLSCa(networkCreateJson)
+      await networkService.createGenesisBlock(networkCreateJson)
+      networkService.createConnectionProfile(networkCreateJson)
+      networkService.createDockerCompose(networkCreateJson)
+
+      // TODO start container
+
+      await networkService.delete(config.networkName)
+
+      assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}`), false)
+    })
+
+    it('should delete network folder in specified path', async () => {
+      await networkService.delete(config.networkName)
+
+      assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}`), false)
     })
   })
 })

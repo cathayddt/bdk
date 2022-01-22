@@ -32,7 +32,7 @@
     "init:autocomplete": "bdk completion > $HOME/.bash_bdk",
     "build:console": "ts-node src/console.ts",
     "start:dev": "NODE_ENV=development nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/console.ts",
-    "test": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk mocha --reporter spec --require ts-node/register ./test/**/*.test.ts --exit",
+    "test": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter spec --require ts-node/register ./test/**/*.test.ts --exit",
     "test:dev": "nodemon --watch 'test/**/*.test.ts' -e ts,tsx --exec npm run test",
     "test:nyan": "NODE_ENV=testing mocha --reporter nyan --require ts-node/register ./test/**/*.test.ts --exit",
     "test:coverage": "nyc npm run test",
