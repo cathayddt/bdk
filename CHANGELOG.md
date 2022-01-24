@@ -4,6 +4,14 @@
 
 All notable changes to BDK project will be documented here.
 
+[1.0.0]: https://github.com/cathayddt/bdk/releases/tag/v1.0.0
+
+[1.0.1]: https://github.com/cathayddt/bdk/releases/tag/v1.0.1
+
+[1.0.2]: https://github.com/cathayddt/bdk/releases/tag/v1.0.2
+
+[1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
+
 ## [1.0.3][1.0.3] - 2022-01-24
 
 ### new
@@ -61,8 +69,6 @@ All notable changes to BDK project will be documented here.
 ### new
 
 - 初始專案原始碼 (Initial project code)
-
-[1.0.0]: https://github.com/cathayddt/bdk/releases/tag/v1.0.0
 
 <!-- Template -->
 <!--
