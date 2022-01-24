@@ -4,6 +4,17 @@
 
 All notable changes to BDK project will be documented here.
 
+## [1.0.3][1.0.3] - 2022-01-24
+
+### new
+
+- Discover for `bdk chaincode approve`, `bdk chaincode commit`, and `bdk chaincode invoke` #48
+
+### fixed
+
+- ICA expiry time #41
+- approve and update don't use arrow function #45
+
 ## [1.0.2][1.0.2] - 2022-01-03
 
 ### new
