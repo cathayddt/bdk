@@ -21,7 +21,7 @@
 // import FabricTools from '../../src/instance/fabricTools'
 
 // describe('Chaincode service:', function () {
-//   this.timeout(600000)
+//   this.timeout(10000)
 //   const chaincodeLabel = 'fabcar_1'
 //   const packagePath = `${config.infraConfig.hostPath}/${config.networkName}/chaincode/${chaincodeLabel}.tar.gz`
 //   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })

@@ -9,7 +9,7 @@ import Peer from '../../src/service/peer'
 import { NetworkCreateType, NetworkCreatePeerOrgType } from '../../src/model/type/network.type'
 
 describe('Peer service:', function () {
-  this.timeout(60000)
+  this.timeout(10000)
 
   let networkService: Network
   let networkCreateJson: NetworkCreateType

@@ -8,7 +8,7 @@
 // import axios from 'axios'
 
 // describe('Test-network service:', function () {
-//   this.timeout(6000)
+//   this.timeout(10000)
 
 //   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
 //   const dockerdOption = { all: true }

@@ -3,7 +3,7 @@ import assert from 'assert'
 
 describe('hooks', function () {
   // this.slow(300000); // five minutes
-  // this.timeout(500);
+  // this.timeout(10000);
 
   before(function () {
     // runs once before the first test in this block
