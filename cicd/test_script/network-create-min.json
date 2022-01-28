@@ -1,0 +1,37 @@
+{
+  "ordererOrgs": [
+    {
+      "name": "Org0Orderer",
+      "domain": "org0orderer.bdk.example.com",
+      "enableNodeOUs": true,
+      "hostname": [
+        "orderer0"
+      ],
+      "ports": [
+        {
+          "port": 7050,
+          "isPublishPort": true,
+          "operationPort": 8443,
+          "isPublishOperationPort": true
+        }
+      ]
+    }
+  ],
+  "peerOrgs": [
+    {
+      "name": "Org0",
+      "domain": "org0.bdk.example.com",
+      "enableNodeOUs": true,
+      "peerCount": 1,
+      "userCount": 1,
+      "ports": [
+        {
+          "port": 7051,
+          "isPublishPort": true,
+          "operationPort": 9443,
+          "isPublishOperationPort": true
+        }
+      ]
+    }
+  ]
+}

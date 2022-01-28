@@ -3,24 +3,41 @@ import fs from 'fs'
 import assert from 'assert'
 import net from 'net'
 import Network from '../../src/service/network'
-import config from '../../src/config'
+import config, { Config as bdkConfig } from '../../src/config'
 import Config from '../../src/service/config'
 import Peer from '../../src/service/peer'
 import { NetworkCreateType, NetworkCreatePeerOrgType } from '../../src/model/type/network.type'
+import Orderer from '../../src/service/orderer'
+import Channel from '../../src/service/channel'
+import { PolicyTypeEnum } from '../../src/model/type/channel.type'
+import { OrgTypeEnum } from '../../src/model/type/config.type'
 
 describe('Peer service:', function () {
-  this.timeout(10000)
+  this.timeout(60000)
 
   let networkService: Network
   let networkCreateJson: NetworkCreateType
   let orgPeerCreateJson: NetworkCreatePeerOrgType[]
   let peerService: Peer
+  let ordererService: Orderer
+  let channelServiceOrg0: Channel
+  let peerServiceOrg0: Peer
 
   before(() => {
     networkService = new Network(config)
     peerService = new Peer(config)
-    networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create.json').toString())
+    ordererService = new Orderer(config)
+    networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create-min.json').toString())
     orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
+    const org0PeerConfig: bdkConfig = {
+      ...config,
+      orgType: OrgTypeEnum.PEER,
+      orgName: networkCreateJson.peerOrgs[0].name,
+      orgDomainName: networkCreateJson.peerOrgs[0].domain,
+      hostname: 'peer0',
+    }
+    channelServiceOrg0 = new Channel(org0PeerConfig)
+    peerServiceOrg0 = new Peer(org0PeerConfig)
   })
 
   describe('up & down', () => {
@@ -213,8 +230,62 @@ describe('Peer service:', function () {
     })
   })
 
-  // TODO addOrgToChannel
-  // TODO addOrgToChannelSteps
+  describe('addOrgToChannelSteps', () => {
+    const channelName = 'test-channel'
+    const channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+    before(async () => {
+      networkService.createNetworkFolder()
+      await networkService.cryptogen(networkCreateJson)
+      networkService.copyTLSCa(networkCreateJson)
+      await networkService.createGenesisBlock(networkCreateJson)
+      networkService.createDockerCompose(networkCreateJson)
+      await peerService.up({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
+      await ordererService.up({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
+      await channelServiceOrg0.create({
+        channelName,
+        orgNames: [networkCreateJson.peerOrgs[0].name],
+        channelAdminPolicy: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Admins' },
+        lifecycleEndorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
+        endorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
+        orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+      })
+      await channelServiceOrg0.join({
+        channelName,
+        orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+      })
+    })
+    describe('fetchChannelConfig', () => {
+      it('should fetch channel config from blockchain', async () => {
+        await peerServiceOrg0.addOrgToChannelSteps().fetchChannelConfig({
+          channelName,
+          orgName: orgPeerCreateJson[0].name,
+        })
+        assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_fetch.pb`), true)
+      })
+    })
+    describe('computeUpdateConfigTx', () => {
+      before(async () => {
+        await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
+        await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
+        await peerServiceOrg0.addOrgToChannelSteps().fetchChannelConfig({
+          channelName,
+          orgName: orgPeerCreateJson[0].name,
+        })
+      })
+      it('should compute config diff', async () => {
+        await peerServiceOrg0.addOrgToChannelSteps().computeUpdateConfigTx({
+          channelName,
+          orgName: orgPeerCreateJson[0].name,
+        })
+        assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_update_envelope.pb`), true)
+      })
+    })
+    after(async () => {
+      await peerService.down({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
+      await ordererService.down({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    })
+  })
   // TODO addOrgToSystemChannel
   // TODO addOrgToSystemChannelSteps
   // TODO getPeerAddressList
