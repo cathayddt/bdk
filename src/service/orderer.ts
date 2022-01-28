@@ -197,21 +197,17 @@ export default class Orderer extends AbstractService {
         logger.debug('add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
-        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
-
-        configBlock.channel_group.groups.Orderer.groups = {
-          ...configBlock.channel_group.groups.Orderer.groups,
-          [orgName]: newOrg,
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Orderer.groups = {
+            ...modifiedConfigBlock.channel_group.groups.Orderer.groups,
+            [orgName]: newOrg,
+          }
+          return modifiedConfigBlock
         }
 
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigComputeType = {
-          channelName,
-        }
-        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+        return await (new Channel(this.config, this.infra)).computeUpdateConfigTx(channelName, updateFunction)
       },
     }
   }
@@ -237,28 +233,24 @@ export default class Orderer extends AbstractService {
       },
       hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.debug('add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
-        const { orderer, channelName } = dto
+        const { channelName } = dto
 
         const consenters = JSON.parse(this.bdkFile.getOrdererOrgConsenter(dto.orgName))
         const index = consenters.findIndex((x: ConsenterType) => x.host.split('.')[0] === dto.hostname)
         const consenter = consenters[index]
 
-        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
-        configBlock.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters.push({
-          clientTlsCert: consenter.clientTlsCert,
-          host: consenter.host,
-          port: consenter.port,
-          serverTlsCert: consenter.serverTlsCert,
-        })
-
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          orderer,
-          channelName,
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters.push({
+            clientTlsCert: consenter.clientTlsCert,
+            host: consenter.host,
+            port: consenter.port,
+            serverTlsCert: consenter.serverTlsCert,
+          })
+          return modifiedConfigBlock
         }
-        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+
+        return await (new Channel(this.config, this.infra)).computeUpdateConfigTx(channelName, updateFunction)
       },
     }
   }

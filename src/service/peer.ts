@@ -199,22 +199,16 @@ export default class Peer extends AbstractService {
       computeUpdateConfigTx: async (dto: PeerAddOrgToChannelType) => {
         logger.debug('add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
-
-        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
-
-        configBlock.channel_group.groups.Application.groups = {
-          ...configBlock.channel_group.groups.Application.groups,
-          [orgName]: newOrg,
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Application.groups = {
+            ...modifiedConfigBlock.channel_group.groups.Application.groups,
+            [orgName]: newOrg,
+          }
+          return modifiedConfigBlock
         }
-
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigComputeType = {
-          channelName,
-        }
-        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+        return await (new Channel(this.config, this.infra)).computeUpdateConfigTx(channelName, updateFunction)
       },
     }
   }
@@ -240,21 +234,17 @@ export default class Peer extends AbstractService {
         logger.debug('add org to system channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
-        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
-
-        configBlock.channel_group.groups.Consortiums.groups.AllOrganizationsConsortium.groups = {
-          ...configBlock.channel_group.groups.Consortiums.groups.AllOrganizationsConsortium.groups,
-          [orgName]: newOrg,
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Consortiums.groups.AllOrganizationsConsortium.groups = {
+            ...modifiedConfigBlock.channel_group.groups.Consortiums.groups.AllOrganizationsConsortium.groups,
+            [orgName]: newOrg,
+          }
+          return modifiedConfigBlock
         }
 
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigComputeType = {
-          channelName,
-        }
-        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+        return await (new Channel(this.config, this.infra)).computeUpdateConfigTx(channelName, updateFunction)
       },
     }
   }
