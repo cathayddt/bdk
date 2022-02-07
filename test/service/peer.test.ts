@@ -2,6 +2,7 @@
 import fs from 'fs'
 import assert from 'assert'
 import net from 'net'
+import sinon from 'sinon'
 import Network from '../../src/service/network'
 import config, { Config as bdkConfig } from '../../src/config'
 import Config from '../../src/service/config'
@@ -239,6 +240,26 @@ describe('Peer service:', function () {
     })
   })
 
+  describe('addOrgToChannel', () => {
+    const channelName = 'test-channel'
+    it('should use addOrgToChannelSteps', async () => {
+      const addOrgToChannelStepsFetchChannelConfigStub = sinon.stub().resolves()
+      const addOrgToChannelStepsComputeUpdateConfigTxStub = sinon.stub().resolves()
+
+      const addOrgToChannelStepsStub = sinon.stub(Peer.prototype, 'addOrgToChannelSteps').callsFake(() => ({
+        fetchChannelConfig: addOrgToChannelStepsFetchChannelConfigStub,
+        computeUpdateConfigTx: addOrgToChannelStepsComputeUpdateConfigTxStub,
+      }))
+      await peerServiceOrg0.addOrgToChannel({
+        channelName,
+        orgName: orgPeerCreateJson[0].name,
+      })
+      assert.strictEqual(addOrgToChannelStepsFetchChannelConfigStub.called, true)
+      assert.strictEqual(addOrgToChannelStepsComputeUpdateConfigTxStub.called, true)
+      addOrgToChannelStepsStub.restore()
+    })
+  })
+
   describe('addOrgToChannelSteps', () => {
     const channelName = 'test-channel'
     const channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
@@ -293,6 +314,28 @@ describe('Peer service:', function () {
       await peerService.down({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
       await ordererService.down({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
       fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    })
+  })
+
+  describe('addOrgToSystemChannel', () => {
+    const channelName = 'system-channel'
+    it('should use addOrgToSystemChannelSteps', async () => {
+      const addOrgToSystemChannelStepsFetchChannelConfigStub = sinon.stub().resolves()
+      const addOrgToSystemChannelStepsComputeUpdateConfigTxStub = sinon.stub().resolves()
+
+      const addOrgToSystemChannelStepsStub = sinon.stub(Peer.prototype, 'addOrgToSystemChannelSteps').callsFake(() => ({
+        fetchChannelConfig: addOrgToSystemChannelStepsFetchChannelConfigStub,
+        computeUpdateConfigTx: addOrgToSystemChannelStepsComputeUpdateConfigTxStub,
+      }))
+
+      await peerServiceOrg0.addOrgToSystemChannel({
+        channelName,
+        orgName: orgPeerCreateJson[0].name,
+        orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+      })
+      assert.strictEqual(addOrgToSystemChannelStepsFetchChannelConfigStub.called, true)
+      assert.strictEqual(addOrgToSystemChannelStepsComputeUpdateConfigTxStub.called, true)
+      addOrgToSystemChannelStepsStub.restore()
     })
   })
 
