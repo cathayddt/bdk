@@ -180,7 +180,7 @@ export default class Orderer extends AbstractService {
     logger.debug(`Org Orderer Add Org: add ${dto.orgName} in ${dto.channelName}`)
 
     await this.addOrgToChannelSteps().fetchChannelConfig(dto)
-    await this.addOrgToChannelSteps().orgConfigComputeUpdateConfigTx(dto)
+    await this.addOrgToChannelSteps().computeUpdateConfigTx(dto)
   }
 
   /**
@@ -192,7 +192,7 @@ export default class Orderer extends AbstractService {
         logger.debug('add org to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
-      orgConfigComputeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
+      computeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
         logger.debug('add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
@@ -218,7 +218,7 @@ export default class Orderer extends AbstractService {
     logger.debug(`Org Orderer Add Consenter: add ${dto.hostname} of ${dto.orgName} in ${dto.channelName}`)
 
     await this.addConsenterToChannelSteps().fetchChannelConfig(dto)
-    await this.addConsenterToChannelSteps().hostnameComputeUpdateConfigTx(dto)
+    await this.addConsenterToChannelSteps().computeUpdateConfigTx(dto)
   }
 
   /**
@@ -230,7 +230,7 @@ export default class Orderer extends AbstractService {
         logger.debug('add consenter to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
-      hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
+      computeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.debug('add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
         const { channelName } = dto
 
