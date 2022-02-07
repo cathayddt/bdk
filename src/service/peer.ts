@@ -247,19 +247,4 @@ export default class Peer extends AbstractService {
       },
     }
   }
-
-  /**
-   * @description 取得 peer address 的列表
-   * @returns peer address 的列表
-   */
-  public getPeerAddressList (): string[] {
-    const peerList = this.bdkFile.getDockerComposeList().peer
-
-    return (() => {
-      return peerList.map((peer) => {
-        const peerDockerCompose = new PeerDockerComposeYaml(this.bdkFile.getDockerComposeYaml(peer, InstanceTypeEnum.peer))
-        return Object.values(peerDockerCompose.value.services).map(peerService => peerService.environment?.find(env => /CORE_PEER_ADDRESS=/.test(env))?.split('=')?.[1] || '').filter(x => x)[0]
-      })
-    })()
-  }
 }
