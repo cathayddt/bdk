@@ -1,5 +1,6 @@
 /* global describe, it, before, after, beforeEach, afterEach */
 import assert from 'assert'
+import { hello } from '../../src/service/hello'
 
 describe('hooks', function () {
   // this.slow(300000); // five minutes
@@ -21,17 +22,8 @@ describe('hooks', function () {
     // runs after each test in this block
   })
 
-  it('node good', function () {
-    assert.strictEqual(1, 1)
-  })
-
-  it('node', function () {
-    assert.notStrictEqual(1, 2)
-  })
-
-  it('retries', function () {
-    this.retries(10)
-
-    assert.strictEqual(1, 1)
+  it('Hello unittest', function () {
+    hello('Hello unittest')
+    assert.strictEqual(true, true)
   })
 })
