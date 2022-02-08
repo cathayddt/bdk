@@ -1,6 +1,6 @@
 import { diff, detailedDiff } from 'deep-object-diff'
 import { logger } from '../util/logger'
-import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelCreateChannelConfigComputeType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, DecodeEnvelopeReturnType, EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../model/type/channel.type'
+import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, DecodeEnvelopeReturnType, EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../model/type/channel.type'
 import { OrgTypeEnum } from '../config'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
@@ -92,36 +92,28 @@ export default class Channel extends AbstractService {
         return await this.fetchChannelConfig(channelName, signType)
       },
       computeUpdateConfigTx: async (dto: ChannelUpdateAnchorPeerType) => {
-        const { orderer, channelName, port } = dto
+        const { channelName, port } = dto
         const orgName = this.config.orgName
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
         logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - compute update`)
 
-        const configBlock = await this.getConfigBlock(channelName)
-
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
-        configBlock.channel_group.groups.Application.groups[orgName].values.AnchorPeers = {
-          mod_policy: 'Admin',
-          value: {
-            anchor_peers: [{
-              host,
-              port,
-            }],
-          },
-          version: '0',
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Application.groups[orgName].values.AnchorPeers = {
+            mod_policy: 'Admin',
+            value: {
+              anchor_peers: [{
+                host,
+                port,
+              }],
+            },
+            version: '0',
+          }
+          return modifiedConfigBlock
         }
 
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          orderer,
-          channelName,
-
-        }
-
-        await this.createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+        await this.computeUpdateConfigTx(channelName, updateFunction)
       },
       signConfigTx: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { orderer, channelName } = dto
@@ -296,37 +288,42 @@ export default class Channel extends AbstractService {
   }
 
   /** @ignore */
+  public async computeUpdateConfigTx (channelName: string, updateFunction: (oldConfig: any) => any) {
+    const { originalFileName, modifiedFileName, compareUpdatedConfigFileName, envelopeFileName } = Channel.channelConfigFileName(channelName)
+    const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
+    this.bdkFile.createChannelConfigJson(channelName, originalFileName, JSON.stringify(configBlock))
+    const modifiedConfigBlock = updateFunction(configBlock)
+    this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(modifiedConfigBlock))
+    await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.CONFIG, channelName, originalFileName, originalFileName)
+    await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.CONFIG, channelName, modifiedFileName, modifiedFileName)
+
+    await (new FabricTools(this.config, this.infra)).computeUpdateProto(channelName, originalFileName, modifiedFileName, compareUpdatedConfigFileName)
+
+    await (new FabricTools(this.config, this.infra)).decodeProto(ConfigtxlatorEnum.CONFIG_UPDATE, channelName, compareUpdatedConfigFileName, compareUpdatedConfigFileName)
+
+    const configUpdateJson = JSON.parse(this.bdkFile.getChannelConfigString(channelName, compareUpdatedConfigFileName))
+    const envelope = {
+      payload: {
+        header: {
+          channel_header: {
+            channel_id: channelName,
+            type: 2,
+          },
+        },
+        data: {
+          config_update: configUpdateJson,
+        },
+      },
+    }
+
+    this.bdkFile.createChannelConfigJson(channelName, envelopeFileName, JSON.stringify(envelope))
+
+    await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.ENVELOPE, channelName, envelopeFileName, envelopeFileName)
+  }
+
+  /** @ignore */
   public createChannelConfigSteps () {
     return {
-      computeUpdateConfigTx: async (data: ChannelCreateChannelConfigComputeType) => {
-        const { channelName } = data
-        const { originalFileName, modifiedFileName, compareUpdatedConfigFileName, envelopeFileName } = Channel.channelConfigFileName(channelName)
-        await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.CONFIG, channelName, originalFileName, originalFileName)
-        await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.CONFIG, channelName, modifiedFileName, modifiedFileName)
-
-        await (new FabricTools(this.config, this.infra)).computeUpdateProto(channelName, originalFileName, modifiedFileName, compareUpdatedConfigFileName)
-
-        await (new FabricTools(this.config, this.infra)).decodeProto(ConfigtxlatorEnum.CONFIG_UPDATE, channelName, compareUpdatedConfigFileName, compareUpdatedConfigFileName)
-
-        const configUpdateJson = JSON.parse(this.bdkFile.getChannelConfigString(channelName, compareUpdatedConfigFileName))
-        const envelope = {
-          payload: {
-            header: {
-              channel_header: {
-                channel_id: channelName,
-                type: 2,
-              },
-            },
-            data: {
-              config_update: configUpdateJson,
-            },
-          },
-        }
-
-        this.bdkFile.createChannelConfigJson(channelName, envelopeFileName, JSON.stringify(envelope))
-
-        await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.ENVELOPE, channelName, envelopeFileName, envelopeFileName)
-      },
       signConfigTx: async (data: ChannelCreateChannelConfigSignType): Promise<InfraRunnerResultType> => {
         const { channelName } = data
         const { envelopeFileName } = Channel.channelConfigFileName(channelName)

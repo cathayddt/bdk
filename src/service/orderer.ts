@@ -6,7 +6,6 @@ import OrdererInstance from '../instance/orderer'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import Channel from './channel'
-import { ChannelCreateChannelConfigComputeType, ChannelCreateChannelConfigUpdateType } from '../model/type/channel.type'
 import { OrdererAddType, ConsenterType, OrdererUpType, OrdererAddOrgToChannelType, OrdererAddConsenterToChannelType } from '../model/type/orderer.type'
 import { InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { OrgOrdererCreateType } from '../model/type/org.type'
@@ -181,7 +180,7 @@ export default class Orderer extends AbstractService {
     logger.debug(`Org Orderer Add Org: add ${dto.orgName} in ${dto.channelName}`)
 
     await this.addOrgToChannelSteps().fetchChannelConfig(dto)
-    await this.addOrgToChannelSteps().orgConfigComputeUpdateConfigTx(dto)
+    await this.addOrgToChannelSteps().computeUpdateConfigTx(dto)
   }
 
   /**
@@ -193,25 +192,21 @@ export default class Orderer extends AbstractService {
         logger.debug('add org to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
-      orgConfigComputeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
+      computeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
         logger.debug('add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
         const { channelName, orgName } = dto
 
-        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
         const newOrg = JSON.parse(this.bdkFile.getOrgConfigJson(orgName))
-
-        configBlock.channel_group.groups.Orderer.groups = {
-          ...configBlock.channel_group.groups.Orderer.groups,
-          [orgName]: newOrg,
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Orderer.groups = {
+            ...modifiedConfigBlock.channel_group.groups.Orderer.groups,
+            [orgName]: newOrg,
+          }
+          return modifiedConfigBlock
         }
 
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigComputeType = {
-          channelName,
-        }
-        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+        return await (new Channel(this.config, this.infra)).computeUpdateConfigTx(channelName, updateFunction)
       },
     }
   }
@@ -223,7 +218,7 @@ export default class Orderer extends AbstractService {
     logger.debug(`Org Orderer Add Consenter: add ${dto.hostname} of ${dto.orgName} in ${dto.channelName}`)
 
     await this.addConsenterToChannelSteps().fetchChannelConfig(dto)
-    await this.addConsenterToChannelSteps().hostnameComputeUpdateConfigTx(dto)
+    await this.addConsenterToChannelSteps().computeUpdateConfigTx(dto)
   }
 
   /**
@@ -235,30 +230,26 @@ export default class Orderer extends AbstractService {
         logger.debug('add consenter to channel step1 (fetchChannelConfig)')
         return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
       },
-      hostnameComputeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
+      computeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.debug('add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
-        const { orderer, channelName } = dto
+        const { channelName } = dto
 
         const consenters = JSON.parse(this.bdkFile.getOrdererOrgConsenter(dto.orgName))
         const index = consenters.findIndex((x: ConsenterType) => x.host.split('.')[0] === dto.hostname)
         const consenter = consenters[index]
 
-        const configBlock = await (new Channel(this.config, this.infra)).getConfigBlock(channelName)
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).originalFileName, JSON.stringify(configBlock))
-
-        configBlock.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters.push({
-          clientTlsCert: consenter.clientTlsCert,
-          host: consenter.host,
-          port: consenter.port,
-          serverTlsCert: consenter.serverTlsCert,
-        })
-
-        this.bdkFile.createChannelConfigJson(channelName, Channel.channelConfigFileName(channelName).modifiedFileName, JSON.stringify(configBlock))
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          orderer,
-          channelName,
+        const updateFunction = (configBlock: any) => {
+          const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+          modifiedConfigBlock.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters.push({
+            clientTlsCert: consenter.clientTlsCert,
+            host: consenter.host,
+            port: consenter.port,
+            serverTlsCert: consenter.serverTlsCert,
+          })
+          return modifiedConfigBlock
         }
-        return await (new Channel(this.config, this.infra)).createChannelConfigSteps().computeUpdateConfigTx(channelCreateChannelConfigUpdate)
+
+        return await (new Channel(this.config, this.infra)).computeUpdateConfigTx(channelName, updateFunction)
       },
     }
   }

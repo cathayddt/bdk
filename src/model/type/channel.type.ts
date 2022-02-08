@@ -97,10 +97,6 @@ export enum ConfigtxlatorEnum {
   ENVELOPE = 'common.Envelope',
 }
 
-export interface ChannelCreateChannelConfigComputeType {
-  channelName: string
-}
-
 export interface ChannelCreateChannelConfigSignType {
   channelName: string
 }
