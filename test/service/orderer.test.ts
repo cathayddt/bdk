@@ -176,8 +176,6 @@ describe('Orderer service:', function () {
     })
   })
 
-  // TODO createOrdererOrgConfigtxJSON
-
   describe('createDockerCompose', () => {
     before(async () => {
       (new Config(config)).init()
@@ -212,6 +210,7 @@ describe('Orderer service:', function () {
 
   describe('addOrgToChannel', () => {
     const channelName = 'test-channel'
+
     it('should use addOrgToChannelSteps', async () => {
       const addOrgToChannelStepsFetchChannelConfigStub = sinon.stub().resolves()
       const addOrgToChannelStepsComputeUpdateConfigTxStub = sinon.stub().resolves()
@@ -220,13 +219,16 @@ describe('Orderer service:', function () {
         fetchChannelConfig: addOrgToChannelStepsFetchChannelConfigStub,
         computeUpdateConfigTx: addOrgToChannelStepsComputeUpdateConfigTxStub,
       }))
+
       await ordererServiceOrg0Orderer.addOrgToChannel({
         channelName,
         orgName: orgOrdererCreateJson[0].name,
         orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
       })
+
       assert.strictEqual(addOrgToChannelStepsFetchChannelConfigStub.called, true)
       assert.strictEqual(addOrgToChannelStepsComputeUpdateConfigTxStub.called, true)
+
       addOrgToChannelStepsStub.restore()
     })
   })
@@ -234,6 +236,7 @@ describe('Orderer service:', function () {
   describe('addOrgToChannelSteps', () => {
     const channelName = 'test-channel'
     const channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+
     before(async () => {
       networkService.createNetworkFolder()
       await networkService.cryptogen(networkCreateJson)
@@ -255,6 +258,7 @@ describe('Orderer service:', function () {
         orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
       })
     })
+
     describe('fetchChannelConfig', () => {
       it('should fetch channel config from blockchain', async () => {
         await ordererServiceOrg0Orderer.addOrgToChannelSteps().fetchChannelConfig({
@@ -262,9 +266,11 @@ describe('Orderer service:', function () {
           orgName: orgOrdererCreateJson[0].name,
           orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
         })
+
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_fetch.pb`), true)
       })
     })
+
     describe('computeUpdateConfigTx', () => {
       before(async () => {
         await ordererService.cryptogen({ ordererOrgs: orgOrdererCreateJson, genesisFileName: 'new-genesis' })
@@ -275,15 +281,18 @@ describe('Orderer service:', function () {
           orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
         })
       })
+
       it('should compute config diff', async () => {
         await ordererServiceOrg0Orderer.addOrgToChannelSteps().computeUpdateConfigTx({
           channelName,
           orgName: orgOrdererCreateJson[0].name,
           orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
         })
+
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_update_envelope.pb`), true)
       })
     })
+
     after(async () => {
       await peerService.down({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
       await ordererService.down({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
@@ -293,6 +302,7 @@ describe('Orderer service:', function () {
 
   describe('addConsenterToChannel', () => {
     const channelName = 'test-channel'
+
     it('should use addConsenterToChannel', async () => {
       const addConsenterToChannelStepsFetchChannelConfigStub = sinon.stub().resolves()
       const addConsenterToChannelStepsComputeUpdateConfigTxStub = sinon.stub().resolves()
@@ -307,8 +317,10 @@ describe('Orderer service:', function () {
         orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
         hostname: orgOrdererCreateJson[0].hostname[0],
       })
+
       assert.strictEqual(addConsenterToChannelStepsFetchChannelConfigStub.called, true)
       assert.strictEqual(addConsenterToChannelStepsComputeUpdateConfigTxStub.called, true)
+
       addConsenterToChannelStepsStub.restore()
     })
   })
@@ -316,6 +328,7 @@ describe('Orderer service:', function () {
   describe('addConsenterToChannelSteps', () => {
     const channelName = 'test-channel'
     const channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+
     before(async () => {
       networkService.createNetworkFolder()
       await networkService.cryptogen(networkCreateJson)
@@ -337,6 +350,7 @@ describe('Orderer service:', function () {
         orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
       })
     })
+
     describe('fetchChannelConfig', () => {
       it('should fetch channel config from blockchain', async () => {
         await ordererServiceOrg0Orderer.addConsenterToChannelSteps().fetchChannelConfig({
@@ -345,9 +359,11 @@ describe('Orderer service:', function () {
           orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
           hostname: orgOrdererCreateJson[0].hostname[0],
         })
+
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_fetch.pb`), true)
       })
     })
+
     describe('computeUpdateConfigTx', () => {
       before(async () => {
         await ordererService.cryptogen({ ordererOrgs: orgOrdererCreateJson, genesisFileName: 'new-genesis' })
@@ -359,6 +375,7 @@ describe('Orderer service:', function () {
           hostname: orgOrdererCreateJson[0].hostname[0],
         })
       })
+
       it('should compute config diff', async () => {
         await ordererServiceOrg0Orderer.addConsenterToChannelSteps().computeUpdateConfigTx({
           channelName,
@@ -366,9 +383,11 @@ describe('Orderer service:', function () {
           orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
           hostname: orgOrdererCreateJson[0].hostname[0],
         })
+
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_update_envelope.pb`), true)
       })
     })
+
     after(async () => {
       await peerService.down({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
       await ordererService.down({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })

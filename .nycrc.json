@@ -9,6 +9,9 @@
   "include": [
     "src/service/**.ts"
   ],
+  "exclude":[
+    "src/service/Service.abstract.ts"
+  ],
   "reporter": [
     "text-summary",
     "text"
