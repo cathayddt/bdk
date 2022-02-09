@@ -3,70 +3,41 @@ import fs from 'fs'
 import assert from 'assert'
 import net from 'net'
 import sinon from 'sinon'
-import Network from '../../src/service/network'
-import config, { Config as bdkConfig } from '../../src/config'
-import Config from '../../src/service/config'
+import config from '../../src/config'
 import Peer from '../../src/service/peer'
-import { NetworkCreateType, NetworkCreatePeerOrgType } from '../../src/model/type/network.type'
-import Orderer from '../../src/service/orderer'
-import Channel from '../../src/service/channel'
-import { PolicyTypeEnum } from '../../src/model/type/channel.type'
-import { OrgTypeEnum } from '../../src/model/type/config.type'
+import { NetworkCreatePeerOrgType } from '../../src/model/type/network.type'
+import MinimumNetwork from '../util/minimumNetwork'
+import { resolve } from 'path'
 
 describe('Peer service:', function () {
   this.timeout(60000)
 
-  let networkService: Network
-  let networkCreateJson: NetworkCreateType
+  let minimumNetwork: MinimumNetwork
   let orgPeerCreateJson: NetworkCreatePeerOrgType[]
   let peerService: Peer
-  let ordererService: Orderer
-  let channelServiceOrg0: Channel
-  let peerServiceOrg0: Peer
+  let peerServiceOrg0Peer: Peer
   let peerServiceOrg0Orderer: Peer
 
   before(() => {
-    networkService = new Network(config)
+    minimumNetwork = new MinimumNetwork()
     peerService = new Peer(config)
-    ordererService = new Orderer(config)
-    networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create-min.json').toString())
+    peerServiceOrg0Peer = new Peer(minimumNetwork.org0PeerConfig)
+    peerServiceOrg0Orderer = new Peer(minimumNetwork.org0OrdererConfig)
     orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
-    const org0PeerConfig: bdkConfig = {
-      ...config,
-      orgType: OrgTypeEnum.PEER,
-      orgName: networkCreateJson.peerOrgs[0].name,
-      orgDomainName: networkCreateJson.peerOrgs[0].domain,
-      hostname: 'peer0',
-    }
-    channelServiceOrg0 = new Channel(org0PeerConfig)
-    peerServiceOrg0 = new Peer(org0PeerConfig)
-    const org0OrdererConfig: bdkConfig = {
-      ...config,
-      orgType: OrgTypeEnum.ORDERER,
-      orgName: networkCreateJson.ordererOrgs[0].name,
-      orgDomainName: networkCreateJson.ordererOrgs[0].domain,
-      hostname: networkCreateJson.ordererOrgs[0].hostname[0],
-    }
-    peerServiceOrg0Orderer = new Peer(org0OrdererConfig)
   })
 
   describe('up & down', () => {
     before(async () => {
-      (new Config(config)).init()
-      networkService.createNetworkFolder()
-      await networkService.cryptogen(networkCreateJson)
-      await networkService.createGenesisBlock(networkCreateJson)
-      networkService.createDockerCompose(networkCreateJson)
+      await minimumNetwork.createNetwork()
     })
 
-    after(() => {
-      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
     })
 
     it('should start and shutdown docker container', (done) => {
-      const peerHostname = `peer0.${networkCreateJson.peerOrgs[0].domain}`
-      const port = networkCreateJson.peerOrgs[0].ports ? networkCreateJson.peerOrgs[0].ports[0].port : 7051
+      const peerHostname = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`
+      const port = minimumNetwork.getPeer().port
 
       peerService.up({ peerHostname }).then(() => {
         const socket = net.connect(port, '127.0.0.1', () => {
@@ -91,13 +62,11 @@ describe('Peer service:', function () {
 
   describe('cryptogen', () => {
     before(() => {
-      (new Config(config)).init()
-      networkService.createNetworkFolder()
+      minimumNetwork.createNetworkFolder()
     })
 
-    after(() => {
-      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
     })
 
     it('should generate peer ca file when function cryptogen done', async () => {
@@ -156,14 +125,12 @@ describe('Peer service:', function () {
 
   describe('copyTLSCa', () => {
     before(async () => {
-      (new Config(config)).init()
-      networkService.createNetworkFolder()
+      minimumNetwork.createNetworkFolder()
       await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
     })
 
-    after(() => {
-      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
     })
 
     it('should copy the peer TLS CA to the specified folder under the blockchain network', () => {
@@ -181,15 +148,13 @@ describe('Peer service:', function () {
 
   describe('createConnectionProfileYaml', () => {
     before(async () => {
-      (new Config(config)).init()
-      networkService.createNetworkFolder()
+      minimumNetwork.createNetworkFolder()
       await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
       peerService.copyTLSCa({ peerOrgs: orgPeerCreateJson })
     })
 
-    after(() => {
-      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
     })
 
     it('should generate peer connection profile file', () => {
@@ -211,16 +176,14 @@ describe('Peer service:', function () {
 
   describe('createDockerCompose', () => {
     before(async () => {
-      (new Config(config)).init()
-      networkService.createNetworkFolder()
+      minimumNetwork.createNetworkFolder()
       await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
       peerService.copyTLSCa({ peerOrgs: orgPeerCreateJson })
       peerService.createConnectionProfileYaml({ peerOrgs: orgPeerCreateJson })
     })
 
-    after(() => {
-      fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
     })
 
     it('should generate orderer/peer docker-compose file', () => {
@@ -241,7 +204,6 @@ describe('Peer service:', function () {
   })
 
   describe('addOrgToChannel', () => {
-    const channelName = 'test-channel'
     it('should use addOrgToChannelSteps', async () => {
       const addOrgToChannelStepsFetchChannelConfigStub = sinon.stub().resolves()
       const addOrgToChannelStepsComputeUpdateConfigTxStub = sinon.stub().resolves()
@@ -250,8 +212,8 @@ describe('Peer service:', function () {
         fetchChannelConfig: addOrgToChannelStepsFetchChannelConfigStub,
         computeUpdateConfigTx: addOrgToChannelStepsComputeUpdateConfigTxStub,
       }))
-      await peerServiceOrg0.addOrgToChannel({
-        channelName,
+      await peerService.addOrgToChannel({
+        channelName: minimumNetwork.channelName,
         orgName: orgPeerCreateJson[0].name,
       })
       assert.strictEqual(addOrgToChannelStepsFetchChannelConfigStub.called, true)
@@ -261,32 +223,23 @@ describe('Peer service:', function () {
   })
 
   describe('addOrgToChannelSteps', () => {
-    const channelName = 'test-channel'
-    const channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+    let channelName: string
+    let channelPath: string
     before(async () => {
-      networkService.createNetworkFolder()
-      await networkService.cryptogen(networkCreateJson)
-      networkService.copyTLSCa(networkCreateJson)
-      await networkService.createGenesisBlock(networkCreateJson)
-      networkService.createDockerCompose(networkCreateJson)
-      await peerService.up({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
-      await ordererService.up({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
-      await channelServiceOrg0.create({
-        channelName,
-        orgNames: [networkCreateJson.peerOrgs[0].name],
-        channelAdminPolicy: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Admins' },
-        lifecycleEndorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
-        endorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
-        orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
-      })
-      await channelServiceOrg0.join({
-        channelName,
-        orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
-      })
+      channelName = minimumNetwork.channelName
+      channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
     })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
     describe('fetchChannelConfig', () => {
       it('should fetch channel config from blockchain', async () => {
-        await peerServiceOrg0.addOrgToChannelSteps().fetchChannelConfig({
+        await peerServiceOrg0Peer.addOrgToChannelSteps().fetchChannelConfig({
           channelName,
           orgName: orgPeerCreateJson[0].name,
         })
@@ -297,28 +250,22 @@ describe('Peer service:', function () {
       before(async () => {
         await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
         await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
-        await peerServiceOrg0.addOrgToChannelSteps().fetchChannelConfig({
+        await peerServiceOrg0Peer.addOrgToChannelSteps().fetchChannelConfig({
           channelName,
           orgName: orgPeerCreateJson[0].name,
         })
       })
       it('should compute config diff', async () => {
-        await peerServiceOrg0.addOrgToChannelSteps().computeUpdateConfigTx({
+        await peerServiceOrg0Peer.addOrgToChannelSteps().computeUpdateConfigTx({
           channelName,
           orgName: orgPeerCreateJson[0].name,
         })
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_update_envelope.pb`), true)
       })
     })
-    after(async () => {
-      await peerService.down({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
-      await ordererService.down({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
-    })
   })
 
   describe('addOrgToSystemChannel', () => {
-    const channelName = 'system-channel'
     it('should use addOrgToSystemChannelSteps', async () => {
       const addOrgToSystemChannelStepsFetchChannelConfigStub = sinon.stub().resolves()
       const addOrgToSystemChannelStepsComputeUpdateConfigTxStub = sinon.stub().resolves()
@@ -328,10 +275,10 @@ describe('Peer service:', function () {
         computeUpdateConfigTx: addOrgToSystemChannelStepsComputeUpdateConfigTxStub,
       }))
 
-      await peerServiceOrg0.addOrgToSystemChannel({
-        channelName,
+      await peerService.addOrgToSystemChannel({
+        channelName: minimumNetwork.channelName,
         orgName: orgPeerCreateJson[0].name,
-        orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+        orderer: minimumNetwork.getOrderer().fullUrl,
       })
       assert.strictEqual(addOrgToSystemChannelStepsFetchChannelConfigStub.called, true)
       assert.strictEqual(addOrgToSystemChannelStepsComputeUpdateConfigTxStub.called, true)
@@ -340,24 +287,25 @@ describe('Peer service:', function () {
   })
 
   describe('addOrgToSystemChannelSteps', () => {
-    const channelName = 'system-channel'
-    const channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+    let channelName: string
+    let channelPath: string
     before(async () => {
-      networkService.createNetworkFolder()
-      await networkService.cryptogen(networkCreateJson)
-      networkService.copyTLSCa(networkCreateJson)
-      await networkService.createGenesisBlock(networkCreateJson)
-      networkService.createDockerCompose(networkCreateJson)
-      await peerService.up({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
-      await ordererService.up({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      channelName = 'system-channel'
+      channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
     })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
     describe('fetchChannelConfig', () => {
       it('should fetch channel config from blockchain', async () => {
         await peerServiceOrg0Orderer.addOrgToSystemChannelSteps().fetchChannelConfig({
           channelName,
           orgName: orgPeerCreateJson[0].name,
-          orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+          orderer: minimumNetwork.getOrderer().fullUrl,
         })
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_fetch.pb`), true)
       })
@@ -369,24 +317,17 @@ describe('Peer service:', function () {
         await peerServiceOrg0Orderer.addOrgToSystemChannelSteps().fetchChannelConfig({
           channelName,
           orgName: orgPeerCreateJson[0].name,
-          orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+          orderer: minimumNetwork.getOrderer().fullUrl,
         })
       })
       it('should compute config diff', async () => {
         await peerServiceOrg0Orderer.addOrgToSystemChannelSteps().computeUpdateConfigTx({
           channelName,
           orgName: orgPeerCreateJson[0].name,
-          orderer: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}:${networkCreateJson.ordererOrgs[0]?.ports?.[0].port}`,
+          orderer: minimumNetwork.getOrderer().fullUrl,
         })
         assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_update_envelope.pb`), true)
       })
     })
-    after(async () => {
-      await peerService.down({ peerHostname: `peer0.${networkCreateJson.peerOrgs[0].domain}` })
-      await ordererService.down({ ordererHostname: `${networkCreateJson.ordererOrgs[0].hostname[0]}.${networkCreateJson.ordererOrgs[0].domain}` })
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
-    })
   })
-
-  // TODO getPeerAddressList
 })
