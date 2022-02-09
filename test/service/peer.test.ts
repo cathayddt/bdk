@@ -294,6 +294,7 @@ describe('Peer service:', function () {
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
+      await new Promise(resolve => setTimeout(resolve, 1000))
     })
 
     after(async () => {
