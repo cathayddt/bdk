@@ -71,7 +71,7 @@ export default class Channel extends AbstractService {
    */
   public async updateAnchorPeer (data: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> {
     logger.debug('Channel update anchor peer')
-    await this.updateAnchorPeerSteps().fetchChannelBlock(data)
+    await this.updateAnchorPeerSteps().fetchChannelConfig(data)
     await this.updateAnchorPeerSteps().computeUpdateConfigTx(data)
     await this.updateAnchorPeerSteps().signConfigTx(data)
     return this.updateAnchorPeerSteps().updateChannelConfig(data)
@@ -82,7 +82,7 @@ export default class Channel extends AbstractService {
    */
   public updateAnchorPeerSteps () {
     return {
-      fetchChannelBlock: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
+      fetchChannelConfig: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { channelName } = dto
         const signType = this.config.orgType
 
