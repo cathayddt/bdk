@@ -100,6 +100,11 @@ export default class MinimumNetwork {
       channelName: this.channelName,
       orderer: this.getOrderer().fullUrl,
     })
+    await this.channelServiceOrg0Peer.updateAnchorPeer({
+      channelName: this.channelName,
+      orderer: this.getOrderer().fullUrl,
+      port: this.getPeer().port,
+    })
   }
 
   public async deleteNetwork () {
