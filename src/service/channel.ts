@@ -33,8 +33,8 @@ export default class Channel extends AbstractService {
     return {
       createChannelArtifact: async (data: ChannelCreateType) => {
         this.generateChannelConfigtxYaml(data)
-        await (new FabricTools(this.config, this.infra)).convertChannelConfigtxToTx(data.channelName)
         this.bdkFile.createChannelArtifactFolder(data.channelName)
+        await (new FabricTools(this.config, this.infra)).convertChannelConfigtxToTx(data.channelName)
       },
       createOnInstance: async (data: ChannelCreateType): Promise<InfraRunnerResultType> => {
         return await (new FabricInstance(this.config, this.infra)).createChannel(data.channelName, data.orderer)
