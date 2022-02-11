@@ -1,11 +1,11 @@
-/* global describe, it, before, after */
+/* global describe, it, before, after, beforeEach, afterEach */
 import fs from 'fs'
 import assert from 'assert'
 import sinon from 'sinon'
 import config from '../../src/config'
 import { NetworkCreateType } from '../../src/model/type/network.type'
 import Channel from '../../src/service/channel'
-import { PolicyTypeEnum } from '../../src/model/type/channel.type'
+import { ChannelConfigEnum, PolicyTypeEnum } from '../../src/model/type/channel.type'
 import MinimumNetwork from '../util/minimumNetwork'
 import { DockerResultType } from '../../src/instance/infra/InfraRunner.interface'
 
@@ -33,7 +33,7 @@ describe('Channel service:', function () {
         createOnInstance: channelCreateStepCreateOnInstanceStub,
       }))
       await channelService.create({
-        channelName: 'test-channel',
+        channelName: minimumNetwork.channelName,
         orgNames: [networkCreateJson.peerOrgs[0].name],
         channelAdminPolicy: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Admins' },
         lifecycleEndorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
@@ -299,6 +299,116 @@ describe('Channel service:', function () {
           port: minimumNetwork.getPeer().port,
         })
         assert.deepStrictEqual((await channelServiceOrg0Peer.getChannelGroup(channelName)).anchorPeer, [`${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:${minimumNetwork.getPeer().port}`])
+      })
+    })
+  })
+  describe('fetchChannelBlock', () => {
+    describe('should use correct fetchChannelBlockSteps', () => {
+      let channelFetchChannelBlockStepFetchChannelNewestBlockStub: sinon.SinonStub
+      let channelFetchChannelBlockStepFetchChannelGenesisBlockStub: sinon.SinonStub
+      let channelFetchChannelBlockStepFetchChannelConfigStub: sinon.SinonStub
+      let channelUpdateAnchorPeerStepsStub: sinon.SinonStub
+
+      beforeEach(() => {
+        channelFetchChannelBlockStepFetchChannelNewestBlockStub = sinon.stub().resolves()
+        channelFetchChannelBlockStepFetchChannelGenesisBlockStub = sinon.stub().resolves()
+        channelFetchChannelBlockStepFetchChannelConfigStub = sinon.stub().resolves()
+        channelUpdateAnchorPeerStepsStub = sinon.stub(Channel.prototype, 'fetchChannelBlockSteps').callsFake(() => ({
+          fetchChannelNewestBlock: channelFetchChannelBlockStepFetchChannelNewestBlockStub,
+          fetchChannelGenesisBlock: channelFetchChannelBlockStepFetchChannelGenesisBlockStub,
+          fetchChannelConfig: channelFetchChannelBlockStepFetchChannelConfigStub,
+        }))
+      })
+
+      afterEach(() => {
+        channelUpdateAnchorPeerStepsStub.restore()
+      })
+
+      it('ChannelConfigEnum.LATEST_BLOCK', async () => {
+        await channelService.fetchChannelBlock({
+          channelName: minimumNetwork.channelName,
+          orderer: minimumNetwork.getOrderer().fullUrl,
+          configType: ChannelConfigEnum.LATEST_BLOCK,
+          outputFileName: 'latest-block',
+        })
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelNewestBlockStub.called, true)
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelGenesisBlockStub.called, false)
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelConfigStub.called, false)
+      })
+
+      it('ChannelConfigEnum.GENESIS_BLOCK', async () => {
+        await channelService.fetchChannelBlock({
+          channelName: minimumNetwork.channelName,
+          orderer: minimumNetwork.getOrderer().fullUrl,
+          configType: ChannelConfigEnum.GENESIS_BLOCK,
+          outputFileName: 'genesis-block',
+        })
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelNewestBlockStub.called, false)
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelGenesisBlockStub.called, true)
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelConfigStub.called, false)
+      })
+
+      it('ChannelConfigEnum.CONFIG_BLOCK', async () => {
+        await channelService.fetchChannelBlock({
+          channelName: minimumNetwork.channelName,
+          orderer: minimumNetwork.getOrderer().fullUrl,
+          configType: ChannelConfigEnum.CONFIG_BLOCK,
+          outputFileName: 'config-block',
+        })
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelNewestBlockStub.called, false)
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelGenesisBlockStub.called, false)
+        assert.deepStrictEqual(channelFetchChannelBlockStepFetchChannelConfigStub.called, true)
+      })
+    })
+  })
+
+  describe('fetchChannelBlockSteps', () => {
+    let channelName: string
+
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('fetchChannelNewestBlock', () => {
+      it('should fetch channel newest block', async () => {
+        await channelServiceOrg0Peer.fetchChannelBlockSteps().fetchChannelNewestBlock({
+          channelName,
+          orderer: minimumNetwork.getOrderer().fullUrl,
+          configType: ChannelConfigEnum.LATEST_BLOCK,
+          outputFileName: 'latest-block',
+        })
+        assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}/latest-block.block`), true)
+      })
+    })
+
+    describe('fetchChannelGenesisBlock', () => {
+      it('should fetch channel genesis block', async () => {
+        await channelServiceOrg0Peer.fetchChannelBlockSteps().fetchChannelGenesisBlock({
+          channelName,
+          orderer: minimumNetwork.getOrderer().fullUrl,
+          configType: ChannelConfigEnum.GENESIS_BLOCK,
+          outputFileName: 'genesis-block',
+        })
+        assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}/genesis-block.block`), true)
+      })
+    })
+
+    describe('fetchChannelConfig', () => {
+      it('should fetch channel config', async () => {
+        await channelServiceOrg0Peer.fetchChannelBlockSteps().fetchChannelConfig({
+          channelName,
+          orderer: minimumNetwork.getOrderer().fullUrl,
+          configType: ChannelConfigEnum.CONFIG_BLOCK,
+          outputFileName: 'config-block',
+        })
+        assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}/config-block.block`), true)
       })
     })
   })
