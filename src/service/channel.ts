@@ -34,7 +34,7 @@ export default class Channel extends AbstractService {
       createChannelArtifact: async (data: ChannelCreateType) => {
         this.generateChannelConfigtxYaml(data)
         await (new FabricTools(this.config, this.infra)).convertChannelConfigtxToTx(data.channelName)
-        this.bdkFile.createChannelArtifact(data.channelName)
+        this.bdkFile.createChannelArtifactFolder(data.channelName)
       },
       createOnInstance: async (data: ChannelCreateType): Promise<InfraRunnerResultType> => {
         return await (new FabricInstance(this.config, this.infra)).createChannel(data.channelName, data.orderer)
@@ -88,7 +88,7 @@ export default class Channel extends AbstractService {
 
         logger.debug(`Channel Update Anchor Peer: fetch ${ChannelConfigEnum.CONFIG_BLOCK} block in ${channelName}`)
 
-        this.bdkFile.createChannelArtifact(channelName)
+        this.bdkFile.createChannelArtifactFolder(channelName)
         return await this.fetchChannelConfig(channelName, signType)
       },
       computeUpdateConfigTx: async (dto: ChannelUpdateAnchorPeerType) => {
@@ -165,19 +165,19 @@ export default class Channel extends AbstractService {
       fetchChannelNewestBlock: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
         const { orderer, outputFileName, orgType, channelName } = data
 
-        this.bdkFile.createChannelArtifact(channelName)
+        this.bdkFile.createChannelArtifactFolder(channelName)
         return await (new FabricInstance(this.config, this.infra)).fetchChannelNewestBlock(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
       fetchChannelGenesisBlock: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
         const { orderer, outputFileName, channelName, orgType } = data
 
-        this.bdkFile.createChannelArtifact(channelName)
+        this.bdkFile.createChannelArtifactFolder(channelName)
         return await (new FabricInstance(this.config, this.infra)).fetchChannelBlock0(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
       fetchChannelConfig: async (data: ChannelFetchBlockType): Promise<InfraRunnerResultType> => {
         const { orderer, channelName, outputFileName, orgType } = data
 
-        this.bdkFile.createChannelArtifact(channelName)
+        this.bdkFile.createChannelArtifactFolder(channelName)
         return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, outputFileName, 'block', orderer, orgType || this.config.orgType)
       },
     }
