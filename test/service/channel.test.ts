@@ -3,11 +3,14 @@ import fs from 'fs'
 import assert from 'assert'
 import sinon from 'sinon'
 import config from '../../src/config'
-import { NetworkCreateType } from '../../src/model/type/network.type'
+import { NetworkCreateOrdererOrgType, NetworkCreatePeerOrgType, NetworkCreateType } from '../../src/model/type/network.type'
 import Channel from '../../src/service/channel'
 import { ChannelConfigEnum, PolicyTypeEnum } from '../../src/model/type/channel.type'
 import MinimumNetwork from '../util/minimumNetwork'
 import { DockerResultType } from '../../src/instance/infra/InfraRunner.interface'
+import Peer from '../../src/service/peer'
+import Orderer from '../../src/service/orderer'
+import Discover from '../../src/service/discover'
 
 describe('Channel service:', function () {
   this.timeout(60000)
@@ -16,12 +19,18 @@ describe('Channel service:', function () {
   let networkCreateJson: NetworkCreateType
   let channelService: Channel
   let channelServiceOrg0Peer: Channel
+  let channelServiceOrg0Orderer: Channel
+  let peerService: Peer
+  let ordererService: Orderer
 
   before(() => {
     minimumNetwork = new MinimumNetwork()
     networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create-min.json').toString())
     channelService = new Channel(config)
     channelServiceOrg0Peer = new Channel(minimumNetwork.org0PeerConfig)
+    channelServiceOrg0Orderer = new Channel(minimumNetwork.org0OrdererConfig)
+    peerService = new Peer(config)
+    ordererService = new Orderer(config)
   })
 
   describe('create', () => {
@@ -550,6 +559,72 @@ describe('Channel service:', function () {
       }
       await channelService.computeUpdateConfigTx(channelName, updateFunction)
       assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}/${channelName}_update_envelope.pb`), true)
+    })
+  })
+
+  describe('approve', () => {
+    let channelName: string
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      const orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
+      await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
+      await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
+      await channelServiceOrg0Peer.fetchChannelConfig(channelName)
+      await peerService.addOrgToChannelSteps().computeUpdateConfigTx({
+        channelName,
+        orgName: orgPeerCreateJson[0].name,
+      })
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should approve channel update envelope', async () => {
+      await channelServiceOrg0Peer.approve({
+        channelName,
+      })
+      const envelope = await channelService.decodeEnvelope({ channelName })
+      assert.deepStrictEqual(envelope.approved, [minimumNetwork.getPeer().orgName])
+    })
+  })
+
+  describe('update', () => {
+    let channelName: string
+    let orgPeerCreateJson: NetworkCreatePeerOrgType[]
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
+      await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
+      await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
+      await channelServiceOrg0Peer.fetchChannelConfig(channelName)
+      await peerService.addOrgToChannelSteps().computeUpdateConfigTx({
+        channelName,
+        orgName: orgPeerCreateJson[0].name,
+      })
+      await channelServiceOrg0Peer.approve({
+        channelName,
+      })
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should update channel by envelope', async () => {
+      await channelServiceOrg0Peer.update({
+        channelName,
+        orderer: minimumNetwork.getOrderer().fullUrl,
+      })
+      const discoverServiceOrg0Peer = new Discover(minimumNetwork.org0PeerConfig)
+      const channelConfigDiscoverResult = Discover.parser.channelConfig(await discoverServiceOrg0Peer.channelConfig({ channel: channelName }) as DockerResultType)
+      assert.deepStrictEqual(Object.keys(channelConfigDiscoverResult.msps).includes(orgPeerCreateJson[0].name), true)
     })
   })
 })
