@@ -518,4 +518,38 @@ describe('Channel service:', function () {
       })
     })
   })
+
+  describe('computeUpdateConfigTx', () => {
+    let channelName: string
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      await channelServiceOrg0Peer.fetchChannelConfig(channelName)
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should create updated configtx', async () => {
+      const updateFunction = (configBlock: any) => {
+        const modifiedConfigBlock = JSON.parse(JSON.stringify(configBlock))
+        modifiedConfigBlock.channel_group.groups.Application.groups[minimumNetwork.getPeer().orgName].values.AnchorPeers = {
+          mod_policy: 'Admin',
+          value: {
+            anchor_peers: [{
+              host: minimumNetwork.getPeer().hostname,
+              port: 8787,
+            }],
+          },
+          version: '0',
+        }
+        return modifiedConfigBlock
+      }
+      await channelService.computeUpdateConfigTx(channelName, updateFunction)
+      assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}/${channelName}_update_envelope.pb`), true)
+    })
+  })
 })
