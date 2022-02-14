@@ -193,7 +193,7 @@ export default class Peer extends AbstractService {
     return {
       fetchChannelConfig: async (dto: PeerAddOrgToChannelType): Promise<InfraRunnerResultType> => {
         logger.debug('add org to channel step1 (fetchChannelConfig)')
-        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType)
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName)
       },
       computeUpdateConfigTx: async (dto: PeerAddOrgToChannelType) => {
         logger.debug('add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
@@ -227,7 +227,7 @@ export default class Peer extends AbstractService {
     return {
       fetchChannelConfig: async (dto: PeerAddOrgToSystemChannelType): Promise<InfraRunnerResultType> => {
         logger.debug('add org to system channel step1 (fetchChannelConfig)')
-        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, dto.orderer)
       },
       computeUpdateConfigTx: async (dto: PeerAddOrgToSystemChannelType) => {
         logger.debug('add org to system channel step2 (orgConfigComputeUpdateAndSignConfigTx)')

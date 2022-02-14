@@ -190,7 +190,7 @@ export default class Orderer extends AbstractService {
     return {
       fetchChannelConfig: async (dto: OrdererAddOrgToChannelType): Promise<InfraRunnerResultType> => {
         logger.debug('add org to channel step1 (fetchChannelConfig)')
-        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, dto.orderer)
       },
       computeUpdateConfigTx: async (dto: OrdererAddOrgToChannelType) => {
         logger.debug('add org to channel step2 (orgConfigComputeUpdateAndSignConfigTx)')
@@ -228,7 +228,7 @@ export default class Orderer extends AbstractService {
     return {
       fetchChannelConfig: async (dto: OrdererAddConsenterToChannelType): Promise<InfraRunnerResultType> => {
         logger.debug('add consenter to channel step1 (fetchChannelConfig)')
-        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, this.config.orgType, dto.orderer)
+        return await (new Channel(this.config, this.infra)).fetchChannelConfig(dto.channelName, dto.orderer)
       },
       computeUpdateConfigTx: async (dto: OrdererAddConsenterToChannelType) => {
         logger.debug('add consenter to channel step2 (hostnameComputeUpdateAndSignConfigTx)')
