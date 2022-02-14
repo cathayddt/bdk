@@ -302,6 +302,7 @@ describe('Channel service:', function () {
       })
     })
   })
+
   describe('fetchChannelBlock', () => {
     describe('should use correct fetchChannelBlockSteps', () => {
       let channelFetchChannelBlockStepFetchChannelNewestBlockStub: sinon.SinonStub
@@ -409,6 +410,58 @@ describe('Channel service:', function () {
           outputFileName: 'config-block',
         })
         assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}/config-block.block`), true)
+      })
+    })
+  })
+
+  describe('getChannelGroup', () => {
+    it('should use getChannelGroupSteps', async () => {
+      const channelGetChannelGroupStepFetchChannelConfigStub = sinon.stub().resolves()
+      const channelGetChannelGroupStepDecodeFetchedChannelConfigStub = sinon.stub().resolves()
+      const channelGetChannelGroupStepsStub = sinon.stub(Channel.prototype, 'getChannelGroupSteps').callsFake(() => ({
+        fetchChannelConfig: channelGetChannelGroupStepFetchChannelConfigStub,
+        decodeFetchedChannelConfig: channelGetChannelGroupStepDecodeFetchedChannelConfigStub,
+      }))
+      await channelService.getChannelGroup(minimumNetwork.channelName)
+      assert.deepStrictEqual(channelGetChannelGroupStepFetchChannelConfigStub.called, true)
+      assert.deepStrictEqual(channelGetChannelGroupStepDecodeFetchedChannelConfigStub.called, true)
+      channelGetChannelGroupStepsStub.restore()
+    })
+  })
+
+  describe('getChannelGroupSteps', () => {
+    let channelName: string
+    let channelPath: string
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('fetchChannelConfig', () => {
+      it('should fetch channel config', async () => {
+        await channelServiceOrg0Peer.getChannelGroupSteps().fetchChannelConfig(channelName)
+        assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_fetch.pb`), true)
+      })
+    })
+
+    describe('decodeFetchedChannelConfig', () => {
+      before(async () => {
+        await channelServiceOrg0Peer.getChannelGroupSteps().fetchChannelConfig(channelName)
+      })
+
+      it('should decode fetched channel config', async () => {
+        const decodeResult = await channelServiceOrg0Peer.getChannelGroupSteps().decodeFetchedChannelConfig(channelName)
+        assert.deepStrictEqual(decodeResult, {
+          anchorPeer: [`${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:${minimumNetwork.getPeer().port}`],
+          orderer: [minimumNetwork.getOrderer().fullUrl],
+        })
       })
     })
   })
