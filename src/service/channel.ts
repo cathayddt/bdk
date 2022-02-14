@@ -1,6 +1,6 @@
 import { diff, detailedDiff } from 'deep-object-diff'
 import { logger } from '../util/logger'
-import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelCreateChannelConfigUpdateType, ChannelFetchBlockType, ChannelConfigEnum, ChannelCreateChannelConfigSignType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, DecodeEnvelopeReturnType, EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../model/type/channel.type'
+import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelFetchBlockType, ChannelConfigEnum, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, DecodeEnvelopeReturnType, EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../model/type/channel.type'
 import { OrgTypeEnum } from '../config'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
@@ -116,26 +116,25 @@ export default class Channel extends AbstractService {
         await this.computeUpdateConfigTx(channelName, updateFunction)
       },
       signConfigTx: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
-        const { orderer, channelName } = dto
+        const { channelName } = dto
         const host = `${this.config.hostname}.${this.config.orgDomainName}`
 
         logger.debug(`Channel Update Anchor Peer: add ${host} anchor peer config in ${channelName} - sign `)
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
-          orderer,
+        const channelCreateChannelConfigUpdate: ChannelApproveType = {
           channelName,
         }
 
-        return await this.createChannelConfigSteps().signConfigTx(channelCreateChannelConfigUpdate)
+        return await this.approve(channelCreateChannelConfigUpdate)
       },
       updateChannelConfig: async (data: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { orderer, channelName } = data
 
         logger.debug(`Channel Update Anchor Peer: update ${channelName} config`)
-        const channelCreateChannelConfigUpdate: ChannelCreateChannelConfigUpdateType = {
+        const channelCreateChannelConfigUpdate: ChannelUpdateType = {
           orderer,
           channelName,
         }
-        return await this.createChannelConfigSteps().updateChannelConfig(channelCreateChannelConfigUpdate)
+        return await this.update(channelCreateChannelConfigUpdate)
       },
     }
   }
@@ -321,35 +320,23 @@ export default class Channel extends AbstractService {
     await (new FabricTools(this.config, this.infra)).encodeProto(ConfigtxlatorEnum.ENVELOPE, channelName, envelopeFileName, envelopeFileName)
   }
 
-  /** @ignore */
-  public createChannelConfigSteps () {
-    return {
-      signConfigTx: async (data: ChannelCreateChannelConfigSignType): Promise<InfraRunnerResultType> => {
-        const { channelName } = data
-        const { envelopeFileName } = Channel.channelConfigFileName(channelName)
-
-        return await (new FabricInstance(this.config, this.infra)).signConfigTx(this.config.orgType, channelName, envelopeFileName)
-      },
-      updateChannelConfig: async (data: ChannelCreateChannelConfigUpdateType): Promise<InfraRunnerResultType> => {
-        const { orderer, channelName } = data
-        const { envelopeFileName } = Channel.channelConfigFileName(channelName)
-        return await (new FabricInstance(this.config, this.infra)).updateChannelConfig(this.config.orgType, orderer, channelName, envelopeFileName)
-      },
-    }
-  }
-
   /**
    * @description 簽署信封
    */
   public async approve (data: ChannelApproveType): Promise<InfraRunnerResultType> {
-    return await this.createChannelConfigSteps().signConfigTx(data)
+    const { channelName } = data
+    const { envelopeFileName } = Channel.channelConfigFileName(channelName)
+
+    return await (new FabricInstance(this.config, this.infra)).signConfigTx(this.config.orgType, channelName, envelopeFileName)
   }
 
   /**
    * @description 將信封的更動更新到鏈上
    */
   public async update (data: ChannelUpdateType): Promise<InfraRunnerResultType> {
-    return await this.createChannelConfigSteps().updateChannelConfig(data)
+    const { orderer, channelName } = data
+    const { envelopeFileName } = Channel.channelConfigFileName(channelName)
+    return await (new FabricInstance(this.config, this.infra)).updateChannelConfig(this.config.orgType, orderer, channelName, envelopeFileName)
   }
 
   /**
