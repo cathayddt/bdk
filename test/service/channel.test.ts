@@ -465,4 +465,45 @@ describe('Channel service:', function () {
       })
     })
   })
+
+  describe('fetchChannelConfig', () => {
+    let channelName: string
+    let channelPath: string
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should fetch channel config', async () => {
+      await channelServiceOrg0Peer.fetchChannelConfig(channelName)
+      assert.strictEqual(fs.existsSync(`${channelPath}/${channelName}_fetch.pb`), true)
+    })
+  })
+
+  describe('getConfigBlock', () => {
+    let channelName: string
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      await channelServiceOrg0Peer.fetchChannelConfig(channelName)
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should get channel config', async () => {
+      const result = await channelServiceOrg0Peer.getConfigBlock(channelName)
+      assert.deepStrictEqual(Object.keys(result).includes('channel_group'), true)
+    })
+  })
 })
