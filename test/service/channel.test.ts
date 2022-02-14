@@ -506,4 +506,16 @@ describe('Channel service:', function () {
       assert.deepStrictEqual(Object.keys(result).includes('channel_group'), true)
     })
   })
+
+  describe('channelConfigFileName', () => {
+    it('should get filename of channel config', () => {
+      assert.deepStrictEqual(Channel.channelConfigFileName('test-channel'), {
+        compareUpdatedConfigFileName: 'test-channel_config_update',
+        envelopeFileName: 'test-channel_update_envelope',
+        fetchFileName: 'test-channel_fetch',
+        modifiedFileName: 'test-channel_modified_config_block',
+        originalFileName: 'test-channel_config_block',
+      })
+    })
+  })
 })
