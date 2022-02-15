@@ -84,12 +84,11 @@ export default class Channel extends AbstractService {
     return {
       fetchChannelConfig: async (dto: ChannelUpdateAnchorPeerType): Promise<InfraRunnerResultType> => {
         const { channelName } = dto
-        const signType = this.config.orgType
 
         logger.debug(`Channel Update Anchor Peer: fetch ${ChannelConfigEnum.CONFIG_BLOCK} block in ${channelName}`)
 
         this.bdkFile.createChannelArtifactFolder(channelName)
-        return await this.fetchChannelConfig(channelName, signType)
+        return await this.fetchChannelConfig(channelName)
       },
       computeUpdateConfigTx: async (dto: ChannelUpdateAnchorPeerType) => {
         const { channelName, port } = dto
@@ -260,7 +259,7 @@ export default class Channel extends AbstractService {
   /**
    * fetch channel config to artifact/${channelName}/${channelName}_config_bock.pb
    */
-  public async fetchChannelConfig (channelName: string, signType: OrgTypeEnum, orderer?: string): Promise<InfraRunnerResultType> {
+  public async fetchChannelConfig (channelName: string, orderer?: string, signType: OrgTypeEnum = this.config.orgType): Promise<InfraRunnerResultType> {
     this.bdkFile.createChannelFolder(channelName)
     return await (new FabricInstance(this.config, this.infra)).fetchChannelConfig(channelName, Channel.channelConfigFileName(channelName).fetchFileName, 'pb', orderer, signType)
   }
