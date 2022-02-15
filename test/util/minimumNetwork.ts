@@ -80,6 +80,7 @@ export default class MinimumNetwork {
   public async peerAndOrdererUp () {
     await this.peerService.up({ peerHostname: `${this.getPeer().hostname}.${this.getPeer().orgDomain}` })
     await this.ordererService.up({ ordererHostname: `${this.getOrderer().hostname}.${this.getOrderer().orgDomain}` })
+    await new Promise(resolve => setTimeout(resolve, 1000))
   }
 
   // public async peerAndOrdererDown () {
@@ -105,6 +106,7 @@ export default class MinimumNetwork {
       orderer: this.getOrderer().fullUrl,
       port: this.getPeer().port,
     })
+    await new Promise(resolve => setTimeout(resolve, 3000))
   }
 
   public async deleteNetwork () {
