@@ -1,4 +1,4 @@
-/* global describe, it, before, after, beforeEach, afterEach */
+/* global describe, it, before, after */
 import fs from 'fs'
 import assert from 'assert'
 import net from 'net'
@@ -7,7 +7,6 @@ import config from '../../src/config'
 import Peer from '../../src/service/peer'
 import { NetworkCreatePeerOrgType } from '../../src/model/type/network.type'
 import MinimumNetwork from '../util/minimumNetwork'
-import { resolve } from 'path'
 
 describe('Peer service:', function () {
   this.timeout(60000)
