@@ -627,4 +627,183 @@ describe('Channel service:', function () {
       assert.deepStrictEqual(Object.keys(channelConfigDiscoverResult.msps).includes(orgPeerCreateJson[0].name), true)
     })
   })
+
+  describe('decodeEnvelope', () => {
+    let channelName: string
+    let orgPeerCreateJson: NetworkCreatePeerOrgType[]
+    let orgOrdererCreateJson: NetworkCreateOrdererOrgType[]
+
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      channelName = minimumNetwork.channelName
+      orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
+      orgOrdererCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-orderer-create.json').toString())
+      await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
+      await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
+      await ordererService.cryptogen({ ordererOrgs: orgOrdererCreateJson, genesisFileName: 'new-genesis' })
+      await ordererService.createOrdererOrgConfigtxJSON({ ordererOrgs: orgOrdererCreateJson, genesisFileName: 'new-genesis' })
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('system channel', () => {
+      beforeEach(async () => {
+        await channelServiceOrg0Orderer.fetchChannelConfig('system-channel', minimumNetwork.getOrderer().fullUrl)
+      })
+
+      describe('ADD_PEER_TO_SYSTEM_CHANNEL', () => {
+        beforeEach(async () => {
+          await peerService.addOrgToSystemChannelSteps().computeUpdateConfigTx({
+            channelName: 'system-channel',
+            orgName: orgPeerCreateJson[0].name,
+            orderer: minimumNetwork.getOrderer().fullUrl,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName: 'system-channel' }),
+            {
+              approved: [],
+              type: 'ADD_PEER_TO_SYSTEM_CHANNEL',
+              org: orgPeerCreateJson[0].name,
+              verify: 'VERIFIED',
+            })
+        })
+      })
+
+      describe('ADD_ORDERER_TO_CHANNEL', () => {
+        beforeEach(async () => {
+          await ordererService.addOrgToChannelSteps().computeUpdateConfigTx({
+            channelName: 'system-channel',
+            orgName: orgOrdererCreateJson[0].name,
+            orderer: minimumNetwork.getOrderer().fullUrl,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName: 'system-channel' }),
+            {
+              approved: [],
+              type: 'ADD_ORDERER_TO_CHANNEL',
+              org: orgOrdererCreateJson[0].name,
+              verify: 'VERIFIED',
+            })
+        })
+      })
+
+      describe('ADD_ORDERER_CONSENTER', () => {
+        beforeEach(async () => {
+          await ordererService.addConsenterToChannelSteps().computeUpdateConfigTx({
+            channelName: 'system-channel',
+            orgName: orgOrdererCreateJson[0].name,
+            hostname: orgOrdererCreateJson[0].hostname[0],
+            orderer: minimumNetwork.getOrderer().fullUrl,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName: 'system-channel' }),
+            {
+              approved: [],
+              consensus: [
+                minimumNetwork.getOrderer().fullUrl,
+                `${orgOrdererCreateJson[0].hostname[0]}.${orgOrdererCreateJson[0].domain}:${orgOrdererCreateJson[0].ports?.[0]?.port}`,
+              ],
+              type: 'ADD_ORDERER_CONSENTER',
+            })
+        })
+      })
+    })
+
+    describe('applicatieon channel', () => {
+      beforeEach(async () => {
+        await channelServiceOrg0Peer.fetchChannelConfig(minimumNetwork.channelName)
+      })
+
+      describe('UPDATE_ANCHOR_PEER', () => {
+        beforeEach(async () => {
+          await channelServiceOrg0Peer.updateAnchorPeerSteps().computeUpdateConfigTx({
+            channelName,
+            orderer: minimumNetwork.getOrderer().fullUrl,
+            port: 8787,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName }),
+            {
+              anchorPeers: [
+                `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:8787`,
+              ],
+              approved: [],
+              org: 'Org0',
+              type: 'UPDATE_ANCHOR_PEER',
+            },
+          )
+        })
+      })
+
+      describe('ADD_PEER_TO_APPLICATION_CHANNEL', () => {
+        beforeEach(async () => {
+          await peerService.addOrgToChannelSteps().computeUpdateConfigTx({
+            channelName,
+            orgName: orgPeerCreateJson[0].name,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName }),
+            {
+              approved: [],
+              org: orgPeerCreateJson[0].name,
+              type: 'ADD_PEER_TO_APPLICATION_CHANNEL',
+              verify: 'VERIFIED',
+            },
+          )
+        })
+      })
+
+      describe('ADD_ORDERER_TO_CHANNEL', () => {
+        beforeEach(async () => {
+          await ordererService.addOrgToChannelSteps().computeUpdateConfigTx({
+            channelName,
+            orgName: orgOrdererCreateJson[0].name,
+            orderer: minimumNetwork.getOrderer().fullUrl,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName }),
+            {
+              approved: [],
+              org: orgOrdererCreateJson[0].name,
+              type: 'ADD_ORDERER_TO_CHANNEL',
+              verify: 'VERIFIED',
+            },
+          )
+        })
+      })
+
+      describe('ADD_ORDERER_CONSENTER', () => {
+        beforeEach(async () => {
+          await ordererService.addConsenterToChannelSteps().computeUpdateConfigTx({
+            channelName,
+            orgName: orgOrdererCreateJson[0].name,
+            hostname: orgOrdererCreateJson[0].hostname[0],
+            orderer: minimumNetwork.getOrderer().fullUrl,
+          })
+        })
+        it('should decode envelope correctly', async () => {
+          assert.deepStrictEqual(await channelService.decodeEnvelope({ channelName }),
+            {
+              approved: [],
+              consensus: [
+                minimumNetwork.getOrderer().fullUrl,
+                `${orgOrdererCreateJson[0].hostname[0]}.${orgOrdererCreateJson[0].domain}:${orgOrdererCreateJson[0].ports?.[0]?.port}`,
+              ],
+              type: 'ADD_ORDERER_CONSENTER',
+            },
+          )
+        })
+      })
+    })
+  })
 })
