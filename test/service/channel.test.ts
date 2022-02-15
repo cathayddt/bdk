@@ -806,4 +806,21 @@ describe('Channel service:', function () {
       })
     })
   })
+
+  describe('listJoinedChannel', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should list joined channel', async () => {
+      const joinedChannel = Channel.parser.listJoinedChannel(await channelServiceOrg0Peer.listJoinedChannel() as DockerResultType)
+      assert.deepStrictEqual(joinedChannel, [minimumNetwork.channelName])
+    })
+  })
 })
