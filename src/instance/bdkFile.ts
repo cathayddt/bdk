@@ -223,7 +223,7 @@ export default class BdkFile {
     fs.writeFileSync(`${this.bdkPath}/config-yaml/${channelName}Channel/configtx.yaml`, configtxYaml.getYamlString())
   }
 
-  public createChannelArtifact (channelName: string) {
+  public createChannelArtifactFolder (channelName: string) {
     fs.mkdirSync(`${this.bdkPath}/channel-artifacts/${channelName}`, { recursive: true })
   }
 
