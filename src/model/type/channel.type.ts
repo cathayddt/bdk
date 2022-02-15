@@ -97,14 +97,6 @@ export enum ConfigtxlatorEnum {
   ENVELOPE = 'common.Envelope',
 }
 
-export interface ChannelCreateChannelConfigSignType {
-  channelName: string
-}
-
-export interface ChannelCreateChannelConfigUpdateType extends ChannelCreateChannelConfigSignType {
-  orderer: string
-}
-
 /**
  * @requires channelName - [string] channel 的名稱
  */
