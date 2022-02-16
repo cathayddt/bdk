@@ -622,6 +622,7 @@ describe('Channel service:', function () {
         channelName,
         orderer: minimumNetwork.getOrderer().fullUrl,
       })
+      await new Promise(resolve => setTimeout(resolve, 3000))
       const discoverServiceOrg0Peer = new Discover(minimumNetwork.org0PeerConfig)
       const channelConfigDiscoverResult = Discover.parser.channelConfig(await discoverServiceOrg0Peer.channelConfig({ channel: channelName }) as DockerResultType)
       assert.deepStrictEqual(Object.keys(channelConfigDiscoverResult.msps).includes(orgPeerCreateJson[0].name), true)
