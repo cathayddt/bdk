@@ -183,11 +183,116 @@ describe('Chaincode service:', function () {
     })
   })
 
-  // describe('commit', () => {
-  // })
+  describe('commit', () => {
+    it('should use commitSteps', async () => {
+      const chaincodeCommitStepDiscoverChannelConfigStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeCommitStepDiscoverPeersStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeCommitStepCommitOnInstanceStub = sinon.stub().resolves()
+      const chaincodeCommitStepsStub = sinon.stub(Chaincode.prototype, 'commitSteps').callsFake(() => ({
+        discoverChannelConfig: chaincodeCommitStepDiscoverChannelConfigStub,
+        discoverPeers: chaincodeCommitStepDiscoverPeersStub,
+        commitOnInstance: chaincodeCommitStepCommitOnInstanceStub,
+      }))
+      const chaincodeParserCommitStepDiscoverChannelConfigStub = sinon.stub(Chaincode.parser, 'commitStepDiscoverChannelConfig').returns('')
+      const chaincodeParserCommitStepDiscoverPeersStub = sinon.stub(Chaincode.parser, 'commitStepDiscoverPeers').returns([''])
+      await chaincodeService.commit({
+        channelId: minimumNetwork.chaincodeName,
+        chaincodeName: 'fabcar',
+        chaincodeVersion: 1,
+        initRequired: true,
+      })
+      assert.deepStrictEqual(chaincodeCommitStepDiscoverChannelConfigStub.called, true)
+      assert.deepStrictEqual(chaincodeCommitStepDiscoverPeersStub.called, true)
+      assert.deepStrictEqual(chaincodeCommitStepCommitOnInstanceStub.called, true)
+      chaincodeCommitStepsStub.restore()
+      chaincodeParserCommitStepDiscoverChannelConfigStub.restore()
+      chaincodeParserCommitStepDiscoverPeersStub.restore()
+    })
+  })
 
-  // describe('commitSteps', () => {
-  // })
+  describe('commitSteps', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await chaincodeService.package({
+        name: 'fabcar',
+        version: 1,
+        path: './chaincode/fabcar/go',
+      })
+      await chaincodeServiceOrg0Peer.install({
+        chaincodeLabel: 'fabcar_1',
+      })
+      await chaincodeServiceOrg0Peer.approve({
+        channelId: minimumNetwork.channelName,
+        chaincodeName: 'fabcar',
+        chaincodeVersion: 1,
+        initRequired: true,
+      })
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('discoverChannelConfig', () => {
+      it('should discover orderer for commit', async () => {
+        const result = await chaincodeServiceOrg0Peer.commitSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.commitStepDiscoverChannelConfig(result), minimumNetwork.getOrderer().fullUrl)
+      })
+    })
+
+    describe('discoverPeers', () => {
+      it('should discover peers for commit', async () => {
+        const result = await chaincodeServiceOrg0Peer.commitSteps().discoverPeers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.commitStepDiscoverPeers(result), [`${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:${minimumNetwork.getPeer().port}`])
+      })
+    })
+
+    describe('commitOnInstance', () => {
+      let orderer: string
+      let peerAddresses: string[]
+
+      before(async () => {
+        const discoverChanelConfigResult = await chaincodeServiceOrg0Peer.commitSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        orderer = Chaincode.parser.commitStepDiscoverChannelConfig(discoverChanelConfigResult)
+        const discoverPeersResult = await chaincodeServiceOrg0Peer.commitSteps().discoverPeers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        peerAddresses = Chaincode.parser.commitStepDiscoverPeers(discoverPeersResult)
+      })
+
+      it('should commit on instance', async () => {
+        const result = await chaincodeServiceOrg0Peer.commitSteps().commitOnInstance({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+          orderer,
+          peerAddresses,
+        }) as DockerResultType
+        assert.match(result.stdout, /txid \[.*\] committed with status \(VALID\) at peer0.org0.bdk.example.com:7051\r\n$/)
+      })
+    })
+  })
 
   // describe('getCommittedChaincode', () => {
   // })
