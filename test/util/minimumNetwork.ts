@@ -5,6 +5,7 @@ import { NetworkCreateType } from '../../src/model/type/network.type'
 import Peer from '../../src/service/peer'
 import Orderer from '../../src/service/orderer'
 import Channel from '../../src/service/channel'
+import Chaincode from '../../src/service/chaincode'
 import { OrgTypeEnum } from '../../src/model/type/config.type'
 import { PolicyTypeEnum } from '../../src/model/type/channel.type'
 
@@ -13,14 +14,17 @@ export default class MinimumNetwork {
   public org0PeerConfig: Config
   public org0OrdererConfig: Config
   public channelName: string
+  public chaincodeName: string
   private networkService: Network
   private peerService: Peer
   private ordererService: Orderer
   private channelServiceOrg0Peer: Channel
+  private chaincodeServiceOrg0Peer: Chaincode
 
   constructor () {
     this.networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create-min.json').toString())
     this.channelName = 'test-channel'
+    this.chaincodeName = 'fabcar'
     this.org0PeerConfig = {
       ...config,
       orgType: OrgTypeEnum.PEER,
@@ -39,6 +43,7 @@ export default class MinimumNetwork {
     this.peerService = new Peer(config)
     this.ordererService = new Orderer(config)
     this.channelServiceOrg0Peer = new Channel(this.org0PeerConfig)
+    this.chaincodeServiceOrg0Peer = new Chaincode(this.org0PeerConfig)
   }
 
   public getPeer (orgIndex: number = 0, peerIndex: number = 0) {
@@ -107,6 +112,36 @@ export default class MinimumNetwork {
       port: this.getPeer().port,
     })
     await new Promise(resolve => setTimeout(resolve, 3000))
+  }
+
+  public async deployChaincode () {
+    await this.chaincodeServiceOrg0Peer.package({
+      name: 'fabcar',
+      version: 1,
+      path: './chaincode/fabcar/go',
+    })
+    await this.chaincodeServiceOrg0Peer.install({
+      chaincodeLabel: `${this.chaincodeName}_1`,
+    })
+    await this.chaincodeServiceOrg0Peer.approve({
+      channelId: this.channelName,
+      chaincodeName: this.chaincodeName,
+      chaincodeVersion: 1,
+      initRequired: true,
+    })
+    await this.chaincodeServiceOrg0Peer.commit({
+      channelId: this.channelName,
+      chaincodeName: this.chaincodeName,
+      chaincodeVersion: 1,
+      initRequired: true,
+    })
+    await this.chaincodeServiceOrg0Peer.invoke({
+      channelId: this.channelName,
+      chaincodeName: this.chaincodeName,
+      chaincodeFunction: 'InitLedger',
+      args: [],
+      isInit: true,
+    })
   }
 
   public async deleteNetwork () {
