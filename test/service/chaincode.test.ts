@@ -4,6 +4,8 @@ import assert from 'assert'
 import config from '../../src/config'
 import Chaincode from '../../src/service/chaincode'
 import MinimumNetwork from '../util/minimumNetwork'
+import sinon from 'sinon'
+import { DockerResultType } from '../../src/instance/infra/InfraRunner.interface'
 
 describe('Chaincode service:', function () {
   this.timeout(60000)
@@ -38,11 +40,66 @@ describe('Chaincode service:', function () {
   // describe('query', () => {
   // })
 
-  // describe('install', () => {
-  // })
+  describe('install', () => {
+    it('should use installSteps', async () => {
+      const chaincodeInstallStepInstallToPeerStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeInstallStepSavePackageIdStub = sinon.stub().returns(undefined)
+      const chaincodeInstallStepsStub = sinon.stub(Chaincode.prototype, 'installSteps').callsFake(() => ({
+        installToPeer: chaincodeInstallStepInstallToPeerStub,
+        savePackageId: chaincodeInstallStepSavePackageIdStub,
+      }))
+      await chaincodeService.install({
+        chaincodeLabel: 'fabcar_1',
+      })
+      assert.deepStrictEqual(chaincodeInstallStepInstallToPeerStub.called, true)
+      assert.deepStrictEqual(chaincodeInstallStepSavePackageIdStub.called, true)
+      chaincodeInstallStepsStub.restore()
+    })
+  })
 
-  // describe('installSteps', () => {
-  // })
+  describe('installSteps', () => {
+    beforeEach(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await chaincodeService.package({
+        name: 'fabcar',
+        version: 1,
+        path: './chaincode/fabcar/go',
+      })
+    })
+
+    afterEach(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('installToPeer', () => {
+      it('should install chaincode to Peer', async () => {
+        await chaincodeServiceOrg0Peer.installSteps().installToPeer({
+          chaincodeLabel: 'fabcar_1',
+        })
+        assert.match(Chaincode.parser.getChaincodePackageId(await chaincodeServiceOrg0Peer.getChaincodePackageId() as DockerResultType, { chaincodeLabel: 'fabcar_1' }), /^fabcar_1:.*$/)
+      })
+    })
+
+    describe('savePackageId', () => {
+      let packageId: string
+      beforeEach(async () => {
+        const installReslult = await chaincodeServiceOrg0Peer.installSteps().installToPeer({
+          chaincodeLabel: 'fabcar_1',
+        }) as DockerResultType
+        packageId = Chaincode.parser.installToPeer(installReslult, { chaincodeLabel: 'fabcar_1' })
+      })
+
+      it('should save package id', () => {
+        chaincodeServiceOrg0Peer.installSteps().savePackageId({
+          chaincodeLabel: 'fabcar_1',
+          packageId,
+        })
+        assert.deepStrictEqual(fs.readFileSync(`${config.infraConfig.bdkPath}/${config.networkName}/chaincode/package-id/fabcar_1`).toString(), packageId)
+      })
+    })
+  })
 
   // describe('getChaincodePackageId', () => {
   // })
