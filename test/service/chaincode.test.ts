@@ -221,8 +221,23 @@ describe('Chaincode service:', function () {
     })
   })
 
-  // describe('getChaincodePackageId', () => {
-  // })
+  describe('getChaincodePackageId', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should get chaincode package id', async () => {
+      const result = await chaincodeServiceOrg0Peer.getChaincodePackageId() as DockerResultType
+      assert.match(Chaincode.parser.getChaincodePackageId(result, { chaincodeLabel: `${minimumNetwork.chaincodeName}_1` }), RegExp(`^${minimumNetwork.chaincodeName}_1:\\w{64}$`))
+    })
+  })
 
   describe('approve', () => {
     it('should use approveSteps', async () => {
@@ -414,6 +429,21 @@ describe('Chaincode service:', function () {
     })
   })
 
-  // describe('getCommittedChaincode', () => {
-  // })
+  describe('getCommittedChaincode', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should get all committed chaincode', async () => {
+      const result = await chaincodeServiceOrg0Peer.getCommittedChaincode(minimumNetwork.channelName) as DockerResultType
+      assert.deepStrictEqual(Chaincode.parser.getCommittedChaincode(result), [minimumNetwork.chaincodeName])
+    })
+  })
 })
