@@ -31,14 +31,134 @@ describe('Chaincode service:', function () {
     })
   })
 
-  // describe('invoke', () => {
-  // })
+  describe('invoke', () => {
+    it('should use invokeSteps', async () => {
+      const chaincodeInvokeStepDiscoverEndorsersStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeInvokeStepDiscoverChannelConfigStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeInvokeStepInvokeOnInstanceStub = sinon.stub().resolves()
+      const chaincodeInvokeStepsStub = sinon.stub(Chaincode.prototype, 'invokeSteps').callsFake(() => ({
+        discoverEndorsers: chaincodeInvokeStepDiscoverEndorsersStub,
+        discoverChannelConfig: chaincodeInvokeStepDiscoverChannelConfigStub,
+        invokeOnInstance: chaincodeInvokeStepInvokeOnInstanceStub,
+      }))
+      const chaincodeParserInvokeStepDiscoverEndorsersStub = sinon.stub(Chaincode.parser, 'invokeStepDiscoverEndorsers').returns([''])
+      const chaincodeParserInvokeStepDiscoverChannelConfigStub = sinon.stub(Chaincode.parser, 'invokeStepDiscoverChannelConfig').returns('')
+      await chaincodeService.invoke({
+        channelId: minimumNetwork.chaincodeName,
+        chaincodeName: 'fabcar',
+        chaincodeFunction: 'CreateCar',
+        args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+        isInit: false,
+      })
+      assert.deepStrictEqual(chaincodeInvokeStepDiscoverEndorsersStub.called, true)
+      assert.deepStrictEqual(chaincodeInvokeStepDiscoverChannelConfigStub.called, true)
+      assert.deepStrictEqual(chaincodeInvokeStepInvokeOnInstanceStub.called, true)
+      chaincodeInvokeStepsStub.restore()
+      chaincodeParserInvokeStepDiscoverEndorsersStub.restore()
+      chaincodeParserInvokeStepDiscoverChannelConfigStub.restore()
+    })
+  })
 
-  // describe('invokeSteps', () => {
-  // })
+  describe('invokeSteps', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
 
-  // describe('query', () => {
-  // })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('discoverEndorsers', () => {
+      it('should discover endorsers', async () => {
+        const result = await chaincodeServiceOrg0Peer.invokeSteps().discoverEndorsers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.invokeStepDiscoverEndorsers(result), [`${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:${minimumNetwork.getPeer().port}`])
+      })
+    })
+
+    describe('discoverChannelConfig', () => {
+      it('should discover channel config', async () => {
+        const result = await chaincodeServiceOrg0Peer.invokeSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.invokeStepDiscoverChannelConfig(result), minimumNetwork.getOrderer().fullUrl)
+      })
+    })
+
+    describe('invokeOnInstance', () => {
+      let orderer: string
+      let peerAddresses: string[]
+
+      before(async () => {
+        const discoverEndorsersResult = await chaincodeServiceOrg0Peer.invokeSteps().discoverEndorsers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        peerAddresses = Chaincode.parser.invokeStepDiscoverEndorsers(discoverEndorsersResult)
+        const discoverChannelConfigResult = await chaincodeServiceOrg0Peer.invokeSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        orderer = Chaincode.parser.invokeStepDiscoverChannelConfig(discoverChannelConfigResult)
+      })
+
+      it('should invoke on instance', async () => {
+        const result = await chaincodeServiceOrg0Peer.invokeSteps().invokeOnInstance({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+          orderer,
+          peerAddresses,
+        }) as DockerResultType
+        assert.match(result.stdout, /txid \[.*\] committed with status \(VALID\) at peer0.org0.bdk.example.com:7051/)
+        assert.match(result.stdout, /Chaincode invoke successful. result: status:200/)
+        assert.deepStrictEqual(Chaincode.parser.invoke(result), {})
+      })
+    })
+  })
+
+  describe('query', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should query chaincode', async () => {
+      const result = await chaincodeServiceOrg0Peer.query({
+        channelId: minimumNetwork.channelName,
+        chaincodeName: minimumNetwork.chaincodeName,
+        chaincodeFunction: 'queryAllCars',
+        args: [],
+      }) as DockerResultType
+      assert.deepStrictEqual(Chaincode.parser.query(result), [{ Key: 'CAR0', Record: { make: 'Toyota', model: 'Prius', colour: 'blue', owner: 'Tomoko' } }, { Key: 'CAR1', Record: { make: 'Ford', model: 'Mustang', colour: 'red', owner: 'Brad' } }, { Key: 'CAR2', Record: { make: 'Hyundai', model: 'Tucson', colour: 'green', owner: 'Jin Soo' } }, { Key: 'CAR3', Record: { make: 'Volkswagen', model: 'Passat', colour: 'yellow', owner: 'Max' } }, { Key: 'CAR4', Record: { make: 'Tesla', model: 'S', colour: 'black', owner: 'Adriana' } }, { Key: 'CAR5', Record: { make: 'Peugeot', model: '205', colour: 'purple', owner: 'Michel' } }, { Key: 'CAR6', Record: { make: 'Chery', model: 'S22L', colour: 'white', owner: 'Aarav' } }, { Key: 'CAR7', Record: { make: 'Fiat', model: 'Punto', colour: 'violet', owner: 'Pari' } }, { Key: 'CAR8', Record: { make: 'Tata', model: 'Nano', colour: 'indigo', owner: 'Valeria' } }, { Key: 'CAR9', Record: { make: 'Holden', model: 'Barina', colour: 'brown', owner: 'Shotaro' } }])
+    })
+  })
 
   describe('install', () => {
     it('should use installSteps', async () => {
