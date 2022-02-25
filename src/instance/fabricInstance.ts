@@ -1,4 +1,5 @@
-import { Config, OrgTypeEnum } from '../config'
+import { Config } from '../config'
+import { OrgTypeEnum } from '../model/type/config.type'
 import { InfraRunner, InfraRunnerResultType } from './infra/InfraRunner.interface'
 import { AbstractInstance } from './Instance.abstract'
 

@@ -51,7 +51,7 @@ export default class BdkFile {
   }
 
   public deleteNetworkFolder () {
-    fs.rmdirSync(`${this.bdkPath}`, { recursive: true })
+    fs.rmSync(`${this.bdkPath}`, { recursive: true })
   }
 
   public createNetworkFolder () {

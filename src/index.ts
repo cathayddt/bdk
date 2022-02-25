@@ -25,9 +25,9 @@ export {
 export { AbstractService, ParserType } from './service/Service.abstract'
 
 export { CaUpType, CaDownType, CaIntermediateType, CaCsrType, CaEnrollCommandTypeEnum, CaEnrollTypeEnum, CaRegisterTypeEnum, CaEnrollType, CaRegisterType, CaBasicType, CaCryptoType, CaSigningType } from './model/type/caService.type'
-export { ChaincodePackageType, ChaincodeApproveType, ChaincodeApproveWithoutDiscoverType, ChaincodeApproveStepApproveOnInstanceType, ChaincodeCommitType, ChaincodeQueryType, ChaincodeInvokeType, ChaincodeInstallType, ChaincodeInstallStepSavePackageIdType, ChaincodeCommitStepCommitOnInstanceType, ChaincodeCommitWithoutDiscoverType, ChaincodeInvokeStepInvokeOnInstanceType, ChaincodeInvokeWithoutDiscoverType } from './model/type/chaincode.type'
-export { PolicyTypeEnum, PolicyStyleEnum, ChannelPolicyType, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ConfigtxlatorEnum, ChannelConfigEnum, ChannelFetchBlockType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, EnvelopeTypeEnum, EnvelopeVerifyEnum as EnvelopeVerifyENum, DecodeEnvelopeReturnType } from './model/type/channel.type'
-export { ConfigEnvType, ConfigSetType } from './model/type/config.type'
+export { ChaincodePackageType, ChaincodeApproveType, ChaincodeApproveWithoutDiscoverType, ChaincodeApproveStepApproveOnInstanceType, ChaincodeCommitType, ChaincodeQueryType, ChaincodeInvokeType, ChaincodeInstallType, ChaincodeInstallStepSavePackageIdType } from './model/type/chaincode.type'
+export { PolicyTypeEnum, PolicyStyleEnum, ChannelPolicyType, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ConfigtxlatorEnum, ChannelConfigEnum, ChannelFetchBlockType, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, EnvelopeTypeEnum, EnvelopeVerifyEnum, DecodeEnvelopeReturnType } from './model/type/channel.type'
+export { ConfigEnvType, ConfigSetType, EnvironmentEnum, OrgTypeEnum } from './model/type/config.type'
 export { DiscoverPeersType, DiscoverChannelConfigType, DiscoverChaincodeEndorsersType, DiscoverPeersResultType, DiscoverChannelConfigResultType, DiscoverChaincodeEndorsersResultType } from './model/type/discover.type'
 export { DockerHostConfigType, DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType } from './model/type/docker.type'
 export { ExplorerUpForMyOrgType, ExplorerUpForMyOrgStepUpType, ExplorerUpdateForMyOrgStepRestartType, ExplorerChannelType } from './model/type/explorer.type'
@@ -40,4 +40,4 @@ export { InfraRunner, InfraStrategy, InfraRunnerResultType, InfraResultType, Doc
 
 export { checkPolicyValue } from './command/channel/create'
 
-export { Config as BdkConfig, EnvironmentEnum, OrgTypeEnum } from './config'
+export { Config as BdkConfig } from './config'

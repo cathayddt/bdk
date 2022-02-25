@@ -1,7 +1,20 @@
 import { diff, detailedDiff } from 'deep-object-diff'
 import { logger } from '../util/logger'
-import { ConfigtxlatorEnum, ChannelCreateType, ChannelJoinType, ChannelUpdateAnchorPeerType, ChannelFetchBlockType, ChannelConfigEnum, ChannelApproveType, ChannelUpdateType, DecodeEnvelopeType, DecodeEnvelopeReturnType, EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../model/type/channel.type'
-import { OrgTypeEnum } from '../config'
+import { OrgTypeEnum } from '../model/type/config.type'
+import {
+  ConfigtxlatorEnum,
+  ChannelCreateType,
+  ChannelJoinType,
+  ChannelUpdateAnchorPeerType,
+  ChannelFetchBlockType,
+  ChannelConfigEnum,
+  ChannelApproveType,
+  ChannelUpdateType,
+  DecodeEnvelopeType,
+  DecodeEnvelopeReturnType,
+  EnvelopeTypeEnum,
+  EnvelopeVerifyEnum,
+} from '../model/type/channel.type'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
 import FabricInstance from '../instance/fabricInstance'

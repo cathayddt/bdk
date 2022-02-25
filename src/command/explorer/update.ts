@@ -1,4 +1,4 @@
-import { Arguments, Argv } from 'yargs'
+import { Argv } from 'yargs'
 import Explorer from '../../service/explorer'
 import { logger } from '../../util'
 import config from '../../config'
@@ -11,7 +11,7 @@ export const builder = (yargs: Argv) => {
   return yargs
 }
 
-export const handler = async (argv: Arguments) => {
+export const handler = async () => {
   logger.debug('exec explorer update')
 
   const explorer = new Explorer(config)

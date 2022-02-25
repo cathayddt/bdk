@@ -1,4 +1,22 @@
-import { EnvironmentEnum } from '../../config'
+/**
+ * @requires development - 開發環境
+ * @requires testing - 測試環境
+ * @requires production - 正式環境
+ */
+export enum EnvironmentEnum {
+  development = 'development',
+  testing = 'testing',
+  production ='production'
+}
+
+/**
+ * @requires ORDERER - 組織為 Orderer 型態
+ * @requires PEER - 組織為 Peer 型態
+ */
+export enum OrgTypeEnum {
+  ORDERER = 'orderer',
+  PEER = 'peer',
+}
 
 /**
  * @requires NODE_ENV - [{@link EnvironmentEnum}] 節點的環境類別
