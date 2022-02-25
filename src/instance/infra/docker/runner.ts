@@ -68,7 +68,7 @@ export class Runner implements InfraRunner<DockerResultType> {
       logger.silly(`run command output: \n${stdout}`)
       logger.debug(`docker run\n  image: ${image}\n  commands: ${commands.join(' ')}`)
       if (dockerRunResult[0].StatusCode !== 0) {
-        throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i))}`, stdout)
+        throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i) || stdout)}`, stdout)
       }
       return { statusCode: dockerRunResult[0].StatusCode, stdout }
     } catch (e: any) {

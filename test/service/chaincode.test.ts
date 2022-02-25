@@ -1,227 +1,449 @@
-// /* global describe, it, before, after, beforeEach, afterEach */
-// import fs from 'fs'
-// import assert from 'assert'
-// import Channel from '../../src/service/channel'
-// import Network from '../../src/service/network'
-// import Peer from '../../src/service/peer'
-// import Orderer from '../../src/service/orderer'
-// import Chaincode from '../../src/service/chaincode'
-// import Config from '../../src/service/config'
-// import { NetworkCreateDto } from '../../src/model/type/network.dto'
-// import { CreateChannelDto, JoinChannelDto, UpdateAnchorPeerDto, PolicyTypeEnum } from '../../src/model/type/channel.dto'
-// import Dockerode from 'dockerode'
-// import sinon from 'sinon'
-// import config from '../../src/config'
-// import cleanSpace from '../util/cleanSpace'
-// import https from 'https'
-// import axios from 'axios'
-// import { configstub } from '../util/configStub'
+/* global describe, it, before, after, beforeEach, afterEach */
+import fs from 'fs'
+import assert from 'assert'
+import config from '../../src/config'
+import Chaincode from '../../src/service/chaincode'
+import MinimumNetwork from '../util/minimumNetwork'
+import sinon from 'sinon'
+import { DockerResultType } from '../../src/instance/infra/InfraRunner.interface'
 
-// import { PackageDto, DeployDto, QueryDto, InvokeDto } from '../../src/model/type/chaincode.dto'
-// import FabricTools from '../../src/instance/fabricTools'
+describe('Chaincode service:', function () {
+  this.timeout(60000)
 
-// describe('Chaincode service:', function () {
-//   this.timeout(10000)
-//   const chaincodeLabel = 'fabcar_1'
-//   const packagePath = `${config.infraConfig.hostPath}/${config.networkName}/chaincode/${chaincodeLabel}.tar.gz`
-//   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
-//   const dockerdOption = { all: true }
+  let minimumNetwork: MinimumNetwork
+  let chaincodeService: Chaincode
+  let chaincodeServiceOrg0Peer: Chaincode
 
-//   const isContainerAlive = async function (port: number): Promise<boolean> {
-//     const totalRetryTime = 3
-//     for (let retrytime = 0; retrytime < totalRetryTime; retrytime++) {
-//       try {
-//         const result = await axios.get(`https://localhost:${port}/healthz`,
-//           {
-//             httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-//           })
+  before(() => {
+    minimumNetwork = new MinimumNetwork()
+    chaincodeService = new Chaincode(config)
+    chaincodeServiceOrg0Peer = new Chaincode(minimumNetwork.org0PeerConfig)
+  })
 
-//         if (result.data.status !== 'OK') return result.data.status
-//         else return true
-//       } catch {
-//         continue
-//       }
-//     }
-//     return false
-//   }
-//   const networkCreateDto: NetworkCreateDto = JSON.parse(fs.readFileSync('test/sample/network-create.json').toString())
-//   const channelCreateDto: CreateChannelDto = JSON.parse(fs.readFileSync('test/sample/channel-create.json').toString())
+  describe('package', () => {
+    it('should package chaincode', async () => {
+      await chaincodeService.package({
+        name: 'fabcar',
+        version: 1,
+        path: './chaincode/fabcar/go',
+      })
+      assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/chaincode/fabcar_1.tar.gz`), true)
+    })
+  })
 
-//   const peerOrgs: {'name': string;'domain': string}[] = []
-//   for (const peerOrg of networkCreateDto.peerOrgs) {
-//     peerOrgs.push({ name: peerOrg.name, domain: peerOrg.domain })
-//   }
-//   const ordererOrgNames: string[] = []
-//   for (const ordererOrg of networkCreateDto.ordererOrgs) {
-//     ordererOrgNames.push(ordererOrg.name)
-//   }
+  describe('invoke', () => {
+    it('should use invokeSteps', async () => {
+      const chaincodeInvokeStepDiscoverEndorsersStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeInvokeStepDiscoverChannelConfigStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeInvokeStepInvokeOnInstanceStub = sinon.stub().resolves()
+      const chaincodeInvokeStepsStub = sinon.stub(Chaincode.prototype, 'invokeSteps').callsFake(() => ({
+        discoverEndorsers: chaincodeInvokeStepDiscoverEndorsersStub,
+        discoverChannelConfig: chaincodeInvokeStepDiscoverChannelConfigStub,
+        invokeOnInstance: chaincodeInvokeStepInvokeOnInstanceStub,
+      }))
+      const chaincodeParserInvokeStepDiscoverEndorsersStub = sinon.stub(Chaincode.parser, 'invokeStepDiscoverEndorsers').returns([''])
+      const chaincodeParserInvokeStepDiscoverChannelConfigStub = sinon.stub(Chaincode.parser, 'invokeStepDiscoverChannelConfig').returns('')
+      await chaincodeService.invoke({
+        channelId: minimumNetwork.chaincodeName,
+        chaincodeName: 'fabcar',
+        chaincodeFunction: 'CreateCar',
+        args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+        isInit: false,
+      })
+      assert.deepStrictEqual(chaincodeInvokeStepDiscoverEndorsersStub.called, true)
+      assert.deepStrictEqual(chaincodeInvokeStepDiscoverChannelConfigStub.called, true)
+      assert.deepStrictEqual(chaincodeInvokeStepInvokeOnInstanceStub.called, true)
+      chaincodeInvokeStepsStub.restore()
+      chaincodeParserInvokeStepDiscoverEndorsersStub.restore()
+      chaincodeParserInvokeStepDiscoverChannelConfigStub.restore()
+    })
+  })
 
-//   const processOrdererOrg: string = channelCreateDto.orderer
-//   const joinChannelDto: JoinChannelDto = {
-//     channelName: channelCreateDto.channelName,
-//     orderer: processOrdererOrg,
-//   }
+  describe('invokeSteps', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
 
-//   const updateAnchorPeerDto: UpdateAnchorPeerDto = {
-//     channelName: channelCreateDto.channelName,
-//     orderer: processOrdererOrg,
-//   }
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
 
-//   before(async function () {
-//     // runs once before the first test in this block
-//     fs.rmdirSync(`${config.infraConfig.hostPath}`, { recursive: true })
-//     await cleanSpace(docker)
-//     configstub.callsFake(function ({ key, value }): void{
-//       // makesure Config set modified process configuration
-//       // const newenv = { [key]: value }
-//       if (key === 'BDK_ORG_NAME') config.orgName = value
-//       if (key === 'BDK_ORG_DOMAIN') config.orgDomainName = value
-//       if (key === 'BDK_ORG_HOSTNAME') config.peerHostname = value
-//     })
+    describe('discoverEndorsers', () => {
+      it('should discover endorsers', async () => {
+        const result = await chaincodeServiceOrg0Peer.invokeSteps().discoverEndorsers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.invokeStepDiscoverEndorsers(result), [`${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:${minimumNetwork.getPeer().port}`])
+      })
+    })
 
-//     Config.init()
-//     Config.set({ key: 'BDK_ORG_HOSTNAME', value: 'peer0' })
-//     Config.set({ key: 'BDK_ORG_NAME', value: networkCreateDto.peerOrgs[0].name })
-//     Config.set({ key: 'BDK_ORG_DOMAIN', value: networkCreateDto.peerOrgs[0].domain })
+    describe('discoverChannelConfig', () => {
+      it('should discover channel config', async () => {
+        const result = await chaincodeServiceOrg0Peer.invokeSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.invokeStepDiscoverChannelConfig(result), minimumNetwork.getOrderer().fullUrl)
+      })
+    })
 
-//     await Network.createFull(networkCreateDto)
-//     await Orderer.up(networkCreateDto.ordererOrgs.reduce((hostnames: string[], ordererorg) => {
-//       return hostnames.concat(ordererorg.hostname.map(host => `${host}.${ordererorg.domain}`))
-//     }, []))
+    describe('invokeOnInstance', () => {
+      let orderer: string
+      let peerAddresses: string[]
 
-//     await Peer.up(networkCreateDto.peerOrgs.reduce((peerhostnames: string[], peerorg) => {
-//       let peerhostname: string[] = []
-//       for (let i = 0; i < peerorg.peerCount; i++) {
-//         peerhostname = [...peerhostname, `peer${i}.${peerorg.domain}`]
-//       }
-//       return [...peerhostnames, ...peerhostname]
-//     }, []))
-//     await new Promise(resolve => { setTimeout(resolve, 1000) })
-//     try {
-//       await Channel.create(channelCreateDto)
-//       for (const orgName of channelCreateDto.orgNames) {
-//         Config.set({ key: 'BDK_ORG_NAME', value: orgName })
-//         Config.set({ key: 'BDK_ORG_DOMAIN', value: networkCreateDto.peerOrgs.filter(x => x.name === orgName)[0].domain })
-//         await Channel.join(joinChannelDto)
-//         await Channel.updateAnchorPeer(updateAnchorPeerDto)
-//       }
-//     } catch (e) {
-//       console.log(e)
-//     }
-//   })
+      before(async () => {
+        const discoverEndorsersResult = await chaincodeServiceOrg0Peer.invokeSteps().discoverEndorsers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        peerAddresses = Chaincode.parser.invokeStepDiscoverEndorsers(discoverEndorsersResult)
+        const discoverChannelConfigResult = await chaincodeServiceOrg0Peer.invokeSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+        }) as DockerResultType
+        orderer = Chaincode.parser.invokeStepDiscoverChannelConfig(discoverChannelConfigResult)
+      })
 
-//   after(async function () {
-//     // runs once after the last test in this block
-//     // Peer.down(["Ben", "Grace","Eugene"]);
-//     // Orderer.down(["BenOrder", "GraceOrder"]);
-//     // Network.delete(`$BDK_NETWORK_NAME`); //TODO: network name
-//     fs.rmdirSync(`${config.infraConfig.hostPath}`, { recursive: true })
-//     await cleanSpace(docker)
-//   })
+      it('should invoke on instance', async () => {
+        const result = await chaincodeServiceOrg0Peer.invokeSteps().invokeOnInstance({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: minimumNetwork.chaincodeName,
+          chaincodeFunction: 'CreateCar',
+          args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
+          isInit: false,
+          orderer,
+          peerAddresses,
+        }) as DockerResultType
+        assert.match(result.stdout, /txid \[.*\] committed with status \(VALID\) at peer0.org0.bdk.example.com:7051/)
+        assert.match(result.stdout, /Chaincode invoke successful. result: status:200/)
+        assert.deepStrictEqual(Chaincode.parser.invoke(result), {})
+      })
+    })
+  })
 
-//   beforeEach(function () {
-//     // runs before each test in this block
-//   })
+  describe('query', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
 
-//   afterEach(function () {
-//     // runs after each test in this block
-//   })
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
 
-//   const packageDto: PackageDto = {
-//     name: 'fabcar',
-//     version: 1,
-//     path: 'test/sample/chaincode/fabcar/go',
-//   }
+    it('should query chaincode', async () => {
+      const result = await chaincodeServiceOrg0Peer.query({
+        channelId: minimumNetwork.channelName,
+        chaincodeName: minimumNetwork.chaincodeName,
+        chaincodeFunction: 'queryAllCars',
+        args: [],
+      }) as DockerResultType
+      assert.deepStrictEqual(Chaincode.parser.query(result), [{ Key: 'CAR0', Record: { make: 'Toyota', model: 'Prius', colour: 'blue', owner: 'Tomoko' } }, { Key: 'CAR1', Record: { make: 'Ford', model: 'Mustang', colour: 'red', owner: 'Brad' } }, { Key: 'CAR2', Record: { make: 'Hyundai', model: 'Tucson', colour: 'green', owner: 'Jin Soo' } }, { Key: 'CAR3', Record: { make: 'Volkswagen', model: 'Passat', colour: 'yellow', owner: 'Max' } }, { Key: 'CAR4', Record: { make: 'Tesla', model: 'S', colour: 'black', owner: 'Adriana' } }, { Key: 'CAR5', Record: { make: 'Peugeot', model: '205', colour: 'purple', owner: 'Michel' } }, { Key: 'CAR6', Record: { make: 'Chery', model: 'S22L', colour: 'white', owner: 'Aarav' } }, { Key: 'CAR7', Record: { make: 'Fiat', model: 'Punto', colour: 'violet', owner: 'Pari' } }, { Key: 'CAR8', Record: { make: 'Tata', model: 'Nano', colour: 'indigo', owner: 'Valeria' } }, { Key: 'CAR9', Record: { make: 'Holden', model: 'Barina', colour: 'brown', owner: 'Shotaro' } }])
+    })
+  })
 
-//   it('[Chaincode.package]', async function () {
-//     if (fs.existsSync(packagePath)) {
-//       fs.rmSync(packagePath)
-//     }
-//     await Chaincode.package(packageDto)
-//     assert.strictEqual(fs.existsSync(packagePath), true, 'chaincode package file not exist')
-//   })
+  describe('install', () => {
+    it('should use installSteps', async () => {
+      const chaincodeInstallStepInstallToPeerStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeInstallStepSavePackageIdStub = sinon.stub().returns(undefined)
+      const chaincodeInstallStepsStub = sinon.stub(Chaincode.prototype, 'installSteps').callsFake(() => ({
+        installToPeer: chaincodeInstallStepInstallToPeerStub,
+        savePackageId: chaincodeInstallStepSavePackageIdStub,
+      }))
+      await chaincodeService.install({
+        chaincodeLabel: 'fabcar_1',
+      })
+      assert.deepStrictEqual(chaincodeInstallStepInstallToPeerStub.called, true)
+      assert.deepStrictEqual(chaincodeInstallStepSavePackageIdStub.called, true)
+      chaincodeInstallStepsStub.restore()
+    })
+  })
 
-//   const deployDto: DeployDto = {
-//     channelId: 'mychannel',
-//     label: 'fabcar_1',
-//     approve: true,
-//     commit: false,
-//     initRequired: true,
-//     orderer: 'orderer0.ben.cathaybc.com',
-//     peerAddresses: ['Ben.ben.cathaybc.com', 'Grace.grace.cathaybc.com', 'Eugene.eugene.cathaybc.com'],
-//   }
+  describe('installSteps', () => {
+    beforeEach(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await chaincodeService.package({
+        name: 'fabcar',
+        version: 1,
+        path: './chaincode/fabcar/go',
+      })
+    })
 
-//   it('[Chaincode.deploy]', async function () {
-//     config.dockerLogging = true
-//     for (const orgName of channelCreateDto.orgNames) {
-//       Config.set({ key: 'BDK_ORG_NAME', value: orgName })
-//       Config.set({ key: 'BDK_ORG_DOMAIN', value: networkCreateDto.peerOrgs.filter(x => x.name === orgName)[0].domain })
+    afterEach(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
 
-//       const precontainer = await docker.listContainers(dockerdOption)
+    describe('installToPeer', () => {
+      it('should install chaincode to Peer', async () => {
+        await chaincodeServiceOrg0Peer.installSteps().installToPeer({
+          chaincodeLabel: 'fabcar_1',
+        })
+        assert.match(Chaincode.parser.getChaincodePackageId(await chaincodeServiceOrg0Peer.getChaincodePackageId() as DockerResultType, { chaincodeLabel: 'fabcar_1' }), /^fabcar_1:.*$/)
+      })
+    })
 
-//       //   TODO: try...catch to restore spy
-//       const approveSpy = sinon.spy(FabricTools, 'approveChaincode')
-//       const commitSpy = sinon.spy(FabricTools, 'commitChaincode')
+    describe('savePackageId', () => {
+      let packageId: string
+      beforeEach(async () => {
+        const installReslult = await chaincodeServiceOrg0Peer.installSteps().installToPeer({
+          chaincodeLabel: 'fabcar_1',
+        }) as DockerResultType
+        packageId = Chaincode.parser.installToPeer(installReslult, { chaincodeLabel: 'fabcar_1' })
+      })
 
-//       await Chaincode.deploy(deployDto)
+      it('should save package id', () => {
+        chaincodeServiceOrg0Peer.installSteps().savePackageId({
+          chaincodeLabel: 'fabcar_1',
+          packageId,
+        })
+        assert.deepStrictEqual(fs.readFileSync(`${config.infraConfig.bdkPath}/${config.networkName}/chaincode/package-id/fabcar_1`).toString(), packageId)
+      })
+    })
+  })
 
-//       if (deployDto.approve) {
-//         const postcontainer = await docker.listContainers(dockerdOption)
-//         assert.strictEqual(precontainer.length + 1, postcontainer.length)
-//         assert.strictEqual(isContainerAlive(7052), true)
-//         sinon.assert.calledOnce(approveSpy)
-//       }
-//       if (deployDto.commit) {
-//         // verify chaincode has been commit
-//         sinon.assert.calledOnce(commitSpy)
-//       }
-//       approveSpy.restore()
-//       commitSpy.restore()
-//     }
-//     deployDto.approve = false
-//     deployDto.commit = true
-//     await Chaincode.deploy(deployDto)
-//   })
+  describe('getChaincodePackageId', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
 
-//   const invokeDto: InvokeDto = {
-//     channelId: 'mychannel',
-//     chaincodeName: 'fabcar_1',
-//     chaincodeFunction: 'CreateCar',
-//     args: ['CAR999', 'BMW', 'X6', 'blue', 'Raymond'],
-//     isInit: true,
-//     orderer: 'orderer0.ben.cathaybc.com',
-//     peerAddresses: ['Ben.ben.cathaybc.com', 'Grace.grace.cathaybc.com', 'Eugene.eugene.cathaybc.com'],
-//   }
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
 
-//   it('[Chaincode.invoke]', async function () {
-//     const invokeSpy = sinon.spy(FabricTools, 'queryChaincode')
-//     await Chaincode.invoke(invokeDto)
-//     const response = Chaincode.invoke(invokeDto)
-//     sinon.assert.calledOnce(invokeSpy)
-//     assert(response, '')
-//     invokeSpy.restore()
-//   })
+    it('should get chaincode package id', async () => {
+      const result = await chaincodeServiceOrg0Peer.getChaincodePackageId() as DockerResultType
+      assert.match(Chaincode.parser.getChaincodePackageId(result, { chaincodeLabel: `${minimumNetwork.chaincodeName}_1` }), RegExp(`^${minimumNetwork.chaincodeName}_1:\\w{64}$`))
+    })
+  })
 
-//   const queryDto: QueryDto = {
-//     channelId: 'mychannel',
-//     chaincodeName: 'fabcar',
-//     chaincodeFunction: 'QueryAllCars',
-//     args: [],
-//   }
+  describe('approve', () => {
+    it('should use approveSteps', async () => {
+      const chaincodeApproveStepDiscoverStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeApproveStepApproveOnInstanceStub = sinon.stub().resolves()
+      const chaincodeApproveStepsStub = sinon.stub(Chaincode.prototype, 'approveSteps').callsFake(() => ({
+        discover: chaincodeApproveStepDiscoverStub,
+        approveOnInstance: chaincodeApproveStepApproveOnInstanceStub,
+      }))
+      const chaincodeParserApproveStepDiscoverStub = sinon.stub(Chaincode.parser, 'approveStepDiscover').returns('')
+      await chaincodeService.approve({
+        channelId: minimumNetwork.chaincodeName,
+        chaincodeName: 'fabcar',
+        chaincodeVersion: 1,
+        initRequired: true,
+      })
+      assert.deepStrictEqual(chaincodeApproveStepDiscoverStub.called, true)
+      assert.deepStrictEqual(chaincodeApproveStepApproveOnInstanceStub.called, true)
+      chaincodeApproveStepsStub.restore()
+      chaincodeParserApproveStepDiscoverStub.restore()
+    })
+  })
 
-//   it('[Chaincode.query]', async function () {
-//     const querySpy = sinon.spy(FabricTools, 'queryChaincode')
+  describe('approveSteps', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await chaincodeService.package({
+        name: 'fabcar',
+        version: 1,
+        path: './chaincode/fabcar/go',
+      })
+      await chaincodeServiceOrg0Peer.install({
+        chaincodeLabel: 'fabcar_1',
+      })
+    })
 
-//     const response = await Chaincode.query(queryDto)
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
 
-//     sinon.assert.calledOnce(querySpy)
-//     /*
-//     const containersInfo = await docker.listContainers(dockerdOption);
-//     const container = docker.getContainer(containersInfo[0].Id);
-//     const log = container.logs({'stdout':true})
-//     assert(log, "");
-// */
-//     assert(response, '')
-//     querySpy.restore()
-//   })
-// })
+    describe('discover', () => {
+      it('should discover orderer for approve', async () => {
+        const result = await chaincodeServiceOrg0Peer.approveSteps().discover({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.approveStepDiscover(result), minimumNetwork.getOrderer().fullUrl)
+      })
+    })
+
+    describe('approveOnInstance', () => {
+      let orderer: string
+
+      before(async () => {
+        const discoverResult = await chaincodeServiceOrg0Peer.approveSteps().discover({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        orderer = Chaincode.parser.approveStepDiscover(discoverResult)
+      })
+
+      it('should approve on instance', async () => {
+        const result = await chaincodeServiceOrg0Peer.approveSteps().approveOnInstance({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+          orderer,
+        }) as DockerResultType
+        assert.match(result.stdout, /txid \[.*\] committed with status \(VALID\) at peer0.org0.bdk.example.com:7051\r\n$/)
+      })
+    })
+  })
+
+  describe('commit', () => {
+    it('should use commitSteps', async () => {
+      const chaincodeCommitStepDiscoverChannelConfigStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeCommitStepDiscoverPeersStub = sinon.stub().resolves({ stdout: '' })
+      const chaincodeCommitStepCommitOnInstanceStub = sinon.stub().resolves()
+      const chaincodeCommitStepsStub = sinon.stub(Chaincode.prototype, 'commitSteps').callsFake(() => ({
+        discoverChannelConfig: chaincodeCommitStepDiscoverChannelConfigStub,
+        discoverPeers: chaincodeCommitStepDiscoverPeersStub,
+        commitOnInstance: chaincodeCommitStepCommitOnInstanceStub,
+      }))
+      const chaincodeParserCommitStepDiscoverChannelConfigStub = sinon.stub(Chaincode.parser, 'commitStepDiscoverChannelConfig').returns('')
+      const chaincodeParserCommitStepDiscoverPeersStub = sinon.stub(Chaincode.parser, 'commitStepDiscoverPeers').returns([''])
+      await chaincodeService.commit({
+        channelId: minimumNetwork.chaincodeName,
+        chaincodeName: 'fabcar',
+        chaincodeVersion: 1,
+        initRequired: true,
+      })
+      assert.deepStrictEqual(chaincodeCommitStepDiscoverChannelConfigStub.called, true)
+      assert.deepStrictEqual(chaincodeCommitStepDiscoverPeersStub.called, true)
+      assert.deepStrictEqual(chaincodeCommitStepCommitOnInstanceStub.called, true)
+      chaincodeCommitStepsStub.restore()
+      chaincodeParserCommitStepDiscoverChannelConfigStub.restore()
+      chaincodeParserCommitStepDiscoverPeersStub.restore()
+    })
+  })
+
+  describe('commitSteps', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await chaincodeService.package({
+        name: 'fabcar',
+        version: 1,
+        path: './chaincode/fabcar/go',
+      })
+      await chaincodeServiceOrg0Peer.install({
+        chaincodeLabel: 'fabcar_1',
+      })
+      await chaincodeServiceOrg0Peer.approve({
+        channelId: minimumNetwork.channelName,
+        chaincodeName: 'fabcar',
+        chaincodeVersion: 1,
+        initRequired: true,
+      })
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('discoverChannelConfig', () => {
+      it('should discover orderer for commit', async () => {
+        const result = await chaincodeServiceOrg0Peer.commitSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.commitStepDiscoverChannelConfig(result), minimumNetwork.getOrderer().fullUrl)
+      })
+    })
+
+    describe('discoverPeers', () => {
+      it('should discover peers for commit', async () => {
+        const result = await chaincodeServiceOrg0Peer.commitSteps().discoverPeers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        assert.deepStrictEqual(Chaincode.parser.commitStepDiscoverPeers(result), [`${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}:${minimumNetwork.getPeer().port}`])
+      })
+    })
+
+    describe('commitOnInstance', () => {
+      let orderer: string
+      let peerAddresses: string[]
+
+      before(async () => {
+        const discoverChanelConfigResult = await chaincodeServiceOrg0Peer.commitSteps().discoverChannelConfig({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        orderer = Chaincode.parser.commitStepDiscoverChannelConfig(discoverChanelConfigResult)
+        const discoverPeersResult = await chaincodeServiceOrg0Peer.commitSteps().discoverPeers({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+        }) as DockerResultType
+        peerAddresses = Chaincode.parser.commitStepDiscoverPeers(discoverPeersResult)
+      })
+
+      it('should commit on instance', async () => {
+        const result = await chaincodeServiceOrg0Peer.commitSteps().commitOnInstance({
+          channelId: minimumNetwork.channelName,
+          chaincodeName: 'fabcar',
+          chaincodeVersion: 1,
+          initRequired: true,
+          orderer,
+          peerAddresses,
+        }) as DockerResultType
+        assert.match(result.stdout, /txid \[.*\] committed with status \(VALID\) at peer0.org0.bdk.example.com:7051\r\n$/)
+      })
+    })
+  })
+
+  describe('getCommittedChaincode', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.deployChaincode()
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    it('should get all committed chaincode', async () => {
+      const result = await chaincodeServiceOrg0Peer.getCommittedChaincode(minimumNetwork.channelName) as DockerResultType
+      assert.deepStrictEqual(Chaincode.parser.getCommittedChaincode(result), [minimumNetwork.chaincodeName])
+    })
+  })
+})

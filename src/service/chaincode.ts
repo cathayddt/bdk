@@ -77,7 +77,7 @@ export default class Chaincode extends AbstractService {
         logger.error('this service only for docker infra')
         throw new Error('this service for docker infra')
       }
-      orderer = Chaincode.parser.commitStepDiscoverChannelConfig(discoverChannelConfigResult)
+      orderer = Chaincode.parser.invokeStepDiscoverChannelConfig(discoverChannelConfigResult)
     }
 
     if ('peerAddresses' in payload) {
