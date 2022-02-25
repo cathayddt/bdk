@@ -12,6 +12,25 @@ All notable changes to BDK project will be documented here.
 
 [1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
 
+[1.0.4]: https://github.com/cathayddt/bdk/releases/tag/v1.0.4
+
+## [1.0.4][1.0.4] - 2022-02-
+
+### new
+
+- Unit test (#47)
+
+### changed
+
+- Refactor: computeUpdateConfigTx (#54)
+- Refactor: rename updateAnchorPeerSteps fetchChannelBlock to fetchChannelConfig (#55)
+- Refactor: remove createChannelConfigSteps (#57)
+- Refactor: channelService fetchChannelConfig have default signType value (#58)
+
+### fixed
+
+- Fix bug: should createChannelArtifactFolder before convertChannelConfigtxToTx (#56)
+
 ## [1.0.3][1.0.3] - 2022-01-24
 
 ### new

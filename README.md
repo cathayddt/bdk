@@ -15,9 +15,9 @@ bdk network create -i
 
 ## 版本 (Releases)
 
-| Latest | Stable |
-|-------------------|-------------------|
-| [v1.0.3][v1.0.3]  | [v1.0.3][v1.0.3]  |
+|      Latest      |      Stable      |
+| ---------------- | ---------------- |
+| [v1.0.4][v1.0.4] | [v1.0.4][v1.0.4] |
 
 [v1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
 
