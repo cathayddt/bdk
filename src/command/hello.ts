@@ -1,4 +1,4 @@
-import { Argv, Arguments } from 'yargs'
+import { Argv } from 'yargs'
 import { hello } from '../service/hello'
 
 export const command = 'hello'
@@ -9,6 +9,6 @@ export const builder = (yargs: Argv<any>) => {
   return yargs
 }
 
-export const handler = (argv: Arguments<any>) => {
-  hello(argv)
+export const handler = () => {
+  hello()
 }
