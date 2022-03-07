@@ -119,7 +119,12 @@ You will see `You have installed bdk successfully!!!` if the command line tool i
 Use the following command to create a simple Hyperledger Fabric Network.
 
 ```bash
+  # create network
   bdk network create --test-network
+  # start orderer docker container (interactive mode)
+  bdk orderer up -i
+  # start peer docker container (interactive mode)
+  bdk peer up -i
 ```
 
 ## LICENSE
