@@ -35,7 +35,7 @@ bdk network create -i
 
 ### 環境 (Prerequisites)
 
-- [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node >= 12 npm >= 6
+- [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v16, npm v8
 - [docker](https://docs.docker.com/engine/install)
 - [docker-compose](https://docs.docker.com/compose/install) >= 1.27
 - eslint (vscode plugin, dev-only)
