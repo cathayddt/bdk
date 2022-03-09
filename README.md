@@ -35,7 +35,7 @@ bdk network create -i
 
 ### 環境 (Prerequisites)
 
-- [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node >= 12 npm >= 6
+- [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v16, npm v8
 - [docker](https://docs.docker.com/engine/install)
 - [docker-compose](https://docs.docker.com/compose/install) >= 1.27
 - eslint (vscode plugin, dev-only)
@@ -108,6 +108,10 @@ Use the following command to verify that BDK has completed installation and is n
 bdk hello
 ```
 
+如果指令已順利安裝，你會看到 `You have installed bdk successfully!!!` 
+
+You will see `You have installed bdk successfully!!!` if the command line tool is installed successfully.
+
 ## 建立一個 Test Network (Create a test network)
 
 使用以下指令，可以建立一個簡單的 Hyperledger Fabric 網路
@@ -115,7 +119,12 @@ bdk hello
 Use the following command to create a simple Hyperledger Fabric Network.
 
 ```bash
+  # create network
   bdk network create --test-network
+  # start orderer docker container (interactive mode)
+  bdk orderer up -i
+  # start peer docker container (interactive mode)
+  bdk peer up -i
 ```
 
 ## LICENSE

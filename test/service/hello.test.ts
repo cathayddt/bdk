@@ -23,7 +23,7 @@ describe('hooks', function () {
   })
 
   it('Hello unittest', function () {
-    hello('Hello unittest')
+    hello()
     assert.strictEqual(true, true)
   })
 })
