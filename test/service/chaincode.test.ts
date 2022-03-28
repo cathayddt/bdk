@@ -8,7 +8,7 @@ import sinon from 'sinon'
 import { DockerResultType } from '../../src/instance/infra/InfraRunner.interface'
 
 describe('Chaincode service:', function () {
-  this.timeout(60000)
+  this.timeout(90000)
 
   let minimumNetwork: MinimumNetwork
   let chaincodeService: Chaincode
