@@ -1,4 +1,4 @@
-import config from '../config'
+import config from '../fabric/config'
 import { transports, format, createLogger } from 'winston'
 import { LEVEL } from 'triple-beam'
 

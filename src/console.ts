@@ -1,4 +1,4 @@
-import config from './config'
+import config from './fabric/config'
 import { spawnSync } from 'child_process'
 import { exit } from 'process'
 

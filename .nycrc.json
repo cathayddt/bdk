@@ -7,10 +7,10 @@
   "functions": 0,
   "statements": 0,
   "include": [
-    "src/service/**.ts"
+    "src/fabric/service/**.ts"
   ],
   "exclude":[
-    "src/service/Service.abstract.ts"
+    "src/fabric/service/Service.abstract.ts"
   ],
   "reporter": [
     "text-summary",

@@ -1,5 +1,5 @@
 import prompts from 'prompts'
-import config from '../config'
+import config from '../fabric/config'
 import { logger } from './logger'
 
 class BdkError extends Error {}
