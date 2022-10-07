@@ -16,7 +16,7 @@ interface OptType {
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
     .example('bdk fabric network delete --network-name test-network', '刪除名稱為 test-network 的 Blockchain network')
-    .example('bdk fabric network delete --force', '刪除名稱為在環境變數中的 BDK_NETWORK_NAME 的 Blockchain network 並且不需要再次做確認')
+    .example('bdk fabric network delete --force', '刪除名稱為在環境變數中的 BDK_FABRIC_NETWORK_NAME 的 Blockchain network 並且不需要再次做確認')
     .option('network-name', { type: 'string', description: '欲刪除 Blockchain network 的名稱', alias: 'n' })
     .option('force', { type: 'boolean', default: false, description: '是否不需要再次確認刪除 Blockchain network', alias: 'f' })
 }

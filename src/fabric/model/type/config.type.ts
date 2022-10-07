@@ -20,7 +20,7 @@ export enum OrgTypeEnum {
 
 /**
  * @requires NODE_ENV - [{@link EnvironmentEnum}] 節點的環境類別
- * @requires BDK_NETWORK_NAME - [string] blockchain network 的名稱
+ * @requires BDK_FABRIC_NETWORK_NAME - [string] blockchain network 的名稱
  * @requires BDK_ORG_TYPE - [string] org 的型態
  * @requires BDK_ORG_NAME - [string] org 的名稱
  * @requires BDK_ORG_DOMAIN - [string] org 的 domain 名稱
@@ -29,7 +29,7 @@ export enum OrgTypeEnum {
  */
 export interface ConfigEnvType {
   NODE_ENV: EnvironmentEnum
-  BDK_NETWORK_NAME: string
+  BDK_FABRIC_NETWORK_NAME: string
   BDK_ORG_TYPE: string
   BDK_ORG_NAME: string
   BDK_ORG_DOMAIN: string

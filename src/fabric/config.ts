@@ -2,12 +2,12 @@ import dotenv from 'dotenv'
 import os from 'os'
 import { ConfigEnvType, EnvironmentEnum, OrgTypeEnum } from './model/type/config.type'
 
-const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk`
+const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/fabric`
 dotenv.config({ path: `${bdkPath}/.env` })
 
 export const defaultEnv: ConfigEnvType = {
   NODE_ENV: EnvironmentEnum.production,
-  BDK_NETWORK_NAME: 'bdk-network',
+  BDK_FABRIC_NETWORK_NAME: 'bdk-fabric-network',
   BDK_ORG_TYPE: 'peer',
   BDK_ORG_NAME: 'Org1',
   BDK_ORG_DOMAIN: 'org1.example.com',
@@ -84,7 +84,7 @@ const config: Config = {
     dockerHostPath: process.env.BDK_DOCKER_HOST_PATH || bdkPath,
     dockerPath: '/tmp',
   },
-  networkName: process.env.BDK_NETWORK_NAME || 'bdk-network',
+  networkName: process.env.BDK_FABRIC_NETWORK_NAME || 'bdk-fabric-network',
   orgType: orgType,
   orgName: process.env.BDK_ORG_NAME || '',
   orgDomainName: process.env.BDK_ORG_DOMAIN || '',

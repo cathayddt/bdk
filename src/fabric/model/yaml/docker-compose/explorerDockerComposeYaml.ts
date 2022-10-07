@@ -49,8 +49,8 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           'DISCOVERY_AS_LOCALHOST=false',
         ],
         volumes: [
-          `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/fabric-explorer/config.json:/opt/explorer/app/platform/fabric/config.json`,
-          `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/fabric-explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile`,
+          `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/fabric-explorer/config.json:/opt/explorer/app/platform/fabric/config.json`,
+          `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/fabric-explorer/connection-profile:/opt/explorer/app/platform/fabric/connection-profile`,
         ],
         ports: [
           `${port}:8080`,

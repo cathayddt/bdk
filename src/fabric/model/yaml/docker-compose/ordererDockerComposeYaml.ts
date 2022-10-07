@@ -33,9 +33,9 @@ class OrdererDockerComposeYaml extends DockerComposeYaml {
       working_dir: '/opt/gopath/src/github.com/hyperledger/fabric',
       command: 'orderer',
       volumes: [
-        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/channel-artifacts/system-channel/${genesisFileName}.block:/var/hyperledger/orderer/orderer.genesis.block`,
-        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/ordererOrganizations/${domain}/orderers/${hostname}.${domain}/msp:/var/hyperledger/orderer/msp`,
-        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/ordererOrganizations/${domain}/orderers/${hostname}.${domain}/tls:/var/hyperledger/orderer/tls`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/channel-artifacts/system-channel/${genesisFileName}.block:/var/hyperledger/orderer/orderer.genesis.block`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/ordererOrganizations/${domain}/orderers/${hostname}.${domain}/msp:/var/hyperledger/orderer/msp`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/ordererOrganizations/${domain}/orderers/${hostname}.${domain}/tls:/var/hyperledger/orderer/tls`,
         `${containerName}:/var/hyperledger/production/orderer`,
       ],
       networks: [config.networkName],

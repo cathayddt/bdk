@@ -45,8 +45,8 @@ class PeerDockerComposeYaml extends DockerComposeYaml {
       command: 'peer node start',
       volumes: [
         '/var/run/:/host/var/run/',
-        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/msp:/etc/hyperledger/fabric/msp`,
-        `\${BDK_DOCKER_HOST_PATH:-~/.bdk}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls:/etc/hyperledger/fabric/tls`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/msp:/etc/hyperledger/fabric/msp`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls:/etc/hyperledger/fabric/tls`,
         `${containerName}:/var/hyperledger/production`,
       ],
       networks: [config.networkName],

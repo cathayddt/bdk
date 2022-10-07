@@ -115,7 +115,7 @@
 
 ### Step 1：產生 Blockchain network 相關的檔案
 
-首先在 *~/.bdk* 資料夾底下以 *~/.bdk* 中 *BDK_NETWORK_NAME* 名稱建立資料夾，再來產生 *crypto-config.yaml* 讓 `cryptogen` 指令產生 Orderer 和 Peer 的憑證和私鑰，將其 TLS Ca 憑證複製到 Blockchain network 資料夾下的 *tlsca* 資料夾中，並且產生 *configtx.yaml* 使用 `configtxgen` 指令產生創始區塊 *genesis.block* ，之後建立 Peer 的連線的設定檔案和 Peer 和 Orderer *docker-compose.yaml* 檔案
+首先在 *~/.bdk/fabric* 資料夾底下以 *~/.bdk/fabric* 中 *BDK_FABRIC_NETWORK_NAME* 名稱建立資料夾，再來產生 *crypto-config.yaml* 讓 `cryptogen` 指令產生 Orderer 和 Peer 的憑證和私鑰，將其 TLS Ca 憑證複製到 Blockchain network 資料夾下的 *tlsca* 資料夾中，並且產生 *configtx.yaml* 使用 `configtxgen` 指令產生創始區塊 *genesis.block* ，之後建立 Peer 的連線的設定檔案和 Peer 和 Orderer *docker-compose.yaml* 檔案
 
 ```bash
 bdk fabric network create -f ~/.bdk/network-create.json --create-full

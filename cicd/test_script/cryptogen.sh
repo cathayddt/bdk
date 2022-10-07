@@ -1,7 +1,7 @@
 #! /bin/bash -ve
 
 export NODE_ENV=production # testing  development  production
-export BDK_NETWORK_NAME=shell-network-cryptogen
+export BDK_FABRIC_NETWORK_NAME=shell-network-cryptogen
 
 . ./cicd/test_script/steps/set-params.sh
 

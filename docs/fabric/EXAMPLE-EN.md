@@ -115,7 +115,7 @@ Variables required by *network-create.json* are defined in the files *configtx.y
 
 ### Step 1: Generate the required files of the blockchain network
 
-Creates directory *BDK_NETWORK_NAME* under *~/.bdk*. Generates *crypto-config.yaml* to let `cryptogen` command generate certificates and keys for orderers and peers. Copies their tls-ca certificates to the *tlsca* directory under the folder mentioned prior, and generates *configtx.yaml* using `configtxgen`, which is used to generate *genesis.block*. Peer and orderer compose files are then generated.
+Creates directory *BDK_FABRIC_NETWORK_NAME* under *~/.bdk/fabric*. Generates *crypto-config.yaml* to let `cryptogen` command generate certificates and keys for orderers and peers. Copies their tls-ca certificates to the *tlsca* directory under the folder mentioned prior, and generates *configtx.yaml* using `configtxgen`, which is used to generate *genesis.block*. Peer and orderer compose files are then generated.
 
 ```bash
 bdk fabric network create -f ~/.bdk/network-create.json --create-full
