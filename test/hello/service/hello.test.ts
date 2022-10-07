@@ -1,6 +1,6 @@
 /* global describe, it, before, after, beforeEach, afterEach */
 import assert from 'assert'
-import { hello } from '../../../src/fabric/service/hello'
+import { hello } from '../../../src/hello/service/hello'
 
 describe('hooks', function () {
   // this.slow(300000); // five minutes

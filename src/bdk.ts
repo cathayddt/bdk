@@ -21,6 +21,7 @@ Blockchain Deploy Kit
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const argv = yargs
   .commandDir('fabric')
+  .commandDir('hello')
   .strict()
   .demandCommand()
   .usage(usageText)
