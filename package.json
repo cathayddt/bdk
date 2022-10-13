@@ -33,6 +33,7 @@
     "build:console": "ts-node src/console.ts",
     "start:dev": "NODE_ENV=development nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/console.ts",
     "test": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter spec --require ts-node/register ./test/**/*.test.ts --exit",
+    "test:quorum": "NODE_ENV=testing mocha --reporter spec --require ts-node/register ./test/**/*.test.ts --exit",
     "test:dev": "nodemon --watch 'test/**/*.test.ts' -e ts,tsx --exec npm run test",
     "test:nyan": "NODE_ENV=testing mocha --reporter nyan --require ts-node/register ./test/**/*.test.ts --exit",
     "test:coverage": "nyc npm run test",
@@ -49,7 +50,9 @@
     "prompts": "^2.4.0",
     "string-format": "^2.0.0",
     "winston": "^3.3.3",
-    "yargs": "^16.0.0"
+    "yargs": "^16.0.0",
+    "ethers": "^5.6.5",
+    "rlp": "^3.0.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",

@@ -5,7 +5,6 @@ import net from 'net'
 import Ca from '../../../src/fabric/service/caService'
 import config from '../../../src/fabric/config'
 import { CaEnrollCommandTypeEnum, CaRegisterTypeEnum } from '../../../src/fabric/model/type/caService.type'
-import { logger } from '../../../src/util'
 
 describe('CA service:', function () {
   this.timeout(10000)
@@ -310,36 +309,36 @@ describe('CA service:', function () {
       assert.strictEqual(fs.existsSync(`${ordererOrgPath}/orderers/${enrollOrderer0Argv.clientId}/fabric-ca-client-config.yaml`), true)
     })
 
-    // it('enroll && register peer', async () => {
-    //   await caService.enroll(enrollPeerClientArgv)
+    it('enroll && register peer', async () => {
+      await caService.enroll(enrollPeerClientArgv)
 
-    //   await caService.register(registerPeerOrgArgv)
-    //   await caService.enroll(enrollPeerOrgArgv)
+      await caService.register(registerPeerOrgArgv)
+      await caService.enroll(enrollPeerOrgArgv)
 
-    //   await caService.register(registerPeer0Argv)
-    //   await caService.enroll(enrollPeer0Argv)
+      await caService.register(registerPeer0Argv)
+      await caService.enroll(enrollPeer0Argv)
 
-    //   const caPath = `${config.infraConfig.bdkPath}/${config.networkName}/ca`
-    //   const peerOrgPath = `${config.infraConfig.bdkPath}/${config.networkName}/peerOrganizations/${enrollPeerOrgArgv.orgHostname}`
+      const caPath = `${config.infraConfig.bdkPath}/${config.networkName}/ca`
+      const peerOrgPath = `${config.infraConfig.bdkPath}/${config.networkName}/peerOrganizations/${enrollPeerOrgArgv.orgHostname}`
 
-    //   // folder
-    //   assert.strictEqual(fs.existsSync(`${caPath}`), true)
-    //   assert.strictEqual(fs.existsSync(`${peerOrgPath}`), true)
+      // folder
+      assert.strictEqual(fs.existsSync(`${caPath}`), true)
+      assert.strictEqual(fs.existsSync(`${peerOrgPath}`), true)
 
-    //   // ca
-    //   assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeerOrgArgv.clientId}@${enrollPeerOrgArgv.upstream}/user/cacerts`), true)
-    //   assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/msp/cacerts`), true)
-    //   assert.strictEqual(fs.existsSync(`${peerOrgPath}/ca/ca.${enrollPeerOrgArgv.orgHostname}-cert.pem`), true)
+      // ca
+      assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeerOrgArgv.clientId}@${enrollPeerOrgArgv.upstream}/user/cacerts`), true)
+      assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/msp/cacerts`), true)
+      assert.strictEqual(fs.existsSync(`${peerOrgPath}/ca/ca.${enrollPeerOrgArgv.orgHostname}-cert.pem`), true)
 
-    //   // tls
-    //   assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/tls/tlsintermediatecerts`), true)
-    //   assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/tls/tlscacerts`), true)
-    //   assert.strictEqual(fs.existsSync(`${peerOrgPath}/users/Admin@${enrollPeerOrgArgv.orgHostname}/msp/intermediatecerts`), true)
-    //   assert.strictEqual(fs.existsSync(`${peerOrgPath}/peers/${enrollPeer0Argv.clientId}/tls/tlscacerts`), true)
+      // tls
+      assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/tls/tlsintermediatecerts`), true)
+      assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/tls/tlscacerts`), true)
+      assert.strictEqual(fs.existsSync(`${peerOrgPath}/users/Admin@${enrollPeerOrgArgv.orgHostname}/msp/intermediatecerts`), true)
+      assert.strictEqual(fs.existsSync(`${peerOrgPath}/peers/${enrollPeer0Argv.clientId}/tls/tlscacerts`), true)
 
-    //   // yaml
-    //   assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/fabric-ca-client-config.yaml`), true)
-    //   assert.strictEqual(fs.existsSync(`${peerOrgPath}/peers/${enrollPeer0Argv.clientId}/fabric-ca-client-config.yaml`), true)
-    // })
+      // yaml
+      assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/fabric-ca-client-config.yaml`), true)
+      assert.strictEqual(fs.existsSync(`${peerOrgPath}/peers/${enrollPeer0Argv.clientId}/fabric-ca-client-config.yaml`), true)
+    })
   })
 })
