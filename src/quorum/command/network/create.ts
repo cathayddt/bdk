@@ -93,5 +93,5 @@ export const handler = async (argv: Arguments<OptType>) => {
     throw new ParamsError('Invalid params: Required parameter missing')
   })()
 
-  network.create(networkCreate)
+  await network.create(networkCreate)
 }

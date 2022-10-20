@@ -148,6 +148,9 @@ export default class BdkFile {
     fs.copyFileSync(`${this.bdkPath}/artifacts/member${i}/address`, `${this.bdkPath}/Member-${i}/data/address`)
   }
 
+  public getBdkPath () {
+    return `${this.bdkPath}`
+  }
   // public createDockerComposeYaml (hostName: string, dockerComposeYaml: ValidatorDockerComposeYaml | MemberDockerComposeYaml) {
   //   const type: InstanceTypeEnum = (() => {
   //     if (dockerComposeYaml instanceof ValidatorDockerComposeYaml) {
