@@ -26,19 +26,3 @@ export interface MemberAddType {
   memberCount: number
   ports?: NetworkMemberPortType[]
 }
-
-// /**
-//  * @requires channelName - [string] channel 的名稱
-//  * @requires orgNames - [string array] peer org 的名稱
-//  */
-// export interface PeerAddOrgToChannelType {
-//   channelName: string
-//   orgName: string
-// }
-
-// /**
-//  * @requires orderer - [string] 使用 orderer 的 address 和 port
-//  */
-// export interface PeerAddOrgToSystemChannelType extends PeerAddOrgToChannelType {
-//   orderer: string
-// }
