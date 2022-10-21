@@ -10,14 +10,15 @@
 // import { DockerComposeYamlInterface } from '../model/yaml/docker-compose/dockerComposeYaml'
 // import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
 // import ExplorerConfigYaml from '../model/yaml/explorer/explorerConfigYaml'
-// import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
+import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 import fs from 'fs-extra'
 import { Config } from '../config'
 import { GenesisJsonType } from '../model/type/network.type'
 
 export enum InstanceTypeEnum {
   validator = 'validator',
-  member = 'member'
+  member = 'member',
+  explorer = 'explorer'
 }
 
 export default class BdkFile {
@@ -318,17 +319,17 @@ export default class BdkFile {
   //   return `${this.bdkPath}/docker-compose/docker-compose-${type}-${hostName}.yaml`
   // }
 
-  // private getExplorerRootFilePath () {
-  //   return `${this.bdkPath}/fabric-explorer`
-  // }
+  private getExplorerRootFilePath () {
+    return `${this.bdkPath}/quorum-explorer`
+  }
 
-  // private createExplorerFolder () {
-  //   fs.mkdirSync(`${this.getExplorerRootFilePath()}/connection-profile`, { recursive: true })
-  // }
+  private createExplorerFolder () {
+    fs.mkdirSync(`${this.getExplorerRootFilePath()}/connection-profile`, { recursive: true })
+  }
 
-  // public getExplorerDockerComposeYamlPath (): string {
-  //   return `${this.getExplorerRootFilePath()}/docker-compose.yaml`
-  // }
+  public getExplorerDockerComposeYamlPath (): string {
+    return `${this.getExplorerRootFilePath()}/docker-compose.yaml`
+  }
 
   // public createDockerComposeYaml (hostName: string, dockerComposeYaml: OrdererDockerComposeYaml | PeerDockerComposeYaml | CaDockerComposeYaml) {
   //   const type: InstanceTypeEnum = (() => {
@@ -346,10 +347,10 @@ export default class BdkFile {
   //   fs.writeFileSync(this.getDockerComposeYamlPath(hostName, type), dockerComposeYaml.getYamlString())
   // }
 
-  // public createExplorerDockerComposeYaml (explorerConnectionProfileYaml: ExplorerDockerComposeYaml) {
-  //   this.createExplorerFolder()
-  //   fs.writeFileSync(this.getExplorerDockerComposeYamlPath(), explorerConnectionProfileYaml.getYamlString())
-  // }
+  public createExplorerDockerComposeYaml (explorerConnectionProfileYaml: ExplorerDockerComposeYaml) {
+    this.createExplorerFolder()
+    fs.writeFileSync(this.getExplorerDockerComposeYamlPath(), explorerConnectionProfileYaml.getYamlString())
+  }
 
   // public getDockerComposeYaml (hostName: string, type: InstanceTypeEnum): DockerComposeYamlInterface {
   //   return YAML.load(fs.readFileSync(this.getDockerComposeYamlPath(hostName, type)).toString()) as DockerComposeYamlInterface
