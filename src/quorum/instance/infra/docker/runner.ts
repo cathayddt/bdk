@@ -77,6 +77,39 @@ export class Runner implements InfraRunner<DockerResultType> {
     }
   }
 
+  public createContainerAndRun = async (payload: DockerRunCommandType) => {
+    await this.checkAndCreateNetwork(payload.network)
+    const { image, tag, commands } = payload
+    const createOptions: DockerCreateOptionsType = payload.createOptions || {
+      Env: (payload.envFile ? fs.readFileSync(payload.envFile, { encoding: 'utf8' }).toString().split(/\n|\r|\r\n/).filter((x) => /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/.test(x)) : []).concat(payload.env || []),
+      HostConfig: {
+        AutoRemove: payload.autoRemove !== undefined ? payload.autoRemove : true,
+        NetworkMode: payload.network,
+        Binds: payload.volumes,
+      },
+      User: `${config.UID}:${config.GID}`,
+    }
+    const stdout = `docker command: \ndocker run -d -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`
+    logger.debug(stdout)
+    const dockerContainer = await this.dockerode.createContainer({
+      name: payload.name,
+      Image: `${image}:${tag || 'latest'}`,
+      Cmd: commands,
+      ...createOptions,
+      AttachStderr: true,
+      AttachStdin: false,
+      AttachStdout: true,
+      OpenStdin: false,
+      StdinOnce: false,
+    })
+    try {
+      await dockerContainer.start()
+      return { stdout: stdout }
+    } catch (e: any) {
+      throw new DockerError(`[x] command [docker run]:${e.message}`)
+    }
+  }
+
   // TODO use static or constructor
   private checkAndCreateNetwork = async (networkName?: string) => {
     if (networkName) {

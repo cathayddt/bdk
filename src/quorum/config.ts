@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import os from 'os'
-import { ConfigEnvType, EnvironmentEnum, NodeTypeEnum } from './model/type/config.type'
+import { EnvironmentEnum, NodeTypeEnum } from './model/type/config.type'
 
 const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/quorum`
 dotenv.config({ path: `${bdkPath}/.env` })

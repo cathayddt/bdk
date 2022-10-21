@@ -13,6 +13,7 @@ export interface DockerHostConfigType {
   NetworkMode?: string // name of network
 }
 export interface DockerCreateOptionsType {
+  Name?: string
   Env?: Array<string> // ["VAR=value", ...]
   HostConfig?: DockerHostConfigType
   WorkingDir?: string
@@ -23,6 +24,7 @@ export interface DockerStartOptionsType {
 }
 
 export interface DockerRunCommandType {
+  name?: string
   image: string
   tag?: string
   commands: string[]
@@ -34,4 +36,5 @@ export interface DockerRunCommandType {
   createOptions?: DockerCreateOptionsType
   startOptions?: DockerStartOptionsType
   entryPoint?: string
+  portBindings?: Map<string, Array<string>>
 }
