@@ -18,6 +18,7 @@ interface ServiceInterface {
   image: string
   labels?: { [key: string]: string }
   networks?: string[]
+  network_mode?: string
   ports?: string[]
   volumes?: string[]
   working_dir?: string

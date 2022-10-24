@@ -2,6 +2,8 @@ import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDock
 import fs from 'fs-extra'
 import { Config } from '../config'
 import { GenesisJsonType } from '../model/type/network.type'
+import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
+import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
 
 export enum InstanceTypeEnum {
   validator = 'validator',
@@ -141,20 +143,27 @@ export default class BdkFile {
     return `${this.bdkPath}`
   }
 
-  private getExplorerRootFilePath () {
-    return `${this.bdkPath}/quorum-explorer`
-  }
-
-  private createExplorerFolder () {
-    fs.mkdirSync(`${this.getExplorerRootFilePath()}/connection-profile`, { recursive: true })
-  }
-
   public getExplorerDockerComposeYamlPath (): string {
-    return `${this.getExplorerRootFilePath()}/docker-compose.yaml`
+    return `${this.getBdkPath()}/explorer-docker-compose.yaml`
+  }
+
+  public getValidatorDockerComposeYamlPath (): string {
+    return `${this.getBdkPath()}/validator-docker-compose.yaml`
+  }
+
+  public getMemberDockerComposeYamlPath (): string {
+    return `${this.getBdkPath()}/member-docker-compose.yaml`
   }
 
   public createExplorerDockerComposeYaml (explorerConnectionProfileYaml: ExplorerDockerComposeYaml) {
-    this.createExplorerFolder()
     fs.writeFileSync(this.getExplorerDockerComposeYamlPath(), explorerConnectionProfileYaml.getYamlString())
+  }
+
+  public createValidatorDockerComposeYaml (validatorDockerComposeYaml: ValidatorDockerComposeYaml) {
+    fs.writeFileSync(this.getValidatorDockerComposeYamlPath(), validatorDockerComposeYaml.getYamlString())
+  }
+
+  public createMemberDockerComposeYaml (memberDockerComposeYaml: MemberDockerComposeYaml) {
+    fs.writeFileSync(this.getMemberDockerComposeYamlPath(), memberDockerComposeYaml.getYamlString())
   }
 }
