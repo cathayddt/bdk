@@ -3,6 +3,10 @@ import RLP from 'rlp'
 import { NetworkCreateType, GenesisJsonType } from '../model/type/network.type'
 import { AbstractService } from './Service.abstract'
 import { logger } from '../../util/logger'
+import ValidatorInstance from '../instance/validator'
+import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
+import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
+import MemberInstance from '../instance/member'
 
 export default class Network extends AbstractService {
   /**
@@ -80,7 +84,7 @@ export default class Network extends AbstractService {
       const memberNode = `enode://${memberPublicKey}@member-${i}:30303`
       staticNodesJson.push(memberNode)
     }
-
+    const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
     this.bdkFile.createStaticNodesJson(staticNodesJson)
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
     for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
@@ -92,46 +96,13 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      await this.infra.runCommand({
-        image: 'quorumengineering/quorum',
-        tag: '22.7.0',
-        network: 'quorum',
-        volumes: [`${bdkPath}/Validator-${i}/data:/data`],
-        commands: [
-          'init',
-          '--datadir',
-          '/data',
-          '/data/genesis.json',
-        ],
-      })
-
-      const portBindings: Map<string, Array<string>> = new Map()
-      portBindings.set(`${8545 + i}`, ['localhost', '8545'])
-      await this.infra.createContainerAndRun({
-        name: `validator-${i}`,
-        image: 'quorumengineering/quorum',
-        tag: '22.7.0',
-        network: 'quorum',
-        env: ['PRIVATE_CONFIG=ignore'],
-        portBindings: portBindings,
-        autoRemove: false,
-        volumes: [`${bdkPath}/Validator-${i}/data:/data`],
-        commands: [
-          '--datadir', '/data',
-          '--networkid', '1337',
-          '--nodiscover', '--verbosity', '3',
-          '--syncmode', 'full', '--nousb',
-          '--mine', '--miner.threads', '1', '--miner.gasprice', '0',
-          '--emitcheckpoints',
-          '--http', '--http.addr', '0.0.0.0', '--http.port', '8545', '--http.corsdomain', '"*"', '--http.vhosts', '"*"',
-          '--ws', '--ws.addr', '0.0.0.0', '--ws.port', '8546', '--ws.origins', '"*"',
-          '--http.api', 'admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft',
-          '--ws.api', 'admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft',
-          '--port', '30303',
-        ],
-      })
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i)
     }
+    this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
+    await (new ValidatorInstance(this.config, this.infra).up())
+
+    const memberDockerComposeYaml = new MemberDockerComposeYaml()
     for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
       this.bdkFile.copyGenesisJsonToMember(i)
       this.bdkFile.copyStaticNodesJsonToMember(i)
@@ -141,45 +112,13 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToMember(i)
       this.bdkFile.copyAddressToMember(i)
 
-      await this.infra.runCommand({
-        image: 'quorumengineering/quorum',
-        tag: '22.7.0',
-        network: 'quorum',
-        volumes: [`${bdkPath}/Member-${i}/data:/data`],
-        commands: [
-          'init',
-          '--datadir',
-          '/data',
-          '/data/genesis.json',
-        ],
-      })
-
-      const portBindings: Map<string, Array<string>> = new Map()
-      portBindings.set(`${8545 + i}`, ['localhost', '8545'])
-      await this.infra.createContainerAndRun({
-        name: `member-${i}`,
-        image: 'quorumengineering/quorum',
-        tag: '22.7.0',
-        network: 'quorum',
-        env: ['PRIVATE_CONFIG=ignore'],
-        portBindings: portBindings,
-        autoRemove: false,
-        volumes: [`${bdkPath}/Member-${i}/data:/data`],
-        commands: [
-          '--datadir', '/data',
-          '--networkid', '1337',
-          '--nodiscover', '--verbosity', '3',
-          '--syncmode', 'full', '--nousb',
-          '--http', '--http.addr', '0.0.0.0', '--http.port', '8545', '--http.corsdomain', '"*"', '--http.vhosts', '"*"',
-          '--ws', '--ws.addr', '0.0.0.0', '--ws.port', '8546', '--ws.origins', '"*"',
-          '--http.api', 'admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft',
-          '--ws.api', 'admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft',
-          '--port', '30303',
-        ],
-      })
+      memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i)
     }
-    // TODO: check peer create suceesfully
-    logger.info('Quroum Network Create Succeesfully!')
+    this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
+
+    await (new MemberInstance(this.config, this.infra).up())
+    // TODO: check peer create successfully
+    logger.info('Quroum Network Create Successfully!')
   }
 
   /** @ignore */
