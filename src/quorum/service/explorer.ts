@@ -14,6 +14,10 @@ export default class Explorer extends AbstractService {
     return await (new ExplorerInstance(this.config, this.infra).up())
   }
 
+  public async delete () {
+    await (new ExplorerInstance(this.config, this.infra).down())
+  }
+
   private createExplorerDockerCompose (port: number) {
     const explorerDockerComposeYaml = new ExplorerDockerComposeYaml(this.bdkFile.getBdkPath(), port)
     this.bdkFile.createExplorerDockerComposeYaml(explorerDockerComposeYaml)

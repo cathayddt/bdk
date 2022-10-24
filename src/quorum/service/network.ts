@@ -121,6 +121,11 @@ export default class Network extends AbstractService {
     logger.info('Quroum Network Create Successfully!')
   }
 
+  public async delete () {
+    await (new ValidatorInstance(this.config, this.infra).down())
+    await (new MemberInstance(this.config, this.infra).down())
+  }
+
   /** @ignore */
   private createKey (dir: string) {
     // TODO: use Shawn's code generate key
