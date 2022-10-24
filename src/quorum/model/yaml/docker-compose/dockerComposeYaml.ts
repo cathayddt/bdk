@@ -6,10 +6,13 @@ interface ServiceInterface {
     dockerfile?: string
     args?: { [key: string]: string }
   }
+  restart?: string
   command?: string
+  entrypoint?: string[]
   container_name?: string
   hostname?: string
-  depends_on?: {[serviceName: string]: {condition: string}}
+  depends_on?: { [serviceName: string]: { condition: string } }
+  links?: string[]
   env_file?: string | string[]
   environment?: string[]
   image: string
