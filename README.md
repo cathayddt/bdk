@@ -1,23 +1,27 @@
 # Blockchain Deployment Kit
 
-提供指令快速建立、管理、監控 hyperledger fabric blockchain，最大的特色是可以使用互動式的問答，讓使用者可以依續性的問答來完成指令所需要的指令，在每個 BDK 指令的後面，加入 `-i` 或是 `--interactive` 的參數，來使用互動式問答
+提供指令快速建立、管理、監控 blockchain，最大的特色是可以使用互動式的問答，讓使用者可以依續性的問答來完成指令所需要的指令，在每個 BDK 指令的後面，加入 `-i` 或是 `--interactive` 的參數，來使用互動式問答
 
-BDK streamlines the normally complicated process of creating a Hyperledger Fabric blockchain with command-line tools and npm packages. Creating, managing, monitoring a blockchain network has never been easier. We support interactive prompts which can be triggered with `-i` or `--interactive` behind all cli commands
+BDK streamlines the normally complicated process of creating a blockchain with command-line tools and npm packages. Creating, managing, monitoring a blockchain network has never been easier. We support interactive prompts which can be triggered with `-i` or `--interactive` behind all cli commands
 
 e.g.
 
+```
+bdk quorum network create -i
+```
+![bdk quorum network create -i](images/bdk-quorum-network-create.gif)
+
 ```bash
-bdk network create -i
+bdk fabric network create -i
 ```
 
-![bdk network create -i](images/bdk-network-create.gif)
-![bdk channel create -i](images/bdk-channel-create.gif)
+![bdk fabric network create -i](images/bdk-fabric-network-create.gif)
 
 ## 版本 (Releases)
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v1.0.4][v1.0.4] | [v1.0.4][v1.0.4] |
+| [v2.0.0][v2.0.0] | [v1.0.4][v1.0.4] |
 
 [v1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
 
@@ -26,7 +30,8 @@ bdk network create -i
 ## 文件 (Documentation)
 
 - 指令文件 CLI Documentation (Work in Progress)
-- [使用範例 (Examples)](docs/EXAMPLE.md)
+- [Fabric 使用範例 (Examples)](docs/fabric/EXAMPLE.md)
+- Quorum 使用範例 (Examples) (Work in Progress)
 - [核心API文件 (Core API Documentation)](link-to-api-documentation)
 - [開發指南 (Contributing)](CONTRIBUTING.md)
 - [資安通報 (Security Issues)](SECURITY.md)
@@ -53,7 +58,7 @@ npm config set //npm.pkg.github.com/:_authToken=[SET-YOUR-TOKEN]
 npm install -g @cathayddt/bdk@latest
 
 # 初始化 (initialize)
-bdk config init
+bdk fabric config init
 ```
 
 #### 從原始碼安裝 (Install from Source)
@@ -120,11 +125,11 @@ Use the following command to create a simple Hyperledger Fabric Network.
 
 ```bash
   # create network
-  bdk network create --test-network
+  bdk fabric network create --test-network
   # start orderer docker container (interactive mode)
-  bdk orderer up -i
+  bdk fabric orderer up -i
   # start peer docker container (interactive mode)
-  bdk peer up -i
+  bdk fabric peer up -i
 ```
 
 ## LICENSE

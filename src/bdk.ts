@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import yargs from 'yargs'
-import config from './config'
+import config from './fabric/config'
 import { errorHandler } from './util'
 
 (config.isDevMode || config.isTestMode) && require('source-map-support/register')
@@ -20,7 +20,9 @@ Blockchain Deploy Kit
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const argv = yargs
-  .commandDir('command')
+  .commandDir('fabric')
+  .commandDir('quorum')
+  .commandDir('hello')
   .strict()
   .demandCommand()
   .completion()
