@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 import RLP from 'rlp'
 import { NetworkCreateType, GenesisJsonType } from '../model/type/network.type'
 import { AbstractService } from './Service.abstract'
-import { logger } from '../../util/logger'
 import ValidatorInstance from '../instance/validator'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
@@ -117,8 +116,7 @@ export default class Network extends AbstractService {
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
     await (new MemberInstance(this.config, this.infra).up())
-    // TODO: check peer create successfully
-    logger.info('Quroum Network Create Successfully!')
+    // TODO: check quorum network create successfully
   }
 
   public async delete () {

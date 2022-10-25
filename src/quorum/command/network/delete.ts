@@ -1,11 +1,12 @@
 import { Arguments } from 'yargs'
 import config from '../../config'
 import Network from '../../service/network'
-import { logger } from '../../../util'
+import { logger, onCancel } from '../../../util'
+import prompts from 'prompts'
 
 export const command = 'delete'
 
-export const desc = 'stop quorum network.'
+export const desc = '刪除現有的 Quorum Network.'
 
 export const builder = {}
 
@@ -14,6 +15,19 @@ export const handler = async (argv: Arguments) => {
 
   const network = new Network(config)
 
-  await network.delete()
-  logger.info('Network Service delete Successfully')
+  let confirmDelete = true
+
+  const response = await prompts({
+    type: 'confirm',
+    name: 'value',
+    message: 'Confirm to delete Quorum Network?',
+    initial: false,
+  }, { onCancel })
+
+  confirmDelete = response.value
+
+  if (confirmDelete) {
+    await network.delete()
+    logger.info('Quorum Network delete Successfully!')
+  }
 }
