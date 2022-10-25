@@ -25,6 +25,7 @@ const argv = yargs
   .commandDir('hello')
   .strict()
   .demandCommand()
+  .completion()
   .usage(usageText)
   // .recommendCommands()
   // .showHelpOnFail(true, 'Specify --help for available options')
