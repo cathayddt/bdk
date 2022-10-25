@@ -8,7 +8,7 @@ export default class Explorer extends AbstractService {
    * @description 啟動 explorer
    */
   public async create (port: number) {
-    logger.debug(`Peer up: ${port}`)
+    logger.debug(`Explorer up: ${port}`)
     this.createExplorerDockerCompose(port)
     logger.debug('Starting explorer container')
     return await (new ExplorerInstance(this.config, this.infra).up())

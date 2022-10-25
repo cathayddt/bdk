@@ -5,16 +5,6 @@ import { EnvironmentEnum, NodeTypeEnum } from './model/type/config.type'
 const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/quorum`
 dotenv.config({ path: `${bdkPath}/.env` })
 
-// export const defaultEnv: ConfigEnvType = {
-//   NODE_ENV: EnvironmentEnum.production,
-//   BDK_QUORUM_NETWORK_NAME: 'bdk-quorum-network',
-//   BDK_ORG_TYPE: 'peer',
-//   BDK_ORG_NAME: 'Org1',
-//   BDK_ORG_DOMAIN: 'org1.example.com',
-//   BDK_HOSTNAME: 'peer0',
-//   LOGGER_SILLY: false,
-// }
-
 /**
  * bdkPath: .bdk folder path which save all fabric files
  * dockerHostPath: Mount docker host path
