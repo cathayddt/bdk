@@ -3,11 +3,11 @@ import Explorer from '../../service/explorer'
 import { onCancel, ParamsError } from '../../../util/error'
 import config from '../../config'
 import prompts from 'prompts'
-import { logger } from 'ethers'
+import { logger } from '../../../util'
 
 export const command = 'create'
 
-export const desc = '產生 Blockchain explorer 所需的相關設定檔案'
+export const desc = '產生 Quorum Explorer 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -30,7 +30,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         {
           type: 'number',
           name: 'port',
-          message: 'What is the port of blockscout explorer?',
+          message: 'What is the port of quorum explorer?',
           min: 0,
           max: 65535,
           initial: 26000,
@@ -41,5 +41,5 @@ export const handler = async (argv: Arguments<OptType>) => {
   })()
 
   await explorer.create(explorerCreate)
-  logger.info(`Explorer create in : http://localhost:${explorerCreate}`)
+  logger.info(`Quorum Explorer Create Successfully! Host at: http://localhost:${explorerCreate}`)
 }

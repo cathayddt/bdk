@@ -5,10 +5,11 @@ import Network from '../../service/network'
 import { onCancel, ParamsError } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
+import { logger } from '../../../util/logger'
 
 export const command = 'create'
 
-export const desc = '產生 Blockchain network 所需的相關設定檔案'
+export const desc = '產生 Quorum network 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -33,21 +34,21 @@ export const handler = async (argv: Arguments<OptType>) => {
           name: 'chainId',
           message: 'What is your chain id?',
           min: 0,
-          initial: 0,
+          initial: 1337,
         },
         {
           type: 'number',
           name: 'validatorNumber',
           message: 'How many validator do you want?',
           min: 1,
-          initial: 1,
+          initial: 4,
         },
         {
           type: 'number',
           name: 'memberNumber',
           message: 'How many member do you want?',
-          min: 0,
-          initial: 0,
+          min: 1,
+          initial: 1,
         },
       ], { onCancel })
 
@@ -80,7 +81,10 @@ export const handler = async (argv: Arguments<OptType>) => {
 
         walletAddress = address
       } else {
-        walletAddress = await network.createWalletAddress().address
+        const { address, privateKey } = await network.createWalletAddress()
+        walletAddress = address
+        logger.info(`Your wallet address: 0x${walletAddress}`)
+        logger.info(`Wallet private key: ${privateKey}`)
       }
 
       const alloc = [{
@@ -94,4 +98,5 @@ export const handler = async (argv: Arguments<OptType>) => {
   })()
 
   await network.create(networkCreate)
+  logger.info('Quorum Network Create Successfully!')
 }
