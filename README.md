@@ -6,18 +6,22 @@ BDK streamlines the normally complicated process of creating a blockchain with c
 
 e.g.
 
+```
+bdk quorum network create -i
+```
+![bdk quorum network create -i](images/bdk-quorum-network-create.gif)
+
 ```bash
 bdk fabric network create -i
 ```
 
-![bdk fabric network create -i](images/bdk-network-create.gif)
-![bdk fabric channel create -i](images/bdk-channel-create.gif)
+![bdk fabric network create -i](images/bdk-fabric-network-create.gif)
 
 ## 版本 (Releases)
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v1.0.4][v1.0.4] | [v1.0.4][v1.0.4] |
+| [v2.0.0][v2.0.0] | [v1.0.4][v1.0.4] |
 
 [v1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
 
@@ -26,7 +30,8 @@ bdk fabric network create -i
 ## 文件 (Documentation)
 
 - 指令文件 CLI Documentation (Work in Progress)
-- [使用範例 (Examples)](docs/fabric/EXAMPLE.md)
+- [Fabric 使用範例 (Examples)](docs/fabric/EXAMPLE.md)
+- Quorum 使用範例 (Examples) (Work in Progress)
 - [核心API文件 (Core API Documentation)](link-to-api-documentation)
 - [開發指南 (Contributing)](CONTRIBUTING.md)
 - [資安通報 (Security Issues)](SECURITY.md)
@@ -72,7 +77,7 @@ npm run build:console
 ### 設定自動完成 (Configure AutoComplete)
 
 ```bash
-bdk fabric completion
+bdk completion
 ```
 
 腳本 (script source is as follows)
@@ -82,8 +87,8 @@ bdk fabric completion
 #
 # yargs command completion script
 #
-# Installation: bdk fabric completion >> ~/.zshrc
-#    or bdk fabric completion >> ~/.zsh_profile on OSX.
+# Installation: bdk completion >> ~/.zshrc
+#    or bdk completion >> ~/.zsh_profile on OSX.
 #
 _bdk_yargs_completions()
 {
@@ -105,7 +110,7 @@ compdef _bdk_yargs_completions bdk
 Use the following command to verify that BDK has completed installation and is now ready to be used.
 
 ```bash
-bdk fabric hello
+bdk hello
 ```
 
 如果指令已順利安裝，你會看到 `You have installed bdk successfully!!!` 
