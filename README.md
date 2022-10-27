@@ -23,7 +23,7 @@ bdk fabric network create -i
 | ---------------- | ---------------- |
 | [v2.0.0][v2.0.0] | [v1.0.4][v1.0.4] |
 
-[v1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
+[v1.0.4]: https://github.com/cathayddt/bdk/releases/tag/v1.0.4
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
@@ -31,8 +31,7 @@ bdk fabric network create -i
 
 - 指令文件 CLI Documentation (Work in Progress)
 - [Fabric 使用範例 (Examples)](docs/fabric/EXAMPLE.md)
-- Quorum 使用範例 (Examples) (Work in Progress)
-- [核心API文件 (Core API Documentation)](link-to-api-documentation)
+- [Quorum 使用範例 (Examples)](docs/quorum/EXAMPLE.md)
 - [開發指南 (Contributing)](CONTRIBUTING.md)
 - [資安通報 (Security Issues)](SECURITY.md)
 

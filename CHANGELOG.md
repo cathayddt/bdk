@@ -14,6 +14,21 @@ All notable changes to BDK project will be documented here.
 
 [1.0.4]: https://github.com/cathayddt/bdk/releases/tag/v1.0.4
 
+[2.0.0]: https://github.com/cathayddt/bdk/releases/tag/v2.0.0
+
+## [2.0.0][2.0.0] - 2022-10-
+
+### new
+
+- BREAKING CHANGE: Quorum Network Feature (#65)
+- New Command: `bdk quorum network`
+- New Command: `bdk quorum explorer`
+- New Commands API Docs
+
+### changed
+- Refactor: move Fabric commands from 'src/' to 'src/fabric'
+- Refactor: Fabric command form `bdk` to `bdk fabric`
+
 ## [1.0.4][1.0.4] - 2022-02-
 
 ### new
