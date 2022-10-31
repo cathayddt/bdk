@@ -1,6 +1,6 @@
 {
   "name": "@cathayddt/bdk",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "Blockchain Deploy Kit",
   "homepage": "https://github.com/cathayddt/bdk#readme",
   "bugs": {
@@ -16,7 +16,9 @@
     "SecondDim (https://github.com/SecondDim)",
     "yujugrace (https://github.com/yujugrace)",
     "kth-tw (https://github.com/kth-tw)",
-    "RuiSiang (https://github.com/RuiSiang)"
+    "RuiSiang (https://github.com/RuiSiang)",
+    "PianoChicken (https://github.com/Pianochicken)",
+    "kidneyweak (https://github.com/kidneyweakx)"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

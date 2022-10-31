@@ -1,6 +1,6 @@
-# 指令文件
+# Fabric 指令文件
 
-[(English version)](COMMANDS-EN.md)
+(English version)(Work In Progress)
 
 ## 目錄
 
