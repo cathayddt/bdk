@@ -21,6 +21,10 @@ export function iterateFormat (
   return item
 }
 
+export function tarDateFormat (date: Date): string {
+  return date.toISOString().slice(0, 19).replace(/T/g, '_').replace(/:/g, '-')
+}
+
 export const randomFromArray = <T> (x: Array<T>) => x[Math.floor(Math.random() * x.length)]
 // export function iterateObject2 (obj: Map, callback: (x: string) => any) {
 //   for (const key in obj) {

@@ -14,12 +14,14 @@ export enum InstanceTypeEnum {
 export default class BdkFile {
   private config: Config
   private bdkPath: string
+  private backupPath: string
   private envPath: string
   private orgPath: string
 
   constructor (config: Config, networkName: string = config.networkName) {
     this.config = config
     this.bdkPath = `${config.infraConfig.bdkPath}/${networkName}`
+    this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
   }
@@ -139,8 +141,29 @@ export default class BdkFile {
     fs.copyFileSync(`${this.bdkPath}/artifacts/member${i}/address`, `${this.bdkPath}/Member-${i}/data/address`)
   }
 
+  public createBackupFolder () {
+    fs.mkdirSync(`${this.backupPath}`, { recursive: true })
+  }
+
+  public createBackupTar (validatorTag: string, date: string) {
+    this.createBackupFolder()
+    return fs.createWriteStream(`${this.backupPath}/Backup_${validatorTag}_${date}.tar.gz`)
+  }
+
   public getBdkPath () {
     return `${this.bdkPath}`
+  }
+
+  public getExportFiles () {
+    return fs.readdirSync(this.bdkPath)
+  }
+
+  public getBackupPath () {
+    return `${this.backupPath}`
+  }
+
+  public getBackupFiles () {
+    return fs.readdirSync(this.backupPath)
   }
 
   public getExplorerDockerComposeYamlPath (): string {
