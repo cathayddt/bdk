@@ -7,6 +7,7 @@ class BdkError extends Error {}
 export class ProcessError extends BdkError {}
 export class ParamsError extends BdkError {}
 export class DockerError extends BdkError {}
+export class BackupError extends BdkError {}
 export class FabricContainerError extends BdkError {
   public stdout: string
   constructor (message: string, stdout: string) {
