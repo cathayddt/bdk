@@ -11,7 +11,7 @@ class ValidatorDockerComposeYaml extends DockerComposeYaml {
       ports: [
         `${port}:8545`,
       ],
-      network_mode: 'quorum',
+      networks: ['quorum'],
       volumes: [`${bdkPath}/Validator-${validatorNum}/data/:/data`],
       entrypoint: [
         '/bin/sh', '-c',
