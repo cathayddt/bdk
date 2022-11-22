@@ -111,6 +111,10 @@ export default class BdkFile {
     fs.mkdirSync(`${this.bdkPath}/Member-${i}/data/keystore`, { recursive: true })
   }
 
+  public removeBdkFiles (path: string) {
+    fs.rmSync(`${this.bdkPath}/${path}`, { recursive: true, force: true })
+  }
+
   public copyGenesisJsonToMember (i: number) {
     this.createMemberFolder(i)
     fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, `${this.bdkPath}/Member-${i}/data/genesis.json`)

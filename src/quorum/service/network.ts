@@ -149,4 +149,16 @@ export default class Network extends AbstractService {
 
     return { privateKey, publicKey, address }
   }
+
+  /** @ignore */
+  public getBdkFiles () {
+    return this.bdkFile.getExportFiles()
+  }
+
+  /** @ignore */
+  public removeBdkFiles (files: string[]) {
+    for (const file of files) {
+      this.bdkFile.removeBdkFiles(file)
+    }
+  }
 }
