@@ -119,9 +119,27 @@ export default class Network extends AbstractService {
     // TODO: check quorum network create successfully
   }
 
-  public async delete () {
+  public async upService (service: string) {
+    if (service.match(/validator[\w-]+/g)) {
+      await (new ValidatorInstance(this.config, this.infra).upOneService(service))
+    } else if (service.match(/member[\w-]+/g)) {
+      await (new MemberInstance(this.config, this.infra).upOneService(service))
+    }
+  }
+
+  public async upAll () {
+    await (new ValidatorInstance(this.config, this.infra).up())
+    await (new MemberInstance(this.config, this.infra).up())
+  }
+
+  public async down () {
     await (new ValidatorInstance(this.config, this.infra).down())
     await (new MemberInstance(this.config, this.infra).down())
+  }
+
+  public async delete () {
+    await this.down()
+    this.removeBdkFiles(this.getBdkFiles())
   }
 
   /** @ignore */
@@ -153,6 +171,13 @@ export default class Network extends AbstractService {
   /** @ignore */
   public getBdkFiles () {
     return this.bdkFile.getExportFiles()
+  }
+
+  /** @ignore */
+  public getUpExportItems () {
+    const node = this.bdkFile.getExportFiles().filter(file => file.match(/(validator|member)[0-9]+/g))
+    const nodeList = node.map(x => ({ title: x, value: x }))
+    return nodeList
   }
 
   /** @ignore */

@@ -22,6 +22,7 @@ export interface InfraRunner<T> {
   runCommand(payload: DockerRunCommandType): Promise<T>
   createContainerAndRun(payload: DockerRunCommandType): Promise<T>
   upInBackground(dockerComposeFile: string): Promise<T>
+  upServiceInBackground(dockerComposeFile: string, service: string): Promise<T>
   downAndRemoveVolumes(dockerComposeFile: string): Promise<T>
   restart(dockerComposeFile: string, service: string[]): Promise<T>
 }
