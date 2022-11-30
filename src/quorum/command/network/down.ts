@@ -4,14 +4,14 @@ import Network from '../../service/network'
 import { logger, onCancel } from '../../../util'
 import prompts from 'prompts'
 
-export const command = 'delete'
+export const command = 'down'
 
-export const desc = '刪除現有的 Quorum Network.'
+export const desc = '停止現有的 Quorum Network.'
 
 export const builder = {}
 
 export const handler = async (argv: Arguments) => {
-  logger.debug('exec network delete', argv.$0)
+  logger.debug('exec network down', argv.$0)
 
   const network = new Network(config)
 
@@ -20,14 +20,14 @@ export const handler = async (argv: Arguments) => {
   const response = await prompts({
     type: 'confirm',
     name: 'value',
-    message: '⚠️ The following processes will remove all existing files. Confirm to delete Quorum Network?',
+    message: 'Confirm to down Quorum Network?',
     initial: false,
   }, { onCancel })
 
   confirmDelete = response.value
 
   if (confirmDelete) {
-    await network.delete()
-    logger.info('Quorum Network delete Successfully!')
+    await network.down()
+    logger.info('Quorum Network down Successfully!')
   }
 }

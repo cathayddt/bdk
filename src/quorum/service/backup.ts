@@ -49,7 +49,7 @@ export default class Backup extends AbstractService {
    * @description 回傳 backup 資料夾所有的備份檔案
    */
   public getExportItems () {
-    const node = this.bdkFile.getExportFiles().filter(file => file.match(/(validator|member)[\w-]+/g))
+    const node = this.bdkFile.getExportFiles().filter(file => file.match(/(validator|member)[0-9]+/g))
     const nodeList = node.map(x => ({ title: x, value: x }))
     return nodeList
   }

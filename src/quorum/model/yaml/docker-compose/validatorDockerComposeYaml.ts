@@ -5,7 +5,7 @@ class ValidatorDockerComposeYaml extends DockerComposeYaml {
     this.addNetwork('quorum', {})
     this.addService(`validator${validatorNum}`, {
       image: 'quorumengineering/quorum:22.7.0',
-      container_name: `validator-${validatorNum}`,
+      container_name: `validator${validatorNum}`,
       restart: 'no',
       environment: ['PRIVATE_CONFIG=ignore'],
       ports: [
