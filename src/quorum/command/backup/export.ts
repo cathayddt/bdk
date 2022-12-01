@@ -17,7 +17,7 @@ export const builder = (yargs: Argv<OptType>) => {
   return yargs
     .example('bdk quorum backup export --interactive', 'Cathay BDK 互動式問答')
     .example('bdk quorum backup export --all', '備份 BDK 資料夾下所有 Quorum Network 資料')
-    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i', default: false })
+    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
     .option('all', { type: 'boolean', description: '是否備份所有資料', alias: 'a' })
 }
 
