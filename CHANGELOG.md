@@ -16,6 +16,23 @@ All notable changes to BDK project will be documented here.
 
 [2.0.0]: https://github.com/cathayddt/bdk/releases/tag/v2.0.0
 
+[2.0.1]: https://github.com/cathayddt/bdk/releases/tag/v2.0.1
+
+## [2.0.1][2.0.1] - 2022-12-
+
+### new
+
+- New Command: `bdk quorum network up`
+- New Command: `bdk quorum network down`
+- New Command: `bdk quorum backup import`
+- New Command: `bdk quorum backup export`
+- New Commands API Docs
+- Fix remove files and network issues
+
+### changed
+- Refactor: `bdk quorum network create` ask to delete exist files before creating
+- Refactor: `bdk quorum network delete` delete node files
+
 ## [2.0.0][2.0.0] - 2022-10-
 
 ### new

@@ -142,6 +142,16 @@ export class Runner implements InfraRunner<DockerResultType> {
     return { stdout: this.runSpawnSync(['-f', dockerComposeFile, 'up', '-d']) }
   }
 
+  public upServiceInBackground = async (dockerComposeFile: string, service: string) => {
+    const networks = (YAML.load(fs.readFileSync(dockerComposeFile).toString()) as DockerComposeYamlInterface).networks
+    for (const network in networks) {
+      if (networks[network]?.external) {
+        await this.checkAndCreateNetwork(network)
+      }
+    }
+    return { stdout: this.runSpawnSync(['-f', dockerComposeFile, 'up', '-d', '--', service]) }
+  }
+
   // eslint-disable-next-line require-await
   public downAndRemoveVolumes = async (dockerComposeFile: string) => {
     // 為保留其他infra的操作空間，此method的type為(dockerComposeFile: string): Promise<InfraResultType>，雖然裡面沒有await，仍用async

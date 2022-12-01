@@ -36,7 +36,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           `${port}:4000`,
         ],
         networks: ['quorum-blockscout'],
-        volumes: [`${bdkPath}/Validator-0/data/geth.ipc:/root/geth.ipc`],
+        volumes: [`${bdkPath}/validator0/data/geth.ipc:/root/geth.ipc`],
       },
     )
     this.addService(
