@@ -16,7 +16,7 @@ interface OptType {
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
     .example('bdk quorum backup import --interactive', 'Cathay BDK 互動式問答')
-    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i', default: false })
+    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
