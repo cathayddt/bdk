@@ -75,12 +75,12 @@ export default class Network extends AbstractService {
 
     for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
       const validatorPublicKey = this.bdkFile.getValidatorPublicKey(i)
-      const validatorNode = `enode://${validatorPublicKey}@validator-${i}:30303`
+      const validatorNode = `enode://${validatorPublicKey}@validator${i}:30303`
       staticNodesJson.push(validatorNode)
     }
     for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
       const memberPublicKey = this.bdkFile.getMemberPublicKey(i)
-      const memberNode = `enode://${memberPublicKey}@member-${i}:30303`
+      const memberNode = `enode://${memberPublicKey}@member${i}:30303`
       staticNodesJson.push(memberNode)
     }
     const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()

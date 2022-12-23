@@ -26,6 +26,10 @@ export default class BdkFile {
     this.orgPath = ''
   }
 
+  public createBdkFolder () {
+    fs.mkdirSync(`${this.bdkPath}`, { recursive: true })
+  }
+
   public createArtifactsFolder () {
     fs.mkdirSync(`${this.bdkPath}/artifacts/goQuorum`, { recursive: true })
   }
@@ -159,6 +163,7 @@ export default class BdkFile {
   }
 
   public getExportFiles () {
+    this.createBdkFolder()
     return fs.readdirSync(this.bdkPath)
   }
 
@@ -167,6 +172,7 @@ export default class BdkFile {
   }
 
   public getBackupFiles () {
+    this.createBackupFolder()
     return fs.readdirSync(this.backupPath)
   }
 
