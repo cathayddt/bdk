@@ -4,6 +4,7 @@ import { Config } from '../config'
 import { GenesisJsonType } from '../model/type/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
+import { PathError } from '../../util/error'
 
 export enum InstanceTypeEnum {
   validator = 'validator',
@@ -65,10 +66,12 @@ export default class BdkFile {
   }
 
   public getValidatorPublicKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/nodekey.pub`)
   }
 
   public getMemberPublicKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey.pub`)
   }
 
@@ -159,20 +162,22 @@ export default class BdkFile {
   }
 
   public getBdkPath () {
+    this.checkPathExist(this.bdkPath)
     return `${this.bdkPath}`
   }
 
   public getExportFiles () {
-    this.createBdkFolder()
+    this.checkPathExist(this.bdkPath)
     return fs.readdirSync(this.bdkPath)
   }
 
   public getBackupPath () {
+    this.checkPathExist(this.backupPath)
     return `${this.backupPath}`
   }
 
   public getBackupFiles () {
-    this.createBackupFolder()
+    this.checkPathExist(this.backupPath)
     return fs.readdirSync(this.backupPath)
   }
 
@@ -198,5 +203,11 @@ export default class BdkFile {
 
   public createMemberDockerComposeYaml (memberDockerComposeYaml: MemberDockerComposeYaml) {
     fs.writeFileSync(this.getMemberDockerComposeYamlPath(), memberDockerComposeYaml.getYamlString())
+  }
+
+  public checkPathExist (path: string) {
+    if (!fs.existsSync(path)) {
+      throw new PathError(`${path} no exist`)
+    }
   }
 }
