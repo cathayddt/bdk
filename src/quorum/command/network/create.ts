@@ -27,6 +27,7 @@ export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
+    network.createBdkFolder()
     const fileList = network.getBdkFiles()
     if (fileList.length !== 0) {
       const confirmDelete = (await prompts({

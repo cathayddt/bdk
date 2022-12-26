@@ -34,7 +34,7 @@ export default class Network extends AbstractService {
       nonce: '0x0',
       timestamp: `0x${Math.floor(Date.now() / 1000).toString(16)}`,
       extraData,
-      gasLimit: '0xFFFFFF',
+      gasLimit: '0xE0000000',
       gasUsed: '0x0',
       number: '0x0',
       difficulty: '0x1',
@@ -61,7 +61,12 @@ export default class Network extends AbstractService {
           ceil2Nby3Block: 0,
         },
         txnSizeLimit: 64,
-        maxCodeSize: 0,
+        maxCodeSizeConfig: [
+          {
+            block: 0,
+            size: 64,
+          },
+        ],
         isQuorum: true,
       },
       alloc,
@@ -75,12 +80,12 @@ export default class Network extends AbstractService {
 
     for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
       const validatorPublicKey = this.bdkFile.getValidatorPublicKey(i)
-      const validatorNode = `enode://${validatorPublicKey}@validator-${i}:30303`
+      const validatorNode = `enode://${validatorPublicKey}@validator${i}:30303`
       staticNodesJson.push(validatorNode)
     }
     for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
       const memberPublicKey = this.bdkFile.getMemberPublicKey(i)
-      const memberNode = `enode://${memberPublicKey}@member-${i}:30303`
+      const memberNode = `enode://${memberPublicKey}@member${i}:30303`
       staticNodesJson.push(memberNode)
     }
     const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
@@ -166,6 +171,11 @@ export default class Network extends AbstractService {
     const address = nodekey.address.replace(/^0x/, '').toLowerCase()
 
     return { privateKey, publicKey, address }
+  }
+
+  /** @ignore */
+  public createBdkFolder () {
+    return this.bdkFile.createBdkFolder()
   }
 
   /** @ignore */

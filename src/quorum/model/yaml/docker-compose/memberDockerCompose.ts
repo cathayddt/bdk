@@ -11,6 +11,7 @@ class MemberDockerComposeYaml extends DockerComposeYaml {
       ports: [
         `${port}:8545`,
       ],
+      networks: ['quorum'],
       volumes: [`${bdkPath}/member${memberNum}/data/:/data`],
       entrypoint: [
         '/bin/sh', '-c',

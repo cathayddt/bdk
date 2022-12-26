@@ -57,7 +57,10 @@ export interface GenesisJsonType {
       ceil2Nby3Block: number
     }
     txnSizeLimit: number
-    maxCodeSize: number
+    maxCodeSizeConfig: {
+      size: number
+      block: number
+    }[]
     isQuorum: boolean
   }
   alloc: {

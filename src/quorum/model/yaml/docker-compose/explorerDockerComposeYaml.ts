@@ -3,7 +3,7 @@ import DockerComposeYaml from './dockerComposeYaml'
 class ExplorerDockerComposeYaml extends DockerComposeYaml {
   constructor (bdkPath: string, port: number = 26000) {
     super()
-    this.addNetwork('quorum-blockscout', { name: 'quorum-blockscout', driver: 'bridge' })
+    this.addNetwork('quorum', {})
     this.addVolume('blockscoutpostgres', {})
     this.addService(
       'blockscout',
@@ -35,7 +35,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
         ports: [
           `${port}:4000`,
         ],
-        networks: ['quorum-blockscout'],
+        networks: ['quorum'],
         volumes: [`${bdkPath}/validator0/data/geth.ipc:/root/geth.ipc`],
       },
     )
@@ -61,9 +61,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           timeout: '10s',
           retries: 5,
         },
-        networks: [
-          'quorum-blockscout',
-        ],
+        networks: ['quorum'],
       },
     )
   }
