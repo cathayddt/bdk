@@ -2,7 +2,7 @@
 
 import yargs from 'yargs'
 import config from './fabric/config'
-import { errorHandler } from './util'
+import { errorHandler, ProcessError } from './util'
 
 (config.isDevMode || config.isTestMode) && require('source-map-support/register')
 
@@ -20,6 +20,10 @@ Blockchain Deploy Kit
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const argv = yargs
+  .check(() => {
+    if (process.getuid() === 0) throw new ProcessError('⚠️  DO NOT RUN AS ROOT ⚠️ ')
+    return true
+  })
   .commandDir('fabric')
   .commandDir('quorum')
   .commandDir('hello')
