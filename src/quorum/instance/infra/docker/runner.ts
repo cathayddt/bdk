@@ -122,7 +122,7 @@ export class Runner implements InfraRunner<DockerResultType> {
   // Docker Compose
   private runSpawnSync (args: Array<string>): string {
     logger.debug(`run spawnSync: docker-compose ${args.join(' ')}`)
-    const spawnReturn = spawnSync('docker-compose', [...args])
+    const spawnReturn = spawnSync('docker-compose', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
     // TODO ! docker 裡面的 error 不能這樣抓
     // TODO 如果 docker-compose 不存在不會報錯
     if (spawnReturn.error) {
