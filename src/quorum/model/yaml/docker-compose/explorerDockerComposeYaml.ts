@@ -8,12 +8,13 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
     this.addService(
       'blockscout',
       {
-        image: 'consensys/blockscout:v4.0.0-beta',
+        image: 'consensys/blockscout:v4.1.5-beta',
         restart: 'no',
         container_name: 'blockscout',
         environment: [
           'PORT=4000',
-          'DATABASE_URL=ecto://postgres:postgres@blockscoutpostgres/postgres?ssl=false',
+          'ECTO_USE_SSL=false',
+          'DATABASE_URL=postgresql://postgres:postgres@blockscoutpostgres:5432/postgres?ssl=false',
           'POSTGRES_PASSWORD=postgres',
           'POSTGRES_USER=postgres',
           'NETWORK=quickstart',
@@ -42,7 +43,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
     this.addService(
       'blockscoutpostgres',
       {
-        image: 'postgres:13.4-alpine',
+        image: 'postgres:13.6-alpine',
         container_name: 'blockscoutpostgres',
         environment: [
           'POSTGRES_USER=postgres',

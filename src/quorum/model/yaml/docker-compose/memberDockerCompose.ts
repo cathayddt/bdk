@@ -4,7 +4,7 @@ class MemberDockerComposeYaml extends DockerComposeYaml {
   public addMember (bdkPath: string, memberNum: number, port: number) {
     this.addNetwork('quorum', {})
     this.addService(`member${memberNum}`, {
-      image: 'quorumengineering/quorum:22.7.0',
+      image: 'quorumengineering/quorum:22.7.4',
       container_name: `member${memberNum}`,
       restart: 'always',
       environment: ['PRIVATE_CONFIG=ignore'],
