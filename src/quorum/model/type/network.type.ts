@@ -56,11 +56,14 @@ export interface GenesisJsonType {
       policy: number
       ceil2Nby3Block: number
     }
-    txnSizeLimit: number
-    maxCodeSizeConfig: {
-      size: number
-      block: number
+    transitions: {
+      block?: number
+      transactionSizeLimit?: number
+      contractSizeLimit?: number
+      blockPeriodSeconds?: number
+      emptyBlockPeriodSeconds?: number
     }[]
+    txnSizeLimit: number
     isQuorum: boolean
   }
   alloc: {

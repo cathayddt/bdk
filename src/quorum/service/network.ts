@@ -55,18 +55,19 @@ export default class Network extends AbstractService {
         qbft: {
           epochLength: 30000,
           blockPeriodSeconds: 1,
-          emptyBlockPeriodSeconds: 60,
+          emptyBlockPeriodSeconds: 3600,
           requestTimeoutSeconds: 4,
           policy: 0,
           ceil2Nby3Block: 0,
         },
-        txnSizeLimit: 64,
-        maxCodeSizeConfig: [
+        transitions: [
           {
             block: 0,
-            size: 64,
+            transactionSizeLimit: 64,
+            contractSizeLimit: 64,
           },
         ],
+        txnSizeLimit: 64,
         isQuorum: true,
       },
       alloc,
