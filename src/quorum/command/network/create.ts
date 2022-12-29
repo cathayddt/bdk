@@ -55,7 +55,7 @@ export const handler = async (argv: Arguments<OptType>) => {
             name: 'chainId',
             message: 'What is your chain id?',
             min: 0,
-            initial: 1337,
+            initial: 81712,
           },
           {
             type: 'number',
