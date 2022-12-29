@@ -5,7 +5,7 @@ import Network from '../../service/network'
 import { onCancel, ParamsError } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
-import { logger } from '../../../util/logger'
+import ora from 'ora'
 
 export const command = 'create'
 
@@ -37,8 +37,9 @@ export const handler = async (argv: Arguments<OptType>) => {
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
+        const spinner = ora('Quorum Network Create ...').start()
         network.removeBdkFiles(fileList)
-        logger.info('✔ Remove all existing files!')
+        spinner.succeed('Remove all existing files!')
       }
       return confirmDelete
     } else {
@@ -104,8 +105,14 @@ export const handler = async (argv: Arguments<OptType>) => {
         } else {
           const { address, privateKey } = await network.createWalletAddress()
           walletAddress = address
-          logger.info(`Your wallet address: 0x${walletAddress}`)
-          logger.info(`Wallet private key: ${privateKey}`)
+          ora().stopAndPersist({
+            text: `Your wallet address: 0x${walletAddress}`,
+            symbol: '🔑',
+          })
+          ora().stopAndPersist({
+            text: `Wallet private key: ${privateKey}`,
+            symbol: '🔑',
+          })
         }
 
         const alloc = [{
@@ -117,8 +124,8 @@ export const handler = async (argv: Arguments<OptType>) => {
       }
       throw new ParamsError('Invalid params: Required parameter missing')
     })()
-
+    const spinner = ora('Quorum Network Create ...').start()
     await network.create(networkCreate)
-    logger.info('Quorum Network Create Successfully!')
+    spinner.succeed('Quorum Network Create Successfully!')
   }
 }

@@ -4,6 +4,7 @@ import Network from '../../service/network'
 import { logger } from '../../../util'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'up'
 
@@ -25,8 +26,9 @@ export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
 
   if (argv.all) {
+    const spinner = ora('Quorum Network Up All ...').start()
     await network.upAll()
-    logger.info('Quorum Network up all Successfully!')
+    spinner.succeed('Quorum Network Up All Successfully!')
   } else if (argv.interactive) {
     const node: string = await (async () => {
       const nodeList = network.getUpExportItems()
@@ -43,8 +45,9 @@ export const handler = async (argv: Arguments<OptType>) => {
       }
     })()
 
+    const spinner = ora(`Quorum Network Up ${node} ...`).start()
     await network.upService(node)
-    logger.info(`Quorum Network up ${node} Successfully!`)
+    spinner.succeed(`Quorum Network Up ${node} Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }

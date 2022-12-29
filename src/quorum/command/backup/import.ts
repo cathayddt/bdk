@@ -1,9 +1,9 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
 import Backup from '../../service/backup'
-import { logger } from '../../../util'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'import'
 
@@ -35,7 +35,7 @@ export const handler = async (argv: Arguments<OptType>) => {
       throw new ParamsError('Invalid params: Required parameter missing')
     }
   })()
-
+  const spinner = ora('Quorum Network Import ...').start()
   await backup.import(archive)
-  logger.info('Quorum Network import Successfully!')
+  spinner.succeed('Quorum Network Import Successfully!')
 }

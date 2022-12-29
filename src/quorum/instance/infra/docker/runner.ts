@@ -1,7 +1,7 @@
 import fs from 'fs'
 import stream from 'stream'
 import YAML from 'js-yaml'
-import { spawnSync } from 'child_process'
+import { spawn } from 'child_process'
 import Dockerode from 'dockerode'
 import { logger } from '../../../../util/logger'
 import { DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType } from '../../../model/type/docker.type'
@@ -120,16 +120,19 @@ export class Runner implements InfraRunner<DockerResultType> {
   }
 
   // Docker Compose
-  private runSpawnSync (args: Array<string>): string {
-    logger.debug(`run spawnSync: docker-compose ${args.join(' ')}`)
-    const spawnReturn = spawnSync('docker-compose', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
-    // TODO ! docker 裡面的 error 不能這樣抓
-    // TODO 如果 docker-compose 不存在不會報錯
-    if (spawnReturn.error) {
-      throw new DockerError(`[x] command [docker-compose]: ${spawnReturn.error.message}`)
-    }
-    logger.silly(spawnReturn.output.join('\n'))
-    return spawnReturn.output.join('\n')
+  private runSpawn (args: Array<string>):Promise<string> {
+    return new Promise((resolve) => {
+      logger.debug(`run spawnSync: docker-compose ${args.join(' ')}`)
+      const spawnReturn = spawn('docker-compose', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
+      // TODO ! docker 裡面的 error 不這樣抓
+      // TODO 如果 docker-compose 不存在不會報錯
+      spawnReturn.stdout.on('close', () => {
+        resolve(`docker-compose ${args.join(' ')} OK`)
+      })
+      spawnReturn.on('error', (error) => {
+        throw new DockerError(`[x] command [docker-compose]: ${error.message}`)
+      })
+    })
   }
 
   public upInBackground = async (dockerComposeFile: string) => {
@@ -139,7 +142,7 @@ export class Runner implements InfraRunner<DockerResultType> {
         await this.checkAndCreateNetwork(network)
       }
     }
-    return { stdout: this.runSpawnSync(['-f', dockerComposeFile, 'up', '-d']) }
+    return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'up', '-d']) }
   }
 
   public upServiceInBackground = async (dockerComposeFile: string, service: string) => {
@@ -149,18 +152,14 @@ export class Runner implements InfraRunner<DockerResultType> {
         await this.checkAndCreateNetwork(network)
       }
     }
-    return { stdout: this.runSpawnSync(['-f', dockerComposeFile, 'up', '-d', '--', service]) }
+    return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'up', '-d', '--', service]) }
   }
 
-  // eslint-disable-next-line require-await
   public downAndRemoveVolumes = async (dockerComposeFile: string) => {
-    // 為保留其他infra的操作空間，此method的type為(dockerComposeFile: string): Promise<InfraResultType>，雖然裡面沒有await，仍用async
-    return { stdout: this.runSpawnSync(['-f', dockerComposeFile, 'down', '--volumes']) }
+    return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'down', '--volumes']) }
   }
 
-  // eslint-disable-next-line require-await
   public restart = async (dockerComposeFile: string, service: string[] = []) => {
-    // 為保留其他infra的操作空間，此method的type為(dockerComposeFile: string): Promise<InfraResultType>，雖然裡面沒有await，仍用async
-    return { stdout: this.runSpawnSync(['-f', dockerComposeFile, 'restart'].concat(service)) }
+    return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'restart'].concat(service)) }
   }
 }

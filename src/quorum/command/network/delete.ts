@@ -3,6 +3,7 @@ import config from '../../config'
 import Network from '../../service/network'
 import { logger, onCancel } from '../../../util'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'delete'
 
@@ -10,9 +11,7 @@ export const desc = '刪除現有的 Quorum Network.'
 
 export const builder = {}
 
-export const handler = async (argv: Arguments) => {
-  logger.debug('exec network delete', argv.$0)
-
+export const handler = async () => {
   const network = new Network(config)
 
   let confirmDelete = true
@@ -27,7 +26,8 @@ export const handler = async (argv: Arguments) => {
   confirmDelete = response.value
 
   if (confirmDelete) {
+    const spinner = ora('Quorum Network Delete ...').start()
     await network.delete()
-    logger.info('Quorum Network delete Successfully!')
+    spinner.succeed('Quorum Network Delete Successfully!')
   }
 }
