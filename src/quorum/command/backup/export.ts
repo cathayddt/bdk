@@ -1,9 +1,9 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
 import Backup from '../../service/backup'
-import { logger } from '../../../util'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'export'
 
@@ -25,8 +25,9 @@ export const handler = async (argv: Arguments<OptType>) => {
   const backup = new Backup(config)
 
   if (argv.all) {
+    const spinner = ora('Quorum Network Export All ...').start()
     await backup.exportAll()
-    logger.info('Quorum Network export all Successfully!')
+    spinner.succeed('Quorum Network Export All Successfully!')
   } else if (argv.interactive) {
     const node: string = await (async () => {
       const nodeList = backup.getExportItems()
@@ -42,8 +43,9 @@ export const handler = async (argv: Arguments<OptType>) => {
       }
     })()
 
+    const spinner = ora(`Quorum Network Export ${node} ...`).start()
     await backup.export(node)
-    logger.info(`Quorum Network export ${node} Successfully!`)
+    spinner.succeed(`Quorum Network Export ${node} Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }

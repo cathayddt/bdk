@@ -3,6 +3,7 @@ import config from '../../config'
 import Explorer from '../../service/explorer'
 import { logger, onCancel } from '../../../util'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'delete'
 
@@ -27,7 +28,8 @@ export const handler = async (argv: Arguments) => {
   confirmDelete = response.value
 
   if (confirmDelete) {
+    const spinner = ora('Quorum Explorer Delete ...').start()
     await explorer.delete()
-    logger.info('Quorum Explorer delete Successfully!')
+    spinner.succeed('Quorum Explorer Delete Successfully!')
   }
 }
