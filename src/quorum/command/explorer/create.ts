@@ -11,8 +11,6 @@ export const desc = '產生 Quorum Explorer 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
-  genesis: boolean
-  dockerCompose: boolean
 }
 
 export const builder = (yargs: Argv<OptType>) => {
@@ -37,7 +35,9 @@ export const handler = async (argv: Arguments<OptType>) => {
         },
       ], { onCancel })).port
     }
-    throw new ParamsError('Invalid params: Required parameter missing')
+    else {
+      return 26000
+    }
   })()
 
   const spinner = ora('Quorum Explorer Create ...').start()
