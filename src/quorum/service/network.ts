@@ -145,7 +145,7 @@ export default class Network extends AbstractService {
 
   public async delete () {
     await this.down()
-    this.removeBdkFiles(this.getBdkFiles())
+    this.removeBdkFiles(this.getNetworkFiles())
   }
 
   /** @ignore */
@@ -182,6 +182,16 @@ export default class Network extends AbstractService {
   /** @ignore */
   public getBdkFiles () {
     return this.bdkFile.getExportFiles()
+  }
+
+  /** @ignore */
+  public getNetworkFiles () {
+    const array = []
+    array.push(this.bdkFile.getExportFiles().filter(file => file.match(/(validator|member)+/g)))
+    array.push(this.bdkFile.getExportFiles().filter(file => file.match(/(artifacts)/g)))
+    const networkFilesList = array.flat()
+
+    return networkFilesList
   }
 
   /** @ignore */
