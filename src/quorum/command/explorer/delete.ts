@@ -11,9 +11,7 @@ export const desc = '刪除現有的 Quorum Explorer.'
 
 export const builder = {}
 
-export const handler = async (argv: Arguments) => {
-  logger.debug('exec explorer delete', argv.$0)
-
+export const handler = async () => {
   const explorer = new Explorer(config)
 
   let confirmDelete = true
@@ -21,7 +19,7 @@ export const handler = async (argv: Arguments) => {
   const response = await prompts({
     type: 'confirm',
     name: 'value',
-    message: 'Confirm to delete Quorum Explorer?',
+    message: '⚠️ The following processes will remove all explorer files. Confirm to delete Quorum Explorer?',
     initial: false,
   }, { onCancel })
 
