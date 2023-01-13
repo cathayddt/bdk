@@ -5,6 +5,7 @@ import Network from '../../service/network'
 import { onCancel, ParamsError } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
+import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import ora from 'ora'
 
 export const command = 'create'
@@ -13,8 +14,6 @@ export const desc = '產生 Quorum network 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
-  genesis: boolean
-  dockerCompose: boolean
 }
 
 export const builder = (yargs: Argv<OptType>) => {
@@ -122,7 +121,10 @@ export const handler = async (argv: Arguments<OptType>) => {
 
         return { chainId, validatorNumber, memberNumber, alloc }
       }
-      throw new ParamsError('Invalid params: Required parameter missing')
+      else {
+        const { address, privateKey } = await network.createWalletAddress()
+        return defaultNetworkConfig(address, privateKey)
+      }
     })()
     const spinner = ora('Quorum Network Create ...').start()
     await network.create(networkCreate)
