@@ -70,6 +70,11 @@ export default class BdkFile {
     return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/nodekey.pub`)
   }
 
+  public getValidatorAddress (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/address`)
+  }
+
   public getMemberPublicKey (i: number) {
     this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey.pub`)
@@ -169,6 +174,12 @@ export default class BdkFile {
   public getExportFiles () {
     this.checkPathExist(this.bdkPath)
     return fs.readdirSync(this.bdkPath)
+  }
+
+  public getStaticNodesJson () {
+    this.checkPathExist(this.bdkPath)
+    const staticNodeJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, 'utf8')
+    return JSON.parse(staticNodeJson)
   }
 
   public getBackupPath () {
