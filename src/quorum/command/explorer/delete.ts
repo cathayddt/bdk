@@ -1,7 +1,6 @@
-import { Arguments } from 'yargs'
 import config from '../../config'
 import Explorer from '../../service/explorer'
-import { logger, onCancel } from '../../../util'
+import { onCancel } from '../../../util'
 import prompts from 'prompts'
 import ora from 'ora'
 

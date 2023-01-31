@@ -1,7 +1,6 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
 import Network from '../../service/network'
-import { logger } from '../../../util'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'

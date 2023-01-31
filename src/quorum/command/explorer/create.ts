@@ -1,6 +1,6 @@
 import { Argv, Arguments } from 'yargs'
 import Explorer from '../../service/explorer'
-import { onCancel, ParamsError } from '../../../util/error'
+import { onCancel } from '../../../util/error'
 import config from '../../config'
 import prompts from 'prompts'
 import ora from 'ora'
@@ -34,8 +34,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           initial: 26000,
         },
       ], { onCancel })).port
-    }
-    else {
+    } else {
       return 26000
     }
   })()
