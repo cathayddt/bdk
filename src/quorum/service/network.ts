@@ -56,7 +56,7 @@ export default class Network extends AbstractService {
           epochLength: 30000,
           blockPeriodSeconds: 1,
           emptyBlockPeriodSeconds: 3600,
-          requestTimeoutSeconds: 4,
+          requestTimeoutSeconds: 60,
           policy: 0,
           ceil2Nby3Block: 0,
         },
@@ -101,7 +101,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i)
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -117,7 +117,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToMember(i)
       this.bdkFile.copyAddressToMember(i)
 
-      memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i)
+      memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2)
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 

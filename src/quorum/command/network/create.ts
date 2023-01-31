@@ -68,8 +68,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'number',
             name: 'memberNumber',
             message: 'How many member do you want?',
-            min: 1,
-            initial: 1,
+            min: 0,
+            initial: 0,
           },
         ], { onCancel })
 
