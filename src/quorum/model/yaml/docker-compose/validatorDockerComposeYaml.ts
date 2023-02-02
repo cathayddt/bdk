@@ -12,6 +12,7 @@ class ValidatorDockerComposeYaml extends DockerComposeYaml {
       environment: ['PRIVATE_CONFIG=ignore'],
       ports: [
         `${port}:8545`,
+        `${port + 1}:8546`,
       ],
       networks: ['quorum'],
       volumes: [`${bdkPath}/validator${validatorNum}/data/:/data`],

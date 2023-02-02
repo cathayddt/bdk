@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import prompts from 'prompts'
 import { Argv, Arguments } from 'yargs'
 import Network from '../../service/network'
-import { onCancel, ParamsError } from '../../../util/error'
+import { onCancel } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
 import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
@@ -68,8 +68,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'number',
             name: 'memberNumber',
             message: 'How many member do you want?',
-            min: 1,
-            initial: 1,
+            min: 0,
+            initial: 0,
           },
         ], { onCancel })
 
@@ -120,8 +120,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         }]
 
         return { chainId, validatorNumber, memberNumber, alloc }
-      }
-      else {
+      } else {
         const { address, privateKey } = await network.createWalletAddress()
         return defaultNetworkConfig(address, privateKey)
       }

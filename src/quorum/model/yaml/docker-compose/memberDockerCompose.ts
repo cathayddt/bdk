@@ -12,6 +12,7 @@ class MemberDockerComposeYaml extends DockerComposeYaml {
       environment: ['PRIVATE_CONFIG=ignore'],
       ports: [
         `${port}:8545`,
+        `${port + 1}:8546`,
       ],
       networks: ['quorum'],
       volumes: [`${bdkPath}/member${memberNum}/data/:/data`],
