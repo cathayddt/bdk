@@ -6,6 +6,7 @@ import ValidatorInstance from '../instance/validator'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
 import MemberInstance from '../instance/member'
+import { DockerResultType } from '../instance/infra/InfraRunner.interface'
 
 export default class Network extends AbstractService {
   /**
@@ -125,6 +126,62 @@ export default class Network extends AbstractService {
     // TODO: check quorum network create successfully
   }
 
+  public async addValidatorLocal () {
+    // count validator number
+    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 0))
+    const validatorNum = validatorCount
+    const { publicKey, address } = this.createKey(`artifacts/validator${validatorNum}`)
+    const validatorNode = `enode://${publicKey}@validator${validatorNum}:30303`
+
+    this.bdkFile.copyPrivateKeyToValidator(validatorNum)
+    this.bdkFile.copyPublicKeyToValidator(validatorNum)
+    this.bdkFile.copyAddressToValidator(validatorNum)
+
+    for (let i = 0; i < validatorNum; i++) {
+      await this.quorumCommand(`istanbul.propose("0x${address}", true)`, i)
+    }
+
+    this.bdkFile.copyGenesisJsonToValidator(validatorNum)
+
+    // read & add new node to static-nodes.json
+    const staticNodesJson = this.bdkFile.getStaticNodesJson()
+    staticNodesJson.push(validatorNode)
+    this.bdkFile.createStaticNodesJson(staticNodesJson)
+    this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
+
+    // for loop to copy static-nodes.json to validator
+    const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
+    for (let i = 0; i < validatorNum + 1; i++) {
+      this.bdkFile.copyStaticNodesJsonToValidator(i)
+      this.bdkFile.copyPermissionedNodesJsonToValidator(i)
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2)
+    }
+    this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
+
+    // for loop to copy static-nodes.json to member
+    const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
+    for (let i = 0; i < memberCount; i++) {
+      this.bdkFile.copyStaticNodesJsonToMember(i)
+      this.bdkFile.copyPermissionedNodesJsonToMember(i)
+    }
+
+    await (new ValidatorInstance(this.config, this.infra).upOneService(`validator${validatorNum}`))
+
+    while (await this.quorumCommand('istanbul.isValidator()', validatorNum) !== 'true') {
+      const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+      const wallet = ethers.Wallet.createRandom().connect(provider)
+      const tx = {
+        to: '0x0000000000000000000000000000000000000000',
+        value: '0x0',
+        nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+      }
+
+      const receipt = await wallet.sendTransaction(tx)
+      await receipt.wait()
+    }
+    return validatorCount
+  }
+
   public async upService (service: string) {
     if (service.match(/validator[\w-]+/g)) {
       await (new ValidatorInstance(this.config, this.infra).upOneService(service))
@@ -146,6 +203,26 @@ export default class Network extends AbstractService {
   public async delete () {
     await this.down()
     this.removeBdkFiles(this.getNetworkFiles())
+  }
+
+  /** @ignore */
+  private async quorumCommand (args: string, i: number) {
+    const result = await this.infra.runCommand({
+      autoRemove: true,
+      user: false,
+      image: 'quorumengineering/quorum',
+      tag: '22.7.4',
+      volumes: [`${this.bdkFile.getBdkPath()}/validator${i}/data/geth.ipc:/root/geth.ipc`],
+      commands: [
+        'attach',
+        '/root/geth.ipc',
+        '--exec',
+        args,
+      ],
+    }) as DockerResultType
+    // strip ANSI color
+    const out = result.stdout.replace(/\s+/g, '').replace(/.\[[0-9;]*m/g, '')
+    return out
   }
 
   /** @ignore */

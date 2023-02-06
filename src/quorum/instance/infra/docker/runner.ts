@@ -29,13 +29,14 @@ export class Runner implements InfraRunner<DockerResultType> {
     await this.checkAndCreateNetwork(payload.network)
     const { image, tag, commands } = payload
     const createOptions: DockerCreateOptionsType = payload.createOptions || {
+      AttachStdout: true,
       Env: (payload.envFile ? fs.readFileSync(payload.envFile, { encoding: 'utf8' }).toString().split(/\n|\r|\r\n/).filter((x) => /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/.test(x)) : []).concat(payload.env || []),
       HostConfig: {
         AutoRemove: payload.autoRemove !== undefined ? payload.autoRemove : true,
         NetworkMode: payload.network,
         Binds: payload.volumes,
       },
-      User: `${config.UID}:${config.GID}`,
+      User: (payload.user !== false) ? `${config.UID}:${config.GID}` : '',
     }
     if (!this.existingImages[`${image}:${tag}`]) {
       const images = await this.dockerode.listImages({ filters: { reference: [`${image}:${tag}`] } })
@@ -70,7 +71,7 @@ export class Runner implements InfraRunner<DockerResultType> {
       if (dockerRunResult[0].StatusCode !== 0) {
         throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i) || stdout)}`, stdout)
       }
-      return { statusCode: dockerRunResult[0].StatusCode, stdout }
+      return { statusCode: dockerRunResult[0].StatusCode, stdout: stdout.toString() }
     } catch (e: any) {
       if (e instanceof FabricContainerError) { throw e }
       throw new DockerError(`[x] command [docker run]:${e.message}`)
@@ -87,7 +88,7 @@ export class Runner implements InfraRunner<DockerResultType> {
         NetworkMode: payload.network,
         Binds: payload.volumes,
       },
-      User: `${config.UID}:${config.GID}`,
+      User: (payload.user !== false) ? `${config.UID}:${config.GID}` : '',
     }
     const stdout = `docker command: \ndocker run -d -u ${config.UID}:${config.GID} ${createOptions.HostConfig?.NetworkMode ? `--network ${createOptions.HostConfig?.NetworkMode} ` : ''}${(createOptions.HostConfig?.Binds || []).map(x => `-v ${x} `).join('')}${(createOptions.Env || []).map(x => `--env ${x} `).join('')}${image}:${tag || 'latest'} ${commands.join(' ')}`
     logger.debug(stdout)
