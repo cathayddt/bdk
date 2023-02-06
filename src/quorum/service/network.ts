@@ -179,7 +179,49 @@ export default class Network extends AbstractService {
       const receipt = await wallet.sendTransaction(tx)
       await receipt.wait()
     }
-    return validatorCount
+    return validatorNum
+  }
+
+  public async addMemberLocal () {
+    // count member number
+    const memberCount = (await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g))).length
+    const memberNum = memberCount
+    const { publicKey } = this.createKey(`artifacts/member${memberNum}`)
+    const memberNode = `enode://${publicKey}@member${memberNum}:30303`
+
+    this.bdkFile.copyPrivateKeyToMember(memberNum)
+    this.bdkFile.copyPublicKeyToMember(memberNum)
+    this.bdkFile.copyAddressToMember(memberNum)
+
+    this.bdkFile.copyGenesisJsonToMember(memberNum)
+
+    // read & add new node to static-nodes.json
+    const staticNodesJson = this.bdkFile.getStaticNodesJson()
+    staticNodesJson.push(memberNode)
+    this.bdkFile.createStaticNodesJson(staticNodesJson)
+    this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
+
+    // for loop to copy static-nodes.json to validator
+    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 0))
+    for (let i = 0; i < validatorCount; i++) {
+      this.bdkFile.copyStaticNodesJsonToValidator(i)
+      this.bdkFile.copyPermissionedNodesJsonToValidator(i)
+    }
+
+    // for loop to copy static-nodes.json to member
+    const memberDockerComposeYaml = new MemberDockerComposeYaml()
+    for (let i = 0; i < memberCount + 1; i++) {
+      this.bdkFile.copyStaticNodesJsonToMember(i)
+      this.bdkFile.copyPermissionedNodesJsonToMember(i)
+      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2)
+    }
+    this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
+
+    await (new MemberInstance(this.config, this.infra).upOneService(`member${memberNum}`))
+
+    while (parseInt(await this.quorumCommand('net.peerCount', memberNum, 'member')) < 1) {}
+
+    return memberNum
   }
 
   public async upService (service: string) {
@@ -206,13 +248,13 @@ export default class Network extends AbstractService {
   }
 
   /** @ignore */
-  private async quorumCommand (args: string, i: number) {
+  private async quorumCommand (args: string, i: number, option: string = 'validator') {
     const result = await this.infra.runCommand({
       autoRemove: true,
       user: false,
       image: 'quorumengineering/quorum',
       tag: '22.7.4',
-      volumes: [`${this.bdkFile.getBdkPath()}/validator${i}/data/geth.ipc:/root/geth.ipc`],
+      volumes: [`${this.bdkFile.getBdkPath()}/${option}${i}/data/geth.ipc:/root/geth.ipc`],
       commands: [
         'attach',
         '/root/geth.ipc',
