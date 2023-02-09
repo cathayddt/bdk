@@ -7,6 +7,8 @@ import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDo
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
 import MemberInstance from '../instance/member'
 import { DockerResultType } from '../instance/infra/InfraRunner.interface'
+import { TimeLimitError } from '../../util/error'
+import { sleep } from '../../util/utils'
 
 export default class Network extends AbstractService {
   /**
@@ -167,17 +169,24 @@ export default class Network extends AbstractService {
 
     await (new ValidatorInstance(this.config, this.infra).upOneService(`validator${validatorNum}`))
 
+    let tryTime = 0
     while (await this.quorumCommand('istanbul.isValidator()', validatorNum) !== 'true') {
-      const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
-      const wallet = ethers.Wallet.createRandom().connect(provider)
-      const tx = {
-        to: '0x0000000000000000000000000000000000000000',
-        value: '0x0',
-        nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
-      }
+      if (tryTime !== 10) {
+        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        const wallet = ethers.Wallet.createRandom().connect(provider)
+        const tx = {
+          to: '0x0000000000000000000000000000000000000000',
+          value: '0x0',
+          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+        }
+        const receipt = await wallet.sendTransaction(tx)
+        await receipt.wait()
 
-      const receipt = await wallet.sendTransaction(tx)
-      await receipt.wait()
+        tryTime += 1
+        await sleep(500)
+      } else {
+        throw new TimeLimitError('[x] Time limit reached. Please check later.')
+      }
     }
     return validatorNum
   }
@@ -219,7 +228,15 @@ export default class Network extends AbstractService {
 
     await (new MemberInstance(this.config, this.infra).upOneService(`member${memberNum}`))
 
-    while (parseInt(await this.quorumCommand('net.peerCount', memberNum, 'member')) < 1) {}
+    let tryTime = 0
+    while (parseInt(await this.quorumCommand('net.peerCount', memberNum, 'member')) < 1) {
+      if (tryTime !== 10) {
+        tryTime += 1
+        await sleep(500)
+      } else {
+        throw new TimeLimitError('[x] Time limit reached. Please check later.')
+      }
+    }
 
     return memberNum
   }
@@ -261,6 +278,7 @@ export default class Network extends AbstractService {
         '--exec',
         args,
       ],
+      ignoreError: true,
     }) as DockerResultType
     // strip ANSI color
     const out = result.stdout.replace(/\s+/g, '').replace(/.\[[0-9;]*m/g, '')

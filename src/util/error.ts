@@ -8,8 +8,16 @@ export class ProcessError extends BdkError {}
 export class ParamsError extends BdkError {}
 export class DockerError extends BdkError {}
 export class BackupError extends BdkError {}
+export class TimeLimitError extends BdkError {}
 export class PathError extends BdkError {}
 export class FabricContainerError extends BdkError {
+  public stdout: string
+  constructor (message: string, stdout: string) {
+    super(message)
+    this.stdout = stdout
+  }
+}
+export class QuorumContainerError extends BdkError {
   public stdout: string
   constructor (message: string, stdout: string) {
     super(message)
@@ -26,6 +34,8 @@ export const onCancel = (prompt: prompts.PromptObject<string>, answers: any) => 
 
 export const errorHandler = (err: Error) => {
   if (err instanceof FabricContainerError) {
+    logger.error(err.message)
+  } else if (err instanceof QuorumContainerError) {
     logger.error(err.message)
   } else if (err instanceof BdkError) {
     logger.error(err.message)

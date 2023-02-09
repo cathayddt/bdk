@@ -6,7 +6,7 @@ import Dockerode from 'dockerode'
 import { logger } from '../../../../util/logger'
 import { DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType } from '../../../model/type/docker.type'
 import config from '../../../config'
-import { DockerError, FabricContainerError } from '../../../../util/error'
+import { DockerError, QuorumContainerError } from '../../../../util/error'
 import { DockerResultType, InfraRunner } from '../InfraRunner.interface'
 import { DockerComposeYamlInterface } from '../../../model/yaml/docker-compose/dockerComposeYaml'
 
@@ -27,7 +27,7 @@ export class Runner implements InfraRunner<DockerResultType> {
 
   public runCommand = async (payload: DockerRunCommandType): Promise<DockerResultType> => {
     await this.checkAndCreateNetwork(payload.network)
-    const { image, tag, commands } = payload
+    const { image, tag, commands, ignoreError } = payload
     const createOptions: DockerCreateOptionsType = payload.createOptions || {
       AttachStdout: true,
       Env: (payload.envFile ? fs.readFileSync(payload.envFile, { encoding: 'utf8' }).toString().split(/\n|\r|\r\n/).filter((x) => /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/.test(x)) : []).concat(payload.env || []),
@@ -68,12 +68,12 @@ export class Runner implements InfraRunner<DockerResultType> {
         startOptions)
       logger.silly(`run command output: \n${stdout}`)
       logger.debug(`docker run\n  image: ${image}\n  commands: ${commands.join(' ')}`)
-      if (dockerRunResult[0].StatusCode !== 0) {
-        throw new FabricContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i) || stdout)}`, stdout)
+      if (dockerRunResult[0].StatusCode !== 0 && !ignoreError) {
+        throw new QuorumContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i) || stdout)}`, stdout)
       }
       return { statusCode: dockerRunResult[0].StatusCode, stdout: stdout.toString() }
     } catch (e: any) {
-      if (e instanceof FabricContainerError) { throw e }
+      if (e instanceof QuorumContainerError) { throw e }
       throw new DockerError(`[x] command [docker run]:${e.message}`)
     }
   }
