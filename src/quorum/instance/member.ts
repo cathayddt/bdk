@@ -26,6 +26,11 @@ export default class Member extends AbstractInstance {
     return await this.infra.downAndRemoveVolumes(this.dockerComposePath)
   }
 
+  public async downOneService (service: string): Promise<InfraRunnerResultType> {
+    logger.debug(`Member instance ${service} down`)
+    return await this.infra.downServiceAndRemoveVolumes(this.dockerComposePath, service)
+  }
+
   public async restart (): Promise<InfraRunnerResultType> {
     logger.debug('Member instance restart')
     return await this.infra.restart(this.dockerComposePath, [`explorer.${this.config.networkName}`])

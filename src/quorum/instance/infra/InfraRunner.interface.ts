@@ -24,6 +24,7 @@ export interface InfraRunner<T> {
   upInBackground(dockerComposeFile: string): Promise<T>
   upServiceInBackground(dockerComposeFile: string, service: string): Promise<T>
   downAndRemoveVolumes(dockerComposeFile: string): Promise<T>
+  downServiceAndRemoveVolumes(dockerComposeFile: string, service: string): Promise<T>
   restart(dockerComposeFile: string, service: string[]): Promise<T>
 }
 
