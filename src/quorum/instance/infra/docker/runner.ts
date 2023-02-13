@@ -160,6 +160,10 @@ export class Runner implements InfraRunner<DockerResultType> {
     return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'down', '--volumes']) }
   }
 
+  public downServiceAndRemoveVolumes = async (dockerComposeFile: string, service: string) => {
+    return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'down', '--volumes', '--', service]) }
+  }
+
   public restart = async (dockerComposeFile: string, service: string[] = []) => {
     return { stdout: await this.runSpawn(['-f', dockerComposeFile, 'restart'].concat(service)) }
   }
