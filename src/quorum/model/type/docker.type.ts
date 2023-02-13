@@ -40,4 +40,5 @@ export interface DockerRunCommandType {
   startOptions?: DockerStartOptionsType
   entryPoint?: string
   portBindings?: Map<string, Array<string>>
+  ignoreError?: boolean
 }
