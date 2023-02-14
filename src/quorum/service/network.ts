@@ -130,17 +130,18 @@ export default class Network extends AbstractService {
 
   public async addValidatorLocal () {
     // count validator number
-    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 0))
+    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
     const validatorNum = validatorCount
-    const { publicKey, address } = this.createKey(`artifacts/validator${validatorNum}`)
-    const validatorNode = `enode://${publicKey}@validator${validatorNum}:30303`
+    const newValidator = 'validator' + validatorNum
+    const { publicKey, address } = this.createKey(`artifacts/${newValidator}`)
+    const validatorNode = `enode://${publicKey}@${newValidator}:30303`
 
     this.bdkFile.copyPrivateKeyToValidator(validatorNum)
     this.bdkFile.copyPublicKeyToValidator(validatorNum)
     this.bdkFile.copyAddressToValidator(validatorNum)
 
     for (let i = 0; i < validatorNum; i++) {
-      await this.quorumCommand(`istanbul.propose("0x${address}", true)`, i)
+      await this.quorumCommand(`istanbul.propose("0x${address}", true)`, 'validator' + i)
     }
 
     this.bdkFile.copyGenesisJsonToValidator(validatorNum)
@@ -167,10 +168,10 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
     }
 
-    await (new ValidatorInstance(this.config, this.infra).upOneService(`validator${validatorNum}`))
+    await (new ValidatorInstance(this.config, this.infra).upOneService(`${newValidator}`))
 
     let tryTime = 0
-    while (await this.quorumCommand('istanbul.isValidator()', validatorNum) !== 'true') {
+    while (await this.quorumCommand('istanbul.isValidator()', `${newValidator}`) !== 'true') {
       if (tryTime !== 10) {
         const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
         const wallet = ethers.Wallet.createRandom().connect(provider)
@@ -195,8 +196,9 @@ export default class Network extends AbstractService {
     // count member number
     const memberCount = (await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g))).length
     const memberNum = memberCount
-    const { publicKey } = this.createKey(`artifacts/member${memberNum}`)
-    const memberNode = `enode://${publicKey}@member${memberNum}:30303`
+    const newMember = 'member' + memberNum
+    const { publicKey } = this.createKey(`artifacts/${newMember}`)
+    const memberNode = `enode://${publicKey}@${newMember}:30303`
 
     this.bdkFile.copyPrivateKeyToMember(memberNum)
     this.bdkFile.copyPublicKeyToMember(memberNum)
@@ -211,7 +213,7 @@ export default class Network extends AbstractService {
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
 
     // for loop to copy static-nodes.json to validator
-    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 0))
+    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
     for (let i = 0; i < validatorCount; i++) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
@@ -226,10 +228,10 @@ export default class Network extends AbstractService {
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
-    await (new MemberInstance(this.config, this.infra).upOneService(`member${memberNum}`))
+    await (new MemberInstance(this.config, this.infra).upOneService(`${newMember}`))
 
     let tryTime = 0
-    while (parseInt(await this.quorumCommand('net.peerCount', memberNum, 'member')) < 1) {
+    while (parseInt(await this.quorumCommand('net.peerCount', newMember)) < 1) {
       if (tryTime !== 10) {
         tryTime += 1
         await sleep(500)
@@ -264,14 +266,20 @@ export default class Network extends AbstractService {
     this.removeBdkFiles(this.getNetworkFiles())
   }
 
+  public async checkNode (node: string, method: string) {
+    const result = await this.quorumCommand(method, node)
+
+    return result
+  }
+
   /** @ignore */
-  private async quorumCommand (args: string, i: number, option: string = 'validator') {
+  private async quorumCommand (args: string, option: string) {
     const result = await this.infra.runCommand({
       autoRemove: true,
       user: false,
       image: 'quorumengineering/quorum',
       tag: '22.7.4',
-      volumes: [`${this.bdkFile.getBdkPath()}/${option}${i}/data/geth.ipc:/root/geth.ipc`],
+      volumes: [`${this.bdkFile.getBdkPath()}/${option}/data/geth.ipc:/root/geth.ipc`],
       commands: [
         'attach',
         '/root/geth.ipc',

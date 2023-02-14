@@ -1,13 +1,13 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
+import prompts from 'prompts'
 import Network from '../../service/network'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
-import prompts from 'prompts'
 import ora from 'ora'
 
-export const command = 'up'
+export const command = 'check'
 
-export const desc = '啟動現有的 Quorum Network.'
+export const desc = '確認 Validator'
 
 interface OptType {
   interactive: boolean
@@ -15,20 +15,14 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network up --interactive', 'Cathay BDK 互動式問答')
-    .example('bdk quorum network up --all', '啟動 BDK 資料夾下現有的 Quorum Network')
+    .example('bdk quorum network check --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
-    .option('all', { type: 'boolean', description: '是否啟動所有節點', alias: 'a' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
 
-  if (argv.all) {
-    const spinner = ora('Quorum Network Up All ...').start()
-    await network.upAll()
-    spinner.succeed('Quorum Network Up All Successfully!')
-  } else if (argv.interactive) {
+  if (argv.interactive) {
     const node: string = await (async () => {
       const nodeList = network.getUpExportItems()
 
@@ -36,17 +30,32 @@ export const handler = async (argv: Arguments<OptType>) => {
         return (await prompts({
           type: 'select',
           name: 'node',
-          message: 'Which node you want to up?',
+          message: 'Which node do you want to check?',
           choices: nodeList,
         }, { onCancel })).node
       } else {
         throw new ProcessError('[x] [file-system error]: Node not exist')
       }
     })()
+    const checkOption = [
+      { title: 'isValidator', value: 'istanbul.isValidator()' },
+      { title: 'getValidator', value: 'istanbul.getValidators()' },
+      { title: 'peerCount', value: 'net.peerCount' },
+    ]
 
-    const spinner = ora(`Quorum Network Up ${node} ...`).start()
-    await network.upService(node)
-    spinner.succeed(`Quorum Network Up ${node} Successfully!`)
+    const { method } = await prompts([
+      {
+        type: 'select',
+        name: 'method',
+        message: 'What do you want to check?',
+        choices: checkOption,
+      },
+    ], { onCancel })
+
+    const spinner = ora('Quorum Network Check ...').start()
+    const result = await network.checkNode(node, method)
+    spinner.succeed(`Quorum Network Check Result: ${result}`)
+    spinner.succeed('Quorum Network Check Successfully!')
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }
