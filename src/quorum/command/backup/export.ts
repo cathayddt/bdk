@@ -1,7 +1,7 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
 import Backup from '../../service/backup'
-import { onCancel, ParamsError } from '../../../util/error'
+import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
 
@@ -39,7 +39,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           choices: nodeList,
         }, { onCancel })).node
       } else {
-        throw new ParamsError('Invalid params: Required node not exist')
+        throw new ProcessError('[x] [file-system error]: Node not exist')
       }
     })()
 
