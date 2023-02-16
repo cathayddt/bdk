@@ -14,7 +14,7 @@ export function defaultNetworkConfig (address: string, privateKey: string) {
   const networkConfig: NetworkCreateType = {
     chainId: 81712,
     validatorNumber: 4,
-    memberNumber: 1,
+    memberNumber: 0,
     alloc: [{
       account: address,
       amount: '1000000000000000000000000000',

@@ -84,17 +84,20 @@ export default class Network extends AbstractService {
 
     for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
       const validatorPublicKey = this.bdkFile.getValidatorPublicKey(i)
-      const validatorNode = `enode://${validatorPublicKey}@validator${i}:30303`
+      const validatorNode = `enode://${validatorPublicKey}@validator${i}:` + (30303 + i)
       staticNodesJson.push(validatorNode)
     }
     for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
       const memberPublicKey = this.bdkFile.getMemberPublicKey(i)
-      const memberNode = `enode://${memberPublicKey}@member${i}:30303`
+      const memberNode = `enode://${memberPublicKey}@member${i}:` + (30403 + i)
       staticNodesJson.push(memberNode)
     }
-    const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
+
     this.bdkFile.createStaticNodesJson(staticNodesJson)
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
+
+    // Process validator node
+    const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
     for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
       this.bdkFile.copyGenesisJsonToValidator(i)
       this.bdkFile.copyStaticNodesJsonToValidator(i)
@@ -104,12 +107,13 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2)
+      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
     await (new ValidatorInstance(this.config, this.infra).up())
 
+    // Process Member node
     const memberDockerComposeYaml = new MemberDockerComposeYaml()
     for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
       this.bdkFile.copyGenesisJsonToMember(i)
@@ -120,7 +124,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToMember(i)
       this.bdkFile.copyAddressToMember(i)
 
-      memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2)
+      memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i)
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
@@ -134,7 +138,8 @@ export default class Network extends AbstractService {
     const validatorNum = validatorCount
     const newValidator = 'validator' + validatorNum
     const { publicKey, address } = this.createKey(`artifacts/${newValidator}`)
-    const validatorNode = `enode://${publicKey}@${newValidator}:30303`
+    const validatorNode = `enode://${publicKey}@${newValidator}:` + (30303 + validatorNum)
+    const chainId = parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0'))
 
     this.bdkFile.copyPrivateKeyToValidator(validatorNum)
     this.bdkFile.copyPublicKeyToValidator(validatorNum)
@@ -157,7 +162,7 @@ export default class Network extends AbstractService {
     for (let i = 0; i < validatorNum + 1; i++) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2)
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -198,7 +203,8 @@ export default class Network extends AbstractService {
     const memberNum = memberCount
     const newMember = 'member' + memberNum
     const { publicKey } = this.createKey(`artifacts/${newMember}`)
-    const memberNode = `enode://${publicKey}@${newMember}:30303`
+    const memberNode = `enode://${publicKey}@${newMember}:` + (30403 + memberNum)
+    const chainId = parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0'))
 
     this.bdkFile.copyPrivateKeyToMember(memberNum)
     this.bdkFile.copyPublicKeyToMember(memberNum)
@@ -224,7 +230,7 @@ export default class Network extends AbstractService {
     for (let i = 0; i < memberCount + 1; i++) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
-      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2)
+      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i)
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
