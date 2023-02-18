@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import RLP from 'rlp'
-import { NetworkCreateType, GenesisJsonType } from '../model/type/network.type'
+import { NetworkCreateType, NetworkGenerateType, GenesisJsonType, JoinValidatorType, AddValidatorRemoteType } from '../model/type/network.type'
 import { AbstractService } from './Service.abstract'
 import ValidatorInstance from '../instance/validator'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
@@ -130,6 +130,79 @@ export default class Network extends AbstractService {
 
     await (new MemberInstance(this.config, this.infra).up())
     // TODO: check quorum network create successfully
+  }
+
+  public async joinValidator (joinValidatorConfig: JoinValidatorType) {
+    // create validator if it is first time
+    const validatorNum = Number(joinValidatorConfig.node.replace(/(validator|member)+/g, ''))
+    const staticNodesJson = []
+
+    for (let i = 0; i < joinValidatorConfig.staticNodesJson.length; i++) {
+      staticNodesJson.push(joinValidatorConfig.staticNodesJson[i].replace(/(validator|member)[0-9]+/g, joinValidatorConfig.ipAddress))
+    }
+
+    this.bdkFile.createArtifactsFolder()
+    this.bdkFile.createGenesisJson(joinValidatorConfig.genesisJson)
+    this.bdkFile.createDisallowedNodesJson([])
+    this.bdkFile.createStaticNodesJson(staticNodesJson)
+    this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
+
+    this.bdkFile.copyGenesisJsonToValidator(validatorNum)
+    this.bdkFile.copyStaticNodesJsonToValidator(validatorNum)
+    this.bdkFile.copyPermissionedNodesJsonToValidator(validatorNum)
+
+    const bdkPath = this.bdkFile.getBdkPath()
+    const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
+    validatorDockerComposeYaml.addValidator(bdkPath, validatorNum, 8545 + validatorNum * 2, joinValidatorConfig.genesisJson.config.chainId, 30303 + validatorNum)
+    this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
+
+    await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinValidatorConfig.node}`))
+
+    return validatorNum
+  }
+
+  public async addValidatorRemote (addValidatorRemoteConfig: AddValidatorRemoteType) {
+    const validatorCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(validator)[0-9]+/g)).length
+
+    // propose
+    for (let i = 0; i < validatorCount; i++) {
+      await this.quorumCommand(`istanbul.propose("${addValidatorRemoteConfig.validatorAddress}", true)`, 'validator' + i)
+    }
+
+    const staticNodesJson = this.bdkFile.getStaticNodesJson()
+    const remoteValidatorNode = `enode://${addValidatorRemoteConfig.validatorPublicKey}@${addValidatorRemoteConfig.ipAddress}:${addValidatorRemoteConfig.discoveryPort}`
+    staticNodesJson.push(remoteValidatorNode)
+
+    this.bdkFile.createStaticNodesJson(staticNodesJson)
+    this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
+
+    // for loop to copy static-nodes.json to validator
+    for (let i = 0; i < validatorCount + 1; i++) {
+      this.bdkFile.copyStaticNodesJsonToValidator(i)
+      this.bdkFile.copyPermissionedNodesJsonToValidator(i)
+    }
+
+    // for loop to copy static-nodes.json to member
+    const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
+    for (let i = 0; i < memberCount; i++) {
+      this.bdkFile.copyStaticNodesJsonToMember(i)
+      this.bdkFile.copyPermissionedNodesJsonToMember(i)
+    }
+  }
+
+  public generate (networkGenerateConfig: NetworkGenerateType) {
+    for (let i = 0; i < networkGenerateConfig.validatorNumber; i++) {
+      this.createKey(`artifacts/validator${i}`)
+      this.bdkFile.copyPrivateKeyToValidator(i)
+      this.bdkFile.copyPublicKeyToValidator(i)
+      this.bdkFile.copyAddressToValidator(i)
+    }
+    for (let i = 0; i < networkGenerateConfig.memberNumber; i++) {
+      this.createKey(`artifacts/member${i}`)
+      this.bdkFile.copyPrivateKeyToMember(i)
+      this.bdkFile.copyPublicKeyToMember(i)
+      this.bdkFile.copyAddressToMember(i)
+    }
   }
 
   public async addValidatorLocal () {

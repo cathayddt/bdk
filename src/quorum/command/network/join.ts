@@ -1,0 +1,73 @@
+import { Argv, Arguments } from 'yargs'
+import config from '../../config'
+import prompts from 'prompts'
+import Network from '../../service/network'
+import { onCancel, ParamsError, ProcessError } from '../../../util/error'
+import ora from 'ora'
+import { JoinValidatorType } from '../../model/type/network.type'
+
+export const command = 'join'
+
+export const desc = '選擇現有節點加入 Network'
+
+interface OptType {
+  interactive: boolean
+}
+
+export const builder = (yargs: Argv<OptType>) => {
+  return yargs
+    .example('bdk quorum network join --interactive', 'Cathay BDK 互動式問答')
+    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
+}
+
+export const handler = async (argv: Arguments) => {
+  const network = new Network(config)
+
+  if (argv.interactive) {
+    const node: string = await (async () => {
+      const nodeList = network.getUpExportItems()
+
+      if (nodeList.length !== 0) {
+        return (await prompts({
+          type: 'select',
+          name: 'node',
+          message: 'Select the node you want to join to other network?',
+          choices: nodeList,
+        }, { onCancel })).node
+      } else {
+        throw new ProcessError('[x] [file-system error]: Node not exist')
+      }
+    })()
+
+    const { ipAddress, genesisJson, staticNodesJson } = await prompts([
+      {
+        type: 'text',
+        name: 'ipAddress',
+        message: 'Provide the ip address of Quorum network you want to join',
+      },
+      {
+        type: 'text',
+        name: 'genesisJson',
+        message: 'Paste the genesis.json file of Quorum network you want to join',
+      },
+      {
+        type: 'text',
+        name: 'staticNodesJson',
+        message: 'Paste the static-nodes.json file of Quorum network you want to join',
+      },
+    ], { onCancel })
+
+    const joinValidatorConfig: JoinValidatorType = {
+      node: node,
+      ipAddress: ipAddress,
+      genesisJson: JSON.parse(genesisJson),
+      staticNodesJson: JSON.parse(staticNodesJson),
+    }
+
+    const spinner = ora('Quorum Network Join ...').start()
+    const validatorNum = await network.joinValidator(joinValidatorConfig)
+    spinner.succeed(`Quorum Network Join Validator${validatorNum} Successfully!`)
+  } else {
+    throw new ParamsError('Invalid params: Required parameter missing')
+  }
+}
