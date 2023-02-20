@@ -5,6 +5,7 @@ import Network from '../../service/network'
 import { onCancel, ParamsError } from '../../../util/error'
 import ora from 'ora'
 import { AddValidatorRemoteType } from '../../model/type/network.type'
+import { ethers } from 'ethers'
 
 export const command = 'add'
 
@@ -67,11 +68,13 @@ export const handler = async (argv: Arguments) => {
             type: 'text',
             name: 'validatorAddress',
             message: 'Paste the address of the node you want to add',
+            validate: validatorAddress => ethers.utils.isAddress(validatorAddress) ? true : 'Address not valid.',
           },
           {
             type: 'text',
             name: 'validatorPublicKey',
             message: 'Paste the public key of the node you want to add',
+            validate: validatorPublicKey => validatorPublicKey.length === 128 ? true : 'Public key not valid.',
           },
           {
             type: 'text',
@@ -86,7 +89,7 @@ export const handler = async (argv: Arguments) => {
         ], { onCancel })
 
         const addValidatorRemoteConfig: AddValidatorRemoteType = {
-          validatorAddress: validatorAddress,
+          validatorAddress: `0x${validatorAddress.replace(/^0x/, '').toLowerCase()}`,
           validatorPublicKey: validatorPublicKey,
           discoveryPort: discoveryPort,
           ipAddress: ipAddress,

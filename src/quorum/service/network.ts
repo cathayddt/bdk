@@ -133,7 +133,6 @@ export default class Network extends AbstractService {
   }
 
   public async joinValidator (joinValidatorConfig: JoinValidatorType) {
-    // create validator if it is first time
     const validatorNum = Number(joinValidatorConfig.node.replace(/(validator|member)+/g, ''))
     const staticNodesJson = []
 
@@ -158,6 +157,26 @@ export default class Network extends AbstractService {
 
     await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinValidatorConfig.node}`))
 
+    let tryTime = 0
+    while (await this.quorumCommand('istanbul.isValidator()', `${joinValidatorConfig.node}`) !== 'true') {
+      if (tryTime !== 10) {
+        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        const wallet = ethers.Wallet.createRandom().connect(provider)
+        const tx = {
+          to: '0x0000000000000000000000000000000000000000',
+          value: '0x0',
+          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+        }
+        const receipt = await wallet.sendTransaction(tx)
+        await receipt.wait()
+
+        tryTime += 1
+        await sleep(500)
+      } else {
+        throw new TimeLimitError('[x] Time limit reached. Please check later.')
+      }
+    }
+
     return validatorNum
   }
 
@@ -177,7 +196,7 @@ export default class Network extends AbstractService {
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
 
     // for loop to copy static-nodes.json to validator
-    for (let i = 0; i < validatorCount + 1; i++) {
+    for (let i = 0; i < validatorCount; i++) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
     }
