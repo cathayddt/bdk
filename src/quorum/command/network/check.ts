@@ -41,6 +41,7 @@ export const handler = async (argv: Arguments<OptType>) => {
       { title: 'isValidator', value: 'istanbul.isValidator()' },
       { title: 'getValidator', value: 'istanbul.getValidators()' },
       { title: 'peerCount', value: 'net.peerCount' },
+      { title: 'chainId', value: 'admin.nodeInfo.protocols.eth.network' },
     ]
 
     const { method } = await prompts([
