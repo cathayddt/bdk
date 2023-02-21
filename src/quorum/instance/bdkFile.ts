@@ -70,6 +70,11 @@ export default class BdkFile {
     return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/nodekey.pub`)
   }
 
+  public getValidatorPrivateKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/nodekey`)
+  }
+
   public getValidatorAddress (i: number) {
     this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/address`)
@@ -78,6 +83,16 @@ export default class BdkFile {
   public getMemberPublicKey (i: number) {
     this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey.pub`)
+  }
+
+  public getMemberPrivateKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey`)
+  }
+
+  public getMemberAddress (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/address`)
   }
 
   public copyStaticNodesJsonToPermissionedNodesJson () {
@@ -176,10 +191,22 @@ export default class BdkFile {
     return fs.readdirSync(this.bdkPath)
   }
 
+  public getGenesisJson () {
+    this.checkPathExist(this.bdkPath)
+    const genesisJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, 'utf8')
+    return JSON.parse(genesisJson)
+  }
+
   public getStaticNodesJson () {
     this.checkPathExist(this.bdkPath)
-    const staticNodeJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, 'utf8')
-    return JSON.parse(staticNodeJson)
+    const staticNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, 'utf8')
+    return JSON.parse(staticNodesJson)
+  }
+
+  public getPermissionedNodesJson () {
+    this.checkPathExist(this.bdkPath)
+    const permissionedNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/permissioned-nodes.json`, 'utf8')
+    return JSON.parse(permissionedNodesJson)
   }
 
   public getBackupPath () {
