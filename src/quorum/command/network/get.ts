@@ -77,6 +77,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         { title: 'address', value: 'address' },
         { title: 'publicKey', value: 'publicKey' },
         { title: 'privateKey', value: 'privateKey' },
+        { title: 'enodeInfo', value: 'enodeInfo' },
       ]
 
       const { nodeInfo } = await prompts([
