@@ -52,8 +52,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'number',
             name: 'validatorNumber',
             message: 'How many validator do you want?',
-            min: 1,
-            initial: 1,
+            min: 0,
+            initial: 0,
           },
           {
             type: 'number',
@@ -69,6 +69,11 @@ export const handler = async (argv: Arguments<OptType>) => {
         throw new ParamsError('Invalid params: Required parameter missing')
       }
     })()
+
+    if (networkGenerate.validatorNumber + networkGenerate.memberNumber === 0) {
+      throw new ParamsError('Invalid params: You need to generate at least one node')
+    }
+
     const spinner = ora('Quorum Network Generate ...').start()
     await network.generate(networkGenerate)
     spinner.succeed('Quorum Network Generate Successfully!')

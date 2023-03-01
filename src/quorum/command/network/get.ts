@@ -89,7 +89,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         },
       ], { onCancel })
       const spinner = ora('Quorum Network Get ...').start()
-      const result = await network.getNodeInfo(node, nodeInfo)
+      const result = network.getNodeInfo(node, nodeInfo)
       spinner.succeed(`Quorum Network Get Result: ${result}`)
       spinner.succeed('Quorum Network Get Successfully!')
     }

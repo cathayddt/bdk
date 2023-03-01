@@ -4,7 +4,7 @@ import prompts from 'prompts'
 import Network from '../../service/network'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import ora from 'ora'
-import { JoinValidatorType } from '../../model/type/network.type'
+import { JoinNodeType } from '../../model/type/network.type'
 
 export const command = 'join'
 
@@ -38,6 +38,9 @@ export const handler = async (argv: Arguments) => {
         throw new ProcessError('[x] [file-system error]: Node not exist')
       }
     })()
+    if (!node.includes('validator') && !node.includes('member')) {
+      throw new ProcessError('[x] [node-type error]: Node must be validator or member')
+    }
 
     const { ipAddress, genesisJson, staticNodesJson } = await prompts([
       {
@@ -57,7 +60,7 @@ export const handler = async (argv: Arguments) => {
       },
     ], { onCancel })
 
-    const joinValidatorConfig: JoinValidatorType = {
+    const joinNodeConfig: JoinNodeType = {
       node: node,
       ipAddress: ipAddress,
       genesisJson: JSON.parse(genesisJson),
@@ -65,8 +68,8 @@ export const handler = async (argv: Arguments) => {
     }
 
     const spinner = ora('Quorum Network Join ...').start()
-    const validatorNum = await network.joinValidator(joinValidatorConfig)
-    spinner.succeed(`Quorum Network Join Validator${validatorNum} Successfully!`)
+    await network.joinNode(joinNodeConfig)
+    spinner.succeed(`Quorum Network Join ${node} Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }

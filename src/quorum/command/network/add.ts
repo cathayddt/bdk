@@ -4,7 +4,7 @@ import prompts from 'prompts'
 import Network from '../../service/network'
 import { onCancel, ParamsError } from '../../../util/error'
 import ora from 'ora'
-import { AddValidatorRemoteType } from '../../model/type/network.type'
+import { AddValidatorRemoteType, AddMemberRemoteType } from '../../model/type/network.type'
 import { ethers } from 'ethers'
 
 export const command = 'add'
@@ -67,12 +67,12 @@ export const handler = async (argv: Arguments) => {
           {
             type: 'text',
             name: 'enodeInfo',
-            message: 'Paste the enodeInfo of the Node you want to add',
+            message: 'Paste the enodeInfo of the validator node you want to add',
           },
           {
             type: 'text',
             name: 'ipAddress',
-            message: 'Provide the ip address of the node you want to add',
+            message: 'Provide the ip address of the validator node you want to add',
           },
         ], { onCancel })
 
@@ -90,6 +90,34 @@ export const handler = async (argv: Arguments) => {
         const spinner = ora('Quorum Network Add ...').start()
         await network.addValidatorRemote(addValidatorRemoteConfig)
         spinner.succeed(`Quorum Network Add Validator ${validatorAddress} Successfully!`)
+      } else {
+        const { enodeInfo, ipAddress } = await prompts([
+          {
+            type: 'text',
+            name: 'enodeInfo',
+            message: 'Paste the enodeInfo of the member node you want to add',
+          },
+          {
+            type: 'text',
+            name: 'ipAddress',
+            message: 'Provide the ip address of the member node you want to add',
+          },
+        ], { onCancel })
+
+        const memberPublicKey = `0x04${(enodeInfo.match(/enode:\/\/(.*?)@/i)[1]).replace(/^0x/, '').toLowerCase()}`
+        const memberDiscoveryPort = enodeInfo.slice(enodeInfo.lastIndexOf(':') + 1)
+        const memberAddress = ethers.utils.computeAddress(memberPublicKey).toLowerCase()
+
+        const addMemberRemoteConfig: AddMemberRemoteType = {
+          memberAddress: memberAddress,
+          memberPublicKey: memberPublicKey.replace(/^0x04/, ''),
+          discoveryPort: memberDiscoveryPort,
+          ipAddress: ipAddress,
+        }
+
+        const spinner = ora('Quorum Network Add ...').start()
+        await network.addMemberRemote(addMemberRemoteConfig)
+        spinner.succeed(`Quorum Network Add Member ${memberAddress} Successfully!`)
       }
       // TODO: addMemberRemote
     }
