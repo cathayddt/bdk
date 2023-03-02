@@ -210,14 +210,28 @@ export default class Network extends AbstractService {
   }
 
   public generate (networkGenerateConfig: NetworkGenerateType) {
+    const staticNodesJson = []
+
+    // Add node to static-nodes.json
     for (let i = 0; i < networkGenerateConfig.validatorNumber; i++) {
-      this.createKey(`artifacts/validator${i}`)
+      const { publicKey } = this.createKey(`artifacts/validator${i}`)
+      const validatorNode = `enode://${publicKey}@validator${i}:` + (30303 + i)
+      staticNodesJson.push(validatorNode)
+    }
+    for (let i = 0; i < networkGenerateConfig.memberNumber; i++) {
+      const { publicKey } = this.createKey(`artifacts/member${i}`)
+      const memberNode = `enode://${publicKey}@member${i}:` + (30403 + i)
+      staticNodesJson.push(memberNode)
+    }
+    this.bdkFile.createStaticNodesJson(staticNodesJson)
+
+    // Process validator & member node
+    for (let i = 0; i < networkGenerateConfig.validatorNumber; i++) {
       this.bdkFile.copyPrivateKeyToValidator(i)
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
     }
     for (let i = 0; i < networkGenerateConfig.memberNumber; i++) {
-      this.createKey(`artifacts/member${i}`)
       this.bdkFile.copyPrivateKeyToMember(i)
       this.bdkFile.copyPublicKeyToMember(i)
       this.bdkFile.copyAddressToMember(i)
@@ -407,6 +421,9 @@ export default class Network extends AbstractService {
         case 'privateKey':
           result = this.bdkFile.getValidatorPrivateKey(nodeNum)
           break
+        case 'enodeInfo':
+          result = this.bdkFile.getValidatorEnodeInfo(nodeNum)
+          break
       }
     } else if (node.includes('member')) {
       switch (nodeInfo) {
@@ -420,6 +437,9 @@ export default class Network extends AbstractService {
 
         case 'privateKey':
           result = this.bdkFile.getMemberPrivateKey(nodeNum)
+          break
+        case 'enodeInfo':
+          result = this.bdkFile.getMemberEnodeInfo(nodeNum)
           break
       }
     }

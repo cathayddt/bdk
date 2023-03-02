@@ -80,6 +80,13 @@ export default class BdkFile {
     return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/address`)
   }
 
+  public getValidatorEnodeInfo (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/goQuorum`)
+    const staticNodesJson: Array<string> = this.getStaticNodesJson()
+    const enodeInfo = staticNodesJson.find(file => file.includes(`validator${i}`))
+    return enodeInfo
+  }
+
   public getMemberPublicKey (i: number) {
     this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey.pub`)
@@ -93,6 +100,13 @@ export default class BdkFile {
   public getMemberAddress (i: number) {
     this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/address`)
+  }
+
+  public getMemberEnodeInfo (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/goQuorum`)
+    const staticNodesJson: Array<string> = this.getStaticNodesJson()
+    const enodeInfo = staticNodesJson.find(file => file.includes(`member${i}`))
+    return enodeInfo
   }
 
   public copyStaticNodesJsonToPermissionedNodesJson () {

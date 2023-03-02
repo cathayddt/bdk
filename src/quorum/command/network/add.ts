@@ -63,23 +63,11 @@ export const handler = async (argv: Arguments) => {
       }
     } else if (connectOption === 'remote') {
       if (nodeOption === 'validator') {
-        const { validatorAddress, validatorPublicKey, discoveryPort, ipAddress } = await prompts([
+        const { enodeInfo, ipAddress } = await prompts([
           {
             type: 'text',
-            name: 'validatorAddress',
-            message: 'Paste the address of the node you want to add',
-            validate: validatorAddress => ethers.utils.isAddress(validatorAddress) ? true : 'Address not valid.',
-          },
-          {
-            type: 'text',
-            name: 'validatorPublicKey',
-            message: 'Paste the public key of the node you want to add',
-            validate: validatorPublicKey => validatorPublicKey.length === 128 ? true : 'Public key not valid.',
-          },
-          {
-            type: 'text',
-            name: 'discoveryPort',
-            message: 'Provide the discovery port of the node you want to add',
+            name: 'enodeInfo',
+            message: 'Paste the enodeInfo of the Node you want to add',
           },
           {
             type: 'text',
@@ -88,10 +76,14 @@ export const handler = async (argv: Arguments) => {
           },
         ], { onCancel })
 
+        const validatorPublicKey = `0x04${(enodeInfo.match(/enode:\/\/(.*?)@/i)[1]).replace(/^0x/, '').toLowerCase()}`
+        const validatorDiscoveryPort = enodeInfo.slice(enodeInfo.lastIndexOf(':') + 1)
+        const validatorAddress = ethers.utils.computeAddress(validatorPublicKey).toLowerCase()
+
         const addValidatorRemoteConfig: AddValidatorRemoteType = {
-          validatorAddress: `0x${validatorAddress.replace(/^0x/, '').toLowerCase()}`,
-          validatorPublicKey: validatorPublicKey,
-          discoveryPort: discoveryPort,
+          validatorAddress: validatorAddress,
+          validatorPublicKey: validatorPublicKey.replace(/^0x04/, ''),
+          discoveryPort: validatorDiscoveryPort,
           ipAddress: ipAddress,
         }
 
