@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import RLP from 'rlp'
-import { NetworkCreateType, NetworkGenerateType, GenesisJsonType, JoinValidatorType, AddValidatorRemoteType } from '../model/type/network.type'
+import { NetworkCreateType, NetworkGenerateType, GenesisJsonType, JoinNodeType, AddValidatorRemoteType, AddMemberRemoteType } from '../model/type/network.type'
 import { AbstractService } from './Service.abstract'
 import ValidatorInstance from '../instance/validator'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
@@ -132,52 +132,80 @@ export default class Network extends AbstractService {
     // TODO: check quorum network create successfully
   }
 
-  public async joinValidator (joinValidatorConfig: JoinValidatorType) {
-    const validatorNum = Number(joinValidatorConfig.node.replace(/(validator|member)+/g, ''))
+  public async joinNode (joinNodeConfig: JoinNodeType) {
+    const nodeNum = Number(joinNodeConfig.node.replace(/(validator|member)+/g, ''))
     const staticNodesJson = []
+    const bdkPath = this.bdkFile.getBdkPath()
+    const enodeInfo = String(this.getNodeInfo(joinNodeConfig.node, 'enodeInfo'))
+    const publicKey = String(this.getNodeInfo(joinNodeConfig.node, 'publicKey'))
 
-    for (let i = 0; i < joinValidatorConfig.staticNodesJson.length; i++) {
-      staticNodesJson.push(joinValidatorConfig.staticNodesJson[i].replace(/(validator|member)[0-9]+/g, joinValidatorConfig.ipAddress))
+    for (let i = 0; i < joinNodeConfig.staticNodesJson.length; i++) {
+      if (joinNodeConfig.staticNodesJson[i].includes(publicKey)) {
+        staticNodesJson.push(enodeInfo)
+      } else {
+        staticNodesJson.push(joinNodeConfig.staticNodesJson[i].replace(/(validator|member)[0-9]+/g, joinNodeConfig.ipAddress))
+      }
     }
 
     this.bdkFile.createArtifactsFolder()
-    this.bdkFile.createGenesisJson(joinValidatorConfig.genesisJson)
+    this.bdkFile.createGenesisJson(joinNodeConfig.genesisJson)
     this.bdkFile.createDisallowedNodesJson([])
     this.bdkFile.createStaticNodesJson(staticNodesJson)
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
 
-    this.bdkFile.copyGenesisJsonToValidator(validatorNum)
-    this.bdkFile.copyStaticNodesJsonToValidator(validatorNum)
-    this.bdkFile.copyPermissionedNodesJsonToValidator(validatorNum)
+    if (joinNodeConfig.node.includes('validator')) {
+      this.bdkFile.copyGenesisJsonToValidator(nodeNum)
+      this.bdkFile.copyStaticNodesJsonToValidator(nodeNum)
+      this.bdkFile.copyPermissionedNodesJsonToValidator(nodeNum)
 
-    const bdkPath = this.bdkFile.getBdkPath()
-    const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
-    validatorDockerComposeYaml.addValidator(bdkPath, validatorNum, 8545 + validatorNum * 2, joinValidatorConfig.genesisJson.config.chainId, 30303 + validatorNum)
-    this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
+      const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
+      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum)
+      this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
-    await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinValidatorConfig.node}`))
+      await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
 
-    let tryTime = 0
-    while (await this.quorumCommand('istanbul.isValidator()', `${joinValidatorConfig.node}`) !== 'true') {
-      if (tryTime !== 10) {
-        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
-        const wallet = ethers.Wallet.createRandom().connect(provider)
-        const tx = {
-          to: '0x0000000000000000000000000000000000000000',
-          value: '0x0',
-          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+      let tryTime = 0
+      while (await this.quorumCommand('istanbul.isValidator()', `${joinNodeConfig.node}`) !== 'true') {
+        if (tryTime !== 10) {
+          const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+          const wallet = ethers.Wallet.createRandom().connect(provider)
+          const tx = {
+            to: '0x0000000000000000000000000000000000000000',
+            value: '0x0',
+            nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+          }
+          const receipt = await wallet.sendTransaction(tx)
+          await receipt.wait()
+
+          tryTime += 1
+          await sleep(500)
+        } else {
+          throw new TimeLimitError('[x] Time limit reached. Please check later.')
         }
-        const receipt = await wallet.sendTransaction(tx)
-        await receipt.wait()
-
-        tryTime += 1
-        await sleep(500)
-      } else {
-        throw new TimeLimitError('[x] Time limit reached. Please check later.')
       }
-    }
+      return nodeNum
+    } else {
+      this.bdkFile.copyGenesisJsonToMember(nodeNum)
+      this.bdkFile.copyStaticNodesJsonToMember(nodeNum)
+      this.bdkFile.copyPermissionedNodesJsonToMember(nodeNum)
 
-    return validatorNum
+      const memberDockerComposeYaml = new MemberDockerComposeYaml()
+      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum)
+      this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
+
+      await (new MemberInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
+
+      let tryTime = 0
+      while (parseInt(await this.quorumCommand('net.peerCount', joinNodeConfig.node)) < 1) {
+        if (tryTime !== 10) {
+          tryTime += 1
+          await sleep(500)
+        } else {
+          throw new TimeLimitError('[x] Time limit reached. Please check later.')
+        }
+      }
+      return nodeNum
+    }
   }
 
   public async addValidatorRemote (addValidatorRemoteConfig: AddValidatorRemoteType) {
@@ -196,6 +224,29 @@ export default class Network extends AbstractService {
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
 
     // for loop to copy static-nodes.json to validator
+    for (let i = 0; i < validatorCount; i++) {
+      this.bdkFile.copyStaticNodesJsonToValidator(i)
+      this.bdkFile.copyPermissionedNodesJsonToValidator(i)
+    }
+
+    // for loop to copy static-nodes.json to member
+    const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
+    for (let i = 0; i < memberCount; i++) {
+      this.bdkFile.copyStaticNodesJsonToMember(i)
+      this.bdkFile.copyPermissionedNodesJsonToMember(i)
+    }
+  }
+
+  public async addMemberRemote (addMemberRemoteConfig: AddMemberRemoteType) {
+    const staticNodesJson = this.bdkFile.getStaticNodesJson()
+    const remoteMemberNode = `enode://${addMemberRemoteConfig.memberPublicKey}@${addMemberRemoteConfig.ipAddress}:${addMemberRemoteConfig.discoveryPort}`
+    staticNodesJson.push(remoteMemberNode)
+
+    this.bdkFile.createStaticNodesJson(staticNodesJson)
+    this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
+
+    // for loop to copy static-nodes.json to validator
+    const validatorCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(validator)[0-9]+/g)).length
     for (let i = 0; i < validatorCount; i++) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)

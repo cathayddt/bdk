@@ -76,7 +76,7 @@ export interface GenesisJsonType {
   }
 }
 
-export interface JoinValidatorType {
+export interface JoinNodeType {
   node: string
   ipAddress: string
   genesisJson: GenesisJsonType
@@ -86,6 +86,13 @@ export interface JoinValidatorType {
 export interface AddValidatorRemoteType {
   validatorAddress: string
   validatorPublicKey: string
+  discoveryPort: string
+  ipAddress: string
+}
+
+export interface AddMemberRemoteType {
+  memberAddress: string
+  memberPublicKey: string
   discoveryPort: string
   ipAddress: string
 }
