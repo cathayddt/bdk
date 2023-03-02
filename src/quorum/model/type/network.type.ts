@@ -20,6 +20,11 @@ export interface NetworkCreateType {
   alloc: AllocType[]
 }
 
+export interface NetworkGenerateType {
+  validatorNumber: number
+  memberNumber: number
+}
+
 interface Alloc {
   balance: string
   comment?: string
@@ -69,4 +74,18 @@ export interface GenesisJsonType {
   alloc: {
     [key: string]: Alloc
   }
+}
+
+export interface JoinValidatorType {
+  node: string
+  ipAddress: string
+  genesisJson: GenesisJsonType
+  staticNodesJson: Array<string>
+}
+
+export interface AddValidatorRemoteType {
+  validatorAddress: string
+  validatorPublicKey: string
+  discoveryPort: string
+  ipAddress: string
 }
