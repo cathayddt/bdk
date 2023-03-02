@@ -370,6 +370,63 @@ export default class Network extends AbstractService {
     return result
   }
 
+  public getNetworkInfo (networkInfo: string) {
+    let result
+
+    switch (networkInfo) {
+      case 'genesis.json':
+        result = JSON.stringify(this.bdkFile.getGenesisJson())
+        break
+
+      case 'static-nodes.json':
+        result = JSON.stringify(this.bdkFile.getStaticNodesJson())
+        break
+
+      case 'permissioned-nodes.json':
+        result = JSON.stringify(this.bdkFile.getPermissionedNodesJson())
+        break
+    }
+
+    return result
+  }
+
+  public getNodeInfo (node: string, nodeInfo: string) {
+    let result
+    const nodeNum = Number(node.replace(/(validator|member)+/g, ''))
+
+    if (node.includes('validator')) {
+      switch (nodeInfo) {
+        case 'address':
+          result = this.bdkFile.getValidatorAddress(nodeNum)
+          break
+
+        case 'publicKey':
+          result = this.bdkFile.getValidatorPublicKey(nodeNum)
+          break
+
+        case 'privateKey':
+          result = this.bdkFile.getValidatorPrivateKey(nodeNum)
+          break
+      }
+    } else if (node.includes('member')) {
+      switch (nodeInfo) {
+        case 'address':
+          result = this.bdkFile.getMemberAddress(nodeNum)
+          break
+
+        case 'publicKey':
+          result = this.bdkFile.getMemberPublicKey(nodeNum)
+          break
+
+        case 'privateKey':
+          result = this.bdkFile.getMemberPrivateKey(nodeNum)
+          break
+      }
+    }
+
+    return result
+  }
+
   /** @ignore */
   private async quorumCommand (args: string, option: string) {
     const result = await this.infra.runCommand({
