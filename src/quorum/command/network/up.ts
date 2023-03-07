@@ -7,7 +7,7 @@ import ora from 'ora'
 
 export const command = 'up'
 
-export const desc = '啟動現有的 Quorum Network.'
+export const desc = '啟動現有的 Quorum Network'
 
 interface OptType {
   interactive: boolean

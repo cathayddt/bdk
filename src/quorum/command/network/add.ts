@@ -9,7 +9,7 @@ import { ethers } from 'ethers'
 
 export const command = 'add'
 
-export const desc = '新增 Validator'
+export const desc = '新增 Quorum Node'
 
 interface OptType {
   interactive: boolean

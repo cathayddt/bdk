@@ -7,7 +7,7 @@ import ora from 'ora'
 
 export const command = 'export'
 
-export const desc = '匯出現有的 Quorum Network.'
+export const desc = '匯出現有的 Quorum Network'
 
 interface OptType {
   interactive: boolean

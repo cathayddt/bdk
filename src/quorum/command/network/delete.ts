@@ -6,7 +6,7 @@ import ora from 'ora'
 
 export const command = 'delete'
 
-export const desc = '刪除現有的 Quorum Network.'
+export const desc = '刪除現有的 Quorum Network'
 
 export const builder = {}
 

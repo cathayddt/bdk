@@ -8,7 +8,7 @@ import ora from 'ora'
 
 export const command = 'generate'
 
-export const desc = '產生 Quorum network 所需的相關設定檔案'
+export const desc = '產生 Quorum Network 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
