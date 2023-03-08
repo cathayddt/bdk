@@ -114,22 +114,23 @@ export default class Network extends AbstractService {
     await (new ValidatorInstance(this.config, this.infra).up())
 
     // Process Member node
-    const memberDockerComposeYaml = new MemberDockerComposeYaml()
-    for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
-      this.bdkFile.copyGenesisJsonToMember(i)
-      this.bdkFile.copyStaticNodesJsonToMember(i)
-      this.bdkFile.copyPermissionedNodesJsonToMember(i)
+    if (networkCreateConfig.memberNumber > 0) {
+      const memberDockerComposeYaml = new MemberDockerComposeYaml()
+      for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
+        this.bdkFile.copyGenesisJsonToMember(i)
+        this.bdkFile.copyStaticNodesJsonToMember(i)
+        this.bdkFile.copyPermissionedNodesJsonToMember(i)
 
-      this.bdkFile.copyPrivateKeyToMember(i)
-      this.bdkFile.copyPublicKeyToMember(i)
-      this.bdkFile.copyAddressToMember(i)
+        this.bdkFile.copyPrivateKeyToMember(i)
+        this.bdkFile.copyPublicKeyToMember(i)
+        this.bdkFile.copyAddressToMember(i)
 
-      memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i)
+        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i)
+      }
+      this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
+
+      await (new MemberInstance(this.config, this.infra).up())
     }
-    this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
-
-    await (new MemberInstance(this.config, this.infra).up())
-    // TODO: check quorum network create successfully
   }
 
   public async joinNode (joinNodeConfig: JoinNodeType) {

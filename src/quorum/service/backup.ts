@@ -24,7 +24,7 @@ export default class Backup extends AbstractService {
   }
 
   /**
-   * @description 匯出 quorum network 單一validator備份資料
+   * @description 匯出 quorum network 單一 node 備份資料
    */
   public export (nodeName: string) {
     const bdkPath = this.bdkFile.getBdkPath()
@@ -33,12 +33,15 @@ export default class Backup extends AbstractService {
       cwd: bdkPath,
       sync: true,
     }
+    const dockerCompose = (nodeName.match(/(validator)[0-9]+/g))
+      ? 'validator-docker-compose.yaml'
+      : 'member-docker-compose.yaml'
+
     try {
       tar
         .c(createOpts, [`${nodeName}`,
           'artifacts',
-          'member-docker-compose.yaml',
-          'validator-docker-compose.yaml'])
+          dockerCompose])
         .pipe(this.bdkFile.createBackupTar(`${nodeName}`, tarDateFormat(new Date())))
     } catch (e: any) {
       throw new BackupError(`[x] tar compress error: ${e.message}`)
