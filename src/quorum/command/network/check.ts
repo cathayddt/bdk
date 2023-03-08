@@ -7,7 +7,7 @@ import ora from 'ora'
 
 export const command = 'check'
 
-export const desc = '確認 Validator'
+export const desc = '確認 Quorum Node 資訊'
 
 interface OptType {
   interactive: boolean

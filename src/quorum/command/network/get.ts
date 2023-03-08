@@ -7,7 +7,7 @@ import ora from 'ora'
 
 export const command = 'get'
 
-export const desc = '取得 Quorum network 檔案資訊'
+export const desc = '取得 Quorum 檔案資訊'
 
 interface OptType {
   interactive: boolean
@@ -65,7 +65,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           return (await prompts({
             type: 'select',
             name: 'node',
-            message: 'Which node do you want to check?',
+            message: 'Which node do you want to get?',
             choices: nodeList,
           }, { onCancel })).node
         } else {

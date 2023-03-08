@@ -8,7 +8,7 @@ import { JoinNodeType } from '../../model/type/network.type'
 
 export const command = 'join'
 
-export const desc = '選擇現有節點加入 Network'
+export const desc = '選擇現有節點加入 Quorum Network'
 
 interface OptType {
   interactive: boolean

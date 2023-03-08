@@ -7,7 +7,7 @@ import ora from 'ora'
 
 export const command = 'down'
 
-export const desc = '停止現有的 Quorum Network.'
+export const desc = '停止現有的 Quorum Network'
 
 export const builder = {}
 
