@@ -18,6 +18,29 @@ All notable changes to BDK project will be documented here.
 
 [2.0.1]: https://github.com/cathayddt/bdk/releases/tag/v2.0.1
 
+[2.0.2]: https://github.com/cathayddt/bdk/releases/tag/v2.0.2
+
+## [2.0.2][2.0.2] - 2023-03-
+
+### new
+1. New Package: `ora` 
+2. New Command: `bdk quorum network add`
+3. New Command: `bdk quorum network generate`
+4. New Command: `bdk quorum network join`
+5. New Command: `bdk quorum network check`
+6. New Command: `bdk quorum network get`
+7. New Example: add remote node
+
+### changed
+1. Fix: path not found, provide `PathError` notification
+2. Fix: superuser privilege, not provide su execute
+3. Fix: `bdk quorum network delete` cannot delete image
+4. Upgrade: quorum (22.7.4) and blockscout (v4.1.5-beta)
+5. Modify: `gasLimit` from `0xFFFFFF` to `0xE0000000`
+6. Modify: `emptyBlockPeriodSeconds` from 60 to 3600
+7. Modify: `requestTimeoutSeconds` from 4 to 60
+8. Modify: `bdk quorum network create` member node default value 0
+
 ## [2.0.1][2.0.1] - 2022-12-
 
 ### new

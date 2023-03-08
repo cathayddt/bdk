@@ -26,16 +26,5 @@ export function tarDateFormat (date: Date): string {
 }
 
 export const randomFromArray = <T> (x: Array<T>) => x[Math.floor(Math.random() * x.length)]
-// export function iterateObject2 (obj: Map, callback: (x: string) => any) {
-//   for (const key in obj) {
-//     if (typeof obj[key] === 'object') {
-//       iterateObject(obj[key], callback)
-//       if (callback(key) !== key) {
-//         obj[callback(key)] = obj[key]
-//         delete obj[key]
-//       }
-//     } else {
-//       obj[key] = callback(obj[key])
-//     }
-//   }
-// }
+
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

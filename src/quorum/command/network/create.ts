@@ -2,19 +2,18 @@ import { ethers } from 'ethers'
 import prompts from 'prompts'
 import { Argv, Arguments } from 'yargs'
 import Network from '../../service/network'
-import { onCancel, ParamsError } from '../../../util/error'
+import { onCancel } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
-import { logger } from '../../../util/logger'
+import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
+import ora from 'ora'
 
 export const command = 'create'
 
-export const desc = '產生 Quorum network 所需的相關設定檔案'
+export const desc = '產生 Quorum Network 所需的相關設定檔案並建立網路'
 
 interface OptType {
   interactive: boolean
-  genesis: boolean
-  dockerCompose: boolean
 }
 
 export const builder = (yargs: Argv<OptType>) => {
@@ -27,6 +26,7 @@ export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
+    network.createBdkFolder()
     const fileList = network.getBdkFiles()
     if (fileList.length !== 0) {
       const confirmDelete = (await prompts({
@@ -36,8 +36,9 @@ export const handler = async (argv: Arguments<OptType>) => {
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
+        const spinner = ora('Quorum Network Create ...').start()
         network.removeBdkFiles(fileList)
-        logger.info('✔ Remove all existing files!')
+        spinner.succeed('Remove all existing files!')
       }
       return confirmDelete
     } else {
@@ -54,7 +55,7 @@ export const handler = async (argv: Arguments<OptType>) => {
             name: 'chainId',
             message: 'What is your chain id?',
             min: 0,
-            initial: 1337,
+            initial: 81712,
           },
           {
             type: 'number',
@@ -67,8 +68,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'number',
             name: 'memberNumber',
             message: 'How many member do you want?',
-            min: 1,
-            initial: 1,
+            min: 0,
+            initial: 0,
           },
         ], { onCancel })
 
@@ -103,8 +104,14 @@ export const handler = async (argv: Arguments<OptType>) => {
         } else {
           const { address, privateKey } = await network.createWalletAddress()
           walletAddress = address
-          logger.info(`Your wallet address: 0x${walletAddress}`)
-          logger.info(`Wallet private key: ${privateKey}`)
+          ora().stopAndPersist({
+            text: `Your wallet address: 0x${walletAddress}`,
+            symbol: '🔑',
+          })
+          ora().stopAndPersist({
+            text: `Wallet private key: ${privateKey}`,
+            symbol: '🔑',
+          })
         }
 
         const alloc = [{
@@ -113,11 +120,13 @@ export const handler = async (argv: Arguments<OptType>) => {
         }]
 
         return { chainId, validatorNumber, memberNumber, alloc }
+      } else {
+        const { address, privateKey } = await network.createWalletAddress()
+        return defaultNetworkConfig(address, privateKey)
       }
-      throw new ParamsError('Invalid params: Required parameter missing')
     })()
-
+    const spinner = ora('Quorum Network Create ...').start()
     await network.create(networkCreate)
-    logger.info('Quorum Network Create Successfully!')
+    spinner.succeed('Quorum Network Create Successfully!')
   }
 }

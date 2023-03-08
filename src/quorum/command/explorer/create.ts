@@ -1,9 +1,9 @@
 import { Argv, Arguments } from 'yargs'
 import Explorer from '../../service/explorer'
-import { onCancel, ParamsError } from '../../../util/error'
+import { onCancel } from '../../../util/error'
 import config from '../../config'
 import prompts from 'prompts'
-import { logger } from '../../../util'
+import ora from 'ora'
 
 export const command = 'create'
 
@@ -11,8 +11,6 @@ export const desc = '產生 Quorum Explorer 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
-  genesis: boolean
-  dockerCompose: boolean
 }
 
 export const builder = (yargs: Argv<OptType>) => {
@@ -36,10 +34,12 @@ export const handler = async (argv: Arguments<OptType>) => {
           initial: 26000,
         },
       ], { onCancel })).port
+    } else {
+      return 26000
     }
-    throw new ParamsError('Invalid params: Required parameter missing')
   })()
 
+  const spinner = ora('Quorum Explorer Create ...').start()
   await explorer.create(explorerCreate)
-  logger.info(`Quorum Explorer Create Successfully! Host at: http://localhost:${explorerCreate}`)
+  spinner.succeed(`Quorum Explorer Create Successfully! Host at: http://localhost:${explorerCreate}`)
 }

@@ -20,6 +20,11 @@ export interface NetworkCreateType {
   alloc: AllocType[]
 }
 
+export interface NetworkGenerateType {
+  validatorNumber: number
+  memberNumber: number
+}
+
 interface Alloc {
   balance: string
   comment?: string
@@ -56,11 +61,38 @@ export interface GenesisJsonType {
       policy: number
       ceil2Nby3Block: number
     }
+    transitions: {
+      block?: number
+      transactionSizeLimit?: number
+      contractSizeLimit?: number
+      blockPeriodSeconds?: number
+      emptyBlockPeriodSeconds?: number
+    }[]
     txnSizeLimit: number
-    maxCodeSize: number
     isQuorum: boolean
   }
   alloc: {
     [key: string]: Alloc
   }
+}
+
+export interface JoinNodeType {
+  node: string
+  ipAddress: string
+  genesisJson: GenesisJsonType
+  staticNodesJson: Array<string>
+}
+
+export interface AddValidatorRemoteType {
+  validatorAddress: string
+  validatorPublicKey: string
+  discoveryPort: string
+  ipAddress: string
+}
+
+export interface AddMemberRemoteType {
+  memberAddress: string
+  memberPublicKey: string
+  discoveryPort: string
+  ipAddress: string
 }

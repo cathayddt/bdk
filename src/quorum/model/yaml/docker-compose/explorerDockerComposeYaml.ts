@@ -3,17 +3,18 @@ import DockerComposeYaml from './dockerComposeYaml'
 class ExplorerDockerComposeYaml extends DockerComposeYaml {
   constructor (bdkPath: string, port: number = 26000) {
     super()
-    this.addNetwork('quorum-blockscout', { name: 'quorum-blockscout', driver: 'bridge' })
+    this.addNetwork('quorum', {})
     this.addVolume('blockscoutpostgres', {})
     this.addService(
       'blockscout',
       {
-        image: 'consensys/blockscout:v4.0.0-beta',
+        image: 'consensys/blockscout:v4.1.5-beta',
         restart: 'no',
         container_name: 'blockscout',
         environment: [
           'PORT=4000',
-          'DATABASE_URL=ecto://postgres:postgres@blockscoutpostgres/postgres?ssl=false',
+          'ECTO_USE_SSL=false',
+          'DATABASE_URL=postgresql://postgres:postgres@blockscoutpostgres:5432/postgres?ssl=false',
           'POSTGRES_PASSWORD=postgres',
           'POSTGRES_USER=postgres',
           'NETWORK=quickstart',
@@ -23,6 +24,9 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           'SHOW_PRICE_CHART=false',
           'ETHEREUM_JSONRPC_VARIANT=geth',
           'ETHEREUM_JSONRPC_TRANSPORT=ipc',
+          'ETHEREUM_JSONRPC_HTTP_URL=http://validator0:8545',
+          'ETHEREUM_JSONRPC_TRACE_URL=http://validator0:8545',
+          'ETHEREUM_JSONRPC_WS_URL=ws://validator0:8546',
           'IPC_PATH=/root/geth.ipc',
         ],
         entrypoint: ['/bin/sh', '-c', 'cd /opt/app/; echo $$MIX_ENV && mix do ecto.create, ecto.migrate; mix phx.server;'],
@@ -35,14 +39,14 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
         ports: [
           `${port}:4000`,
         ],
-        networks: ['quorum-blockscout'],
+        networks: ['quorum'],
         volumes: [`${bdkPath}/validator0/data/geth.ipc:/root/geth.ipc`],
       },
     )
     this.addService(
       'blockscoutpostgres',
       {
-        image: 'postgres:13.4-alpine',
+        image: 'postgres:13.6-alpine',
         container_name: 'blockscoutpostgres',
         environment: [
           'POSTGRES_USER=postgres',
@@ -61,9 +65,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           timeout: '10s',
           retries: 5,
         },
-        networks: [
-          'quorum-blockscout',
-        ],
+        networks: ['quorum'],
       },
     )
   }

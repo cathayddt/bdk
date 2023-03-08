@@ -4,6 +4,7 @@ import { Config } from '../config'
 import { GenesisJsonType } from '../model/type/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
+import { PathError } from '../../util/error'
 
 export enum InstanceTypeEnum {
   validator = 'validator',
@@ -24,6 +25,10 @@ export default class BdkFile {
     this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
+  }
+
+  public createBdkFolder () {
+    fs.mkdirSync(`${this.bdkPath}`, { recursive: true })
   }
 
   public createArtifactsFolder () {
@@ -61,11 +66,47 @@ export default class BdkFile {
   }
 
   public getValidatorPublicKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/nodekey.pub`)
   }
 
+  public getValidatorPrivateKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/nodekey`)
+  }
+
+  public getValidatorAddress (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/validator${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/validator${i}/address`)
+  }
+
+  public getValidatorEnodeInfo (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/goQuorum`)
+    const staticNodesJson: Array<string> = this.getStaticNodesJson()
+    const enodeInfo = staticNodesJson.find(file => file.includes(`validator${i}`))
+    return enodeInfo
+  }
+
   public getMemberPublicKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
     return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey.pub`)
+  }
+
+  public getMemberPrivateKey (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/nodekey`)
+  }
+
+  public getMemberAddress (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/member${i}`)
+    return fs.readFileSync(`${this.bdkPath}/artifacts/member${i}/address`)
+  }
+
+  public getMemberEnodeInfo (i: number) {
+    this.checkPathExist(`${this.bdkPath}/artifacts/goQuorum`)
+    const staticNodesJson: Array<string> = this.getStaticNodesJson()
+    const enodeInfo = staticNodesJson.find(file => file.includes(`member${i}`))
+    return enodeInfo
   }
 
   public copyStaticNodesJsonToPermissionedNodesJson () {
@@ -155,18 +196,40 @@ export default class BdkFile {
   }
 
   public getBdkPath () {
+    this.checkPathExist(this.bdkPath)
     return `${this.bdkPath}`
   }
 
   public getExportFiles () {
+    this.checkPathExist(this.bdkPath)
     return fs.readdirSync(this.bdkPath)
   }
 
+  public getGenesisJson () {
+    this.checkPathExist(this.bdkPath)
+    const genesisJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, 'utf8')
+    return JSON.parse(genesisJson)
+  }
+
+  public getStaticNodesJson () {
+    this.checkPathExist(this.bdkPath)
+    const staticNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, 'utf8')
+    return JSON.parse(staticNodesJson)
+  }
+
+  public getPermissionedNodesJson () {
+    this.checkPathExist(this.bdkPath)
+    const permissionedNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/permissioned-nodes.json`, 'utf8')
+    return JSON.parse(permissionedNodesJson)
+  }
+
   public getBackupPath () {
+    this.checkPathExist(this.backupPath)
     return `${this.backupPath}`
   }
 
   public getBackupFiles () {
+    this.checkPathExist(this.backupPath)
     return fs.readdirSync(this.backupPath)
   }
 
@@ -192,5 +255,11 @@ export default class BdkFile {
 
   public createMemberDockerComposeYaml (memberDockerComposeYaml: MemberDockerComposeYaml) {
     fs.writeFileSync(this.getMemberDockerComposeYamlPath(), memberDockerComposeYaml.getYamlString())
+  }
+
+  public checkPathExist (path: string) {
+    if (!fs.existsSync(path)) {
+      throw new PathError(`${path} no exist`)
+    }
   }
 }

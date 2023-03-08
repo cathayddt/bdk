@@ -18,6 +18,7 @@ export interface DockerCreateOptionsType {
   HostConfig?: DockerHostConfigType
   WorkingDir?: string
   User?: string
+  AttachStdout?: boolean
 }
 export interface DockerStartOptionsType {
   id: string
@@ -26,7 +27,9 @@ export interface DockerStartOptionsType {
 export interface DockerRunCommandType {
   name?: string
   image: string
+  user?: boolean
   tag?: string
+  stdout?: string
   commands: string[]
   volumes?: string[]
   autoRemove?: boolean
@@ -37,4 +40,5 @@ export interface DockerRunCommandType {
   startOptions?: DockerStartOptionsType
   entryPoint?: string
   portBindings?: Map<string, Array<string>>
+  ignoreError?: boolean
 }

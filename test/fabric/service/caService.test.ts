@@ -1,4 +1,4 @@
-/* global describe, it, before, after, beforeEach */
+/* global describe, it, before, after */
 import fs from 'fs'
 import assert from 'assert'
 import net from 'net'

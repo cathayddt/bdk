@@ -1,8 +1,8 @@
-import { Arguments } from 'yargs'
 import config from '../../config'
 import Explorer from '../../service/explorer'
-import { logger, onCancel } from '../../../util'
+import { onCancel } from '../../../util'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'delete'
 
@@ -10,9 +10,7 @@ export const desc = '刪除現有的 Quorum Explorer.'
 
 export const builder = {}
 
-export const handler = async (argv: Arguments) => {
-  logger.debug('exec explorer delete', argv.$0)
-
+export const handler = async () => {
   const explorer = new Explorer(config)
 
   let confirmDelete = true
@@ -20,14 +18,15 @@ export const handler = async (argv: Arguments) => {
   const response = await prompts({
     type: 'confirm',
     name: 'value',
-    message: 'Confirm to delete Quorum Explorer?',
+    message: '⚠️ The following processes will remove all explorer files. Confirm to delete Quorum Explorer?',
     initial: false,
   }, { onCancel })
 
   confirmDelete = response.value
 
   if (confirmDelete) {
+    const spinner = ora('Quorum Explorer Delete ...').start()
     await explorer.delete()
-    logger.info('Quorum Explorer delete Successfully!')
+    spinner.succeed('Quorum Explorer Delete Successfully!')
   }
 }
