@@ -5,7 +5,7 @@ import Network from '../../../src/quorum/service/network'
 import Explorer from '../../../src/quorum/service/explorer'
 import config from '../../../src/quorum/config'
 
-describe('Quorum.Explorer', function () {
+describe('Quorum.Explorer.Service', function () {
   this.timeout(60000)
 
   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
