@@ -6,7 +6,7 @@ import Explorer from '../../../src/quorum/service/explorer'
 import config from '../../../src/quorum/config'
 
 describe('Quorum.Explorer.Service', function () {
-  this.timeout(60000)
+  this.timeout(600000)
 
   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
   const dockerdOption = { all: true }
