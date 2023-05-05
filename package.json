@@ -38,6 +38,7 @@
     "test:dev": "nodemon --watch 'test/**/*.test.ts' -e ts,tsx --exec npm run test",
     "test:nyan": "NODE_ENV=testing mocha --reporter nyan --require ts-node/register ./test/**/*.test.ts --exit",
     "test:quorum": "nyc npm run test -- --grep Quorum",
+    "test:fabric": "nyc npm run test -- --grep Fabric",
     "test:coverage": "nyc npm run test",
     "test:sonar": "NODE_ENV=testing nyc --reporter=lcov mocha --reporter mocha-sonarqube-reporter --reporter-options output=coverage/xunit.xml --require ts-node/register ./test/**/*.test.ts --exit",
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."

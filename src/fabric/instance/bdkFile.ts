@@ -10,7 +10,7 @@ import OrdererDockerComposeYaml from '../model/yaml/docker-compose/ordererDocker
 import PeerDockerComposeYaml from '../model/yaml/docker-compose/peerDockerComposeYaml'
 import CaDockerComposeYaml from '../model/yaml/docker-compose/caComposeYaml'
 import { OrgJsonType } from '../model/type/org.type'
-import { ProcessError } from '../../util'
+import { PathError, ProcessError } from '../../util'
 import { Config } from '../config'
 import { DockerComposeYamlInterface } from '../model/yaml/docker-compose/dockerComposeYaml'
 import ExplorerConnectionProfileYaml from '../model/yaml/explorer/explorerConnectionProfileYaml'
@@ -26,12 +26,14 @@ export enum InstanceTypeEnum {
 export default class BdkFile {
   private config: Config
   private bdkPath: string
+  private backupPath: string
   private envPath: string
   private orgPath: string
 
   constructor (config: Config, networkName: string = config.networkName) {
     this.config = config
     this.bdkPath = `${config.infraConfig.bdkPath}/${networkName}`
+    this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
   }
@@ -505,5 +507,40 @@ export default class BdkFile {
 
   public getChannelJson (channel: string, filename: string): string {
     return fs.readFileSync(`${this.bdkPath}/channel-artifacts/${channel}/${filename}.json`).toString()
+  }
+
+  public createBackupFolder () {
+    fs.mkdirSync(`${this.backupPath}`, { recursive: true })
+  }
+
+  public createBackupTar (validatorTag: string, date: string) {
+    this.createBackupFolder()
+    return fs.createWriteStream(`${this.backupPath}/Backup_${validatorTag}_${date}.tar.gz`)
+  }
+
+  public getBdkPath () {
+    this.checkPathExist(this.bdkPath)
+    return `${this.bdkPath}`
+  }
+
+  public getExportFiles () {
+    this.checkPathExist(this.bdkPath)
+    return fs.readdirSync(this.bdkPath)
+  }
+
+  public getBackupPath () {
+    this.checkPathExist(this.backupPath)
+    return `${this.backupPath}`
+  }
+
+  public getBackupFiles () {
+    this.checkPathExist(this.backupPath)
+    return fs.readdirSync(this.backupPath)
+  }
+
+  public checkPathExist (path: string) {
+    if (!fs.existsSync(path)) {
+      throw new PathError(`${path} no exist`)
+    }
   }
 }

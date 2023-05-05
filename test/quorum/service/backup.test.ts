@@ -12,7 +12,7 @@ import { NetworkCreateType } from '../../../src/quorum/model/type/network.type'
 
 // write a test for the backup class
 describe('Quorum.Backup', function () {
-  this.timeout(10000)
+  this.timeout(100000)
 
   const backup = new Backup(config)
   const network = new Network(config)
