@@ -97,7 +97,7 @@ bdk quorum network get -i
 ### Step 5：加入網路
 
 ```bash
-# 從要加入的機器(第三台機器)輸入指令，選擇要加入的節點(第一 or 二台機器)，並依序輸入以下資訊，填入要加入網路的 IP Address、genesis.json、static-nodes.json。
+# 從要加入的機器(第三台機器)輸入指令，選擇要加入的節點(第一台或第二台機器)，並依序輸入以下資訊，填入要加入網路的 IP Address、genesis.json、static-nodes.json。
 bdk quorum network join -i
 ```
 
