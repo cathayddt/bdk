@@ -3,6 +3,7 @@ import prompts from 'prompts'
 import config from '../../config'
 import Network from '../../service/network'
 import { logger, onCancel } from '../../../util'
+import ora from 'ora'
 
 export const command = 'delete'
 
@@ -40,7 +41,9 @@ export const handler = async (argv: Arguments<OptType>) => {
 
   if (confirmDelete) {
     try {
+      const spinner = ora('Fabric Network Delete ...').start()
       await network.delete(networkName)
+      spinner.succeed(`Fabric Network ${networkName} Delete Successfully!`)
     } catch (error: any) {
       logger.error(error.toString())
     }
