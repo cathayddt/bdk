@@ -4,6 +4,7 @@ import Peer from '../../service/peer'
 import config from '../../config'
 import { logger, onCancel } from '../../../util'
 import BdkFile from '../../instance/bdkFile'
+import ora from 'ora'
 
 export const command = 'down'
 
@@ -51,7 +52,9 @@ export const handler = async (argv: Arguments<OptType>) => {
   })()
 
   if (peerHostNames.length > 0) {
+    const spinner = ora('Fabric Peer Down ...').start()
     await Promise.all(peerHostNames.map(peerHostname => peer.down({ peerHostname })))
+    spinner.succeed(`Fabric Peer Down ${peerHostNames} Successfully!`)
   } else {
     logger.error('[x] Please add argument in command!')
   }

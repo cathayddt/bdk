@@ -3,6 +3,7 @@ import prompts from 'prompts'
 import Peer from '../../service/peer'
 import { logger } from '../../../util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'add'
 
@@ -43,7 +44,9 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
 
     if (peerCount > 0) {
+      const spinner = ora('Fabric Peer add ...').start()
       peer.add({ peerCount })
+      spinner.succeed('Fabric Peer add Successfully!')
     } else {
       logger.error('[x] Please add argument in command!')
     }
