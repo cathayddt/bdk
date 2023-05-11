@@ -5,6 +5,7 @@ import { PolicyStyleEnum, ChannelConfigEnum } from '../../model/type/channel.typ
 import config from '../../config'
 import { onCancel, ParamsError } from '../../../util'
 import { getOrdererList, joinedChannelChoice } from '../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'fetch'
 
@@ -131,5 +132,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Channel Fetch ...').start()
   await channel.fetchChannelBlock({ orderer, channelName: name, configType: type, outputFileName })
+  spinner.succeed('Fabric Channel Fetch Successfully!')
 }

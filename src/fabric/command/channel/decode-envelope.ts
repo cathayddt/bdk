@@ -5,6 +5,7 @@ import config from '../../config'
 import Channel from '../../service/channel'
 import { getChannelEnvelopeList } from '../../model/prompts/util'
 import { EnvelopeTypeEnum, EnvelopeVerifyEnum } from '../../model/type/channel.type'
+import ora from 'ora'
 
 export const command = 'decode-envelope'
 
@@ -50,6 +51,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Channel Decode Envelope ...\n').start()
   const decodeResult = (await channel.decodeEnvelope({ channelName }))
   logger.info(`Approved org: ${decodeResult.approved.toString()}`)
   switch (decodeResult.type) {
@@ -77,4 +79,5 @@ export const handler = async (argv: Arguments<OptType>) => {
     default:
       break
   }
+  spinner.succeed(`Fabric Channel ${channelName} Decode Envelope Successfully!`)
 }

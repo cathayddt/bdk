@@ -4,6 +4,7 @@ import prompts from 'prompts'
 import config from '../../config'
 import { onCancel } from '../../../util'
 import { getChannelList, getOrdererList } from '../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'join'
 
@@ -60,5 +61,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   }
 
+  const spinner = ora('Fabric Channel Join ...').start()
   await channel.join(joinChannelInput)
+  spinner.succeed('Fabric Channel Join Successfully!')
 }

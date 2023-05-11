@@ -6,6 +6,7 @@ import config from '../../config'
 import { onCancel, logger, ParamsError } from '../../../util'
 import { policyQuestions, getPolicyTypeAndValue } from '../../model/prompts/policyQuestion'
 import { getOrdererList, getOrgNames } from '../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'create'
 
@@ -149,5 +150,7 @@ export const handler = async (argv: Arguments<OptType>) => {
       orderer: orderer,
     }
   }
+  const spinner = ora('Fabric Channel Create ...').start()
   await channel.create(createChannelInput)
+  spinner.succeed('Fabric Channel Create Successfully!')
 }
