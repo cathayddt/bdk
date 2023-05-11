@@ -4,6 +4,7 @@ import { onCancel, ParamsError } from '../../../util'
 import Ca from '../../service/caService'
 import { CaRegisterType } from '../../model/type/caService.type'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'register'
 
@@ -108,9 +109,13 @@ export const handler = async (argv: CaRegisterParams) => {
       //     'Please specify the path to the tls certfile of the upstream server',
       // },
     ], { onCancel })
+    const spinner = ora('Fabric Ca Register ...').start()
     await ca.register(args)
+    spinner.succeed('Fabric Ca Register Successfully!')
   } else {
+    const spinner = ora('Fabric Ca Register ...').start()
     checkRequired(argv)
     await ca.register(argv)
+    spinner.succeed('Fabric Ca Register Successfully!')
   }
 }

@@ -4,6 +4,7 @@ import { onCancel, ParamsError } from '../../../util'
 import Ca from '../../service/caService'
 import { CaUpType } from '../../model/type/caService.type'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'up'
 
@@ -502,6 +503,7 @@ export const handler = async (argv: CaServiceUpParams) => {
         // enrollmentProfile: '',
       }
     }
+    const spinner = ora('Fabric Ca Up ...').start()
     await ca.up(
       {
         basic,
@@ -512,10 +514,13 @@ export const handler = async (argv: CaServiceUpParams) => {
         upstreamEnabled: settings.caType === 'ICA',
       } as CaUpType,
     )
+    spinner.succeed('Fabric Ca Up Successfully!')
   } else {
+    const spinner = ora('Fabric Ca Up ...').start()
     checkRequired(argv)
     checkCertKeyPairs(argv)
     checkCsr(argv)
     await ca.up(transformCaServiceUpObj(argv))
+    spinner.succeed('Fabric Ca Up Successfully!')
   }
 }
