@@ -4,6 +4,7 @@ import { Arguments, Argv } from 'yargs'
 import { onCancel, ParamsError } from '../../../../util'
 import Peer from '../../../service/peer'
 import { getOrdererList } from '../../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'add-system-channel'
 
@@ -67,5 +68,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Org Peer Join In System-channel ...').start()
   await peer.addOrgToSystemChannel({ channelName: 'system-channel', orgName: peerOrgName, orderer })
+  spinner.succeed(`Fabric Org Peer ${peerOrgName} Join In System-channel Successfully!`)
 }

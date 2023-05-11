@@ -5,6 +5,7 @@ import { onCancel, ParamsError } from '../../../../util'
 import { OrgJsonType } from '../../../model/type/org.type'
 import Org from '../../../service/org'
 import config from '../../../config'
+import ora from 'ora'
 
 export const command = 'import'
 
@@ -85,5 +86,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     throw new ParamsError('Invalid params: Required parameter missing')
   })()
 
+  const spinner = ora('Fabric Org Config Import ...').start()
   org.importConfig(orgJsonList)
+  spinner.succeed('Fabric Org Config Import Successfully!')
 }

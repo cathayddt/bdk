@@ -7,6 +7,7 @@ import Orderer from '../../../service/orderer'
 import { ordererQuestions } from '../../../model/prompts/ordererQuestion'
 import { OrgOrdererCreateType } from '../../../model/type/org.type'
 import config from '../../../config'
+import ora from 'ora'
 
 export const command = 'create'
 
@@ -156,6 +157,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Org Orderer Create ...').start()
   if (cryptogen || argv.createFull) {
     await orderer.cryptogen(orgOrdererCreate)
   }
@@ -169,4 +171,5 @@ export const handler = async (argv: Arguments<OptType>) => {
   if (dockerCompose || argv.createFull) {
     orderer.createDockerCompose(orgOrdererCreate)
   }
+  spinner.succeed('Fabric Org Orderer Create Successfully!')
 }

@@ -7,6 +7,7 @@ import { NetworkCreatePeerOrgType } from '../../../model/type/network.type'
 import { peerQuestions } from '../../../model/prompts/peerQuestion'
 import { OrgPeerCreateType } from '../../../model/type/org.type'
 import config from '../../../config'
+import ora from 'ora'
 
 export const command = 'create'
 
@@ -153,6 +154,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Org Peer Create ...').start()
   if (cryptogen || argv.createFull) {
     await peer.cryptogen(orgPeerCreate)
   }
@@ -170,4 +172,5 @@ export const handler = async (argv: Arguments<OptType>) => {
   if (dockerCompose || argv.createFull) {
     peer.createDockerCompose(orgPeerCreate)
   }
+  spinner.succeed('Fabric Org Peer Create Successfully!')
 }
