@@ -4,6 +4,7 @@ import { logger, onCancel } from '../../../util'
 import Chaincode from '../../service/chaincode'
 import config from '../../config'
 import { getChaincodeList } from '../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'install'
 
@@ -64,5 +65,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Chaincode Install ...').start()
   await chaincode.install({ chaincodeLabel })
+  spinner.succeed(`Fabric Chaincode Install ${chaincodeLabel} Successfully!`)
 }

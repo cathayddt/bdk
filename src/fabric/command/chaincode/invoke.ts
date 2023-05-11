@@ -6,6 +6,7 @@ import Channel from '../../service/channel'
 import Chaincode from '../../service/chaincode'
 import { committedChaincodeChoice, joinedChannelChoice } from '../../model/prompts/util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'invoke'
 
@@ -173,9 +174,12 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   }
 
+  const spinner = ora('Fabric Chaincode Invoke ...').start()
   const invokeResult = await chaincode.invoke(invokeChannelInput)
   if (!('stdout' in invokeResult)) {
     throw new Error('command only for docker infra')
   }
+  logger.info('\n')
   logger.info(`${JSON.stringify(Chaincode.parser.invoke(invokeResult))}`)
+  spinner.succeed(`Fabric Chaincode Invoke ${invokeChannelInput.chaincodeFunction} Successfully!`)
 }

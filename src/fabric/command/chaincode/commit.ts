@@ -6,6 +6,7 @@ import Chaincode from '../../service/chaincode'
 import Channel from '../../service/channel'
 import config from '../../config'
 import { getChaincodeList, joinedChannelChoice } from '../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'commit'
 
@@ -178,5 +179,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   }
 
+  const spinner = ora('Fabric Chaincode Commit ...').start()
   await chaincode.commit(commitChannelInput)
+  spinner.succeed('Fabric Chaincode Commit Successfully!')
 }
