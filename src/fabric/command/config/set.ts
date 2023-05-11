@@ -3,6 +3,7 @@ import Config from '../../service/config'
 import prompts from 'prompts'
 import { onCancel } from '../../../util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'set'
 
@@ -41,8 +42,12 @@ export const handler = async (argv: ConfigSetParams) => {
         message: 'Please input value to add/edit',
       },
     ], { onCancel })
+    const spinner = ora('Fabric Config Set ...').start()
     configService.set(args)
+    spinner.succeed(`Fabric Config Set Successfully! key: key: ${args.key}, value: ${args.value}`)
   } else {
+    const spinner = ora('Fabric Config Set ...').start()
     configService.set({ key: argv.key, value: argv.value })
+    spinner.succeed(`Fabric Config Set Successfully! key: ${argv.key}, value: ${argv.value}`)
   }
 }
