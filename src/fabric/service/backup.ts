@@ -24,6 +24,60 @@ export default class Backup extends AbstractService {
   }
 
   /**
+   * @description 匯出 fabric network 單一 peer or orderer 備份資料
+   */
+  public export (nodeName: string[]) {
+    const bdkPath = this.bdkFile.getBdkPath()
+    const createOpts = {
+      gzip: true,
+      cwd: bdkPath,
+      sync: true,
+    }
+
+    if (nodeName[0].startsWith('peer')) {
+      const peerFiles = [
+        'channel-artifacts',
+        'config-yaml',
+        'tlsca',
+        'org-json',
+        ...nodeName.map((peer) => `docker-compose/docker-compose-peer-${peer}.yaml`),
+        ...nodeName.map((peer) => `env/peer-${peer}.env`),
+        'peerOrganizations',
+        'ordererOrganizations',
+      ]
+
+      try {
+        tar
+          .c(createOpts, peerFiles)
+          .pipe(this.bdkFile.createBackupTar(`${nodeName}`, tarDateFormat(new Date())))
+      } catch (e: any) {
+        throw new BackupError(`[x] tar compress error: ${e.message}`)
+      }
+    } else if (nodeName[0].startsWith('orderer')) {
+      const ordererFiles = [
+        'channel-artifacts',
+        'config-yaml',
+        'tlsca',
+        'org-json',
+        ...nodeName.map((orderer) => `docker-compose/docker-compose-orderer-${orderer}.yaml`),
+        ...nodeName.map((orderer) => `env/orderer-${orderer}.env`),
+        'peerOrganizations',
+        'ordererOrganizations',
+      ]
+
+      try {
+        tar
+          .c(createOpts, ordererFiles)
+          .pipe(this.bdkFile.createBackupTar(`${nodeName}`, tarDateFormat(new Date())))
+      } catch (e: any) {
+        throw new BackupError(`[x] tar compress error: ${e.message}`)
+      }
+    } else {
+      throw new BackupError('[x] tar compress error: nodeName error')
+    }
+  }
+
+  /**
    * @description 回傳 backup 資料夾所有的備份檔案
    */
   public getExportItems () {
@@ -64,5 +118,11 @@ export default class Backup extends AbstractService {
     } catch (e: any) {
       throw new BackupError(`[x] tar extract error: ${e.message}`)
     }
+  }
+
+  /** @ignore */
+  public getDockerComposeList () {
+    const fileNames = this.bdkFile.getDockerComposeList()
+    return fileNames
   }
 }

@@ -20,6 +20,7 @@ describe('Fabric.Backup', function () {
 
   before(async function () {
     await minimumNetwork.createNetwork()
+    await minimumNetwork.peerAndOrdererUp()
   })
 
   after(async () => {
@@ -45,6 +46,57 @@ describe('Fabric.Backup', function () {
     it('should have error when tarball error', async () => {
       const stub = sinon.stub(tar, 'c').throws(new BackupError('tarball error'))
       await assert.rejects(async () => { await backup.exportAll() }, BackupError)
+      stub.restore()
+    })
+  })
+
+  describe('Fabric.Backup.export', () => {
+    it('should create a peer backup tarball for a single node', async () => {
+      const peer = minimumNetwork.getPeer().hostname + '.' + minimumNetwork.getPeer().orgDomain
+      const nodeName = [peer]
+      backup.export(nodeName)
+      await sleep(1000)
+      const backupItems = backup.getBackupItems()
+      const nodeBackup = backupItems.find(item => item.title.includes(nodeName[0]))
+      assert(nodeBackup, `No backup item found for node: ${nodeName}`)
+
+      const filePath = resolve(`${bdkPath}/backup/${nodeBackup.value}`)
+      assert(fs.existsSync(filePath), `Backup file not found: ${filePath}`)
+    })
+
+    it('should have error when tarball error', async () => {
+      const stub = sinon.stub(tar, 'c').throws(new BackupError('tarball error'))
+      const orderer = minimumNetwork.getOrderer().hostname + '.' + minimumNetwork.getOrderer().orgDomain
+      const nodeName = [orderer]
+      await assert.rejects(async () => { await backup.export(nodeName) }, BackupError)
+      stub.restore()
+    })
+
+    it('should create a orderer backup tarball for a single node', async () => {
+      const orderer = minimumNetwork.getOrderer().hostname + '.' + minimumNetwork.getOrderer().orgDomain
+      const nodeName = [orderer]
+      backup.export(nodeName)
+      await sleep(1000)
+      const backupItems = backup.getBackupItems()
+      const nodeBackup = backupItems.find(item => item.title.includes(nodeName[0]))
+      assert(nodeBackup, `No backup item found for node: ${nodeName}`)
+
+      const filePath = resolve(`${bdkPath}/backup/${nodeBackup.value}`)
+      assert(fs.existsSync(filePath), `Backup file not found: ${filePath}`)
+    })
+
+    it('should have error when tarball error', async () => {
+      const stub = sinon.stub(tar, 'c').throws(new BackupError('tarball error'))
+      const peer = minimumNetwork.getPeer().hostname + '.' + minimumNetwork.getPeer().orgDomain
+      const nodeName = [peer]
+      await assert.rejects(async () => { await backup.export(nodeName) }, BackupError)
+      stub.restore()
+    })
+
+    it('should handle other node names', async () => {
+      const stub = sinon.stub(tar, 'c').throws(new BackupError('tarball error'))
+      const nodeName = ['unknownNode']
+      await assert.rejects(async () => { await backup.export(nodeName) }, BackupError)
       stub.restore()
     })
   })
@@ -105,6 +157,13 @@ describe('Fabric.Backup', function () {
       const backupItems = backup.getBackupItems()
       await assert.rejects(async () => { await backup.import(backupItems[0].value) }, BackupError)
       stub.restore()
+    })
+
+    describe('Fabric.Backup.getDockerComposeList', () => {
+      it('should return a list of docker compose', () => {
+        const fileNames = backup.getDockerComposeList().peer
+        assert(fileNames.length > 0, 'No docker compose found')
+      })
     })
   })
 })
