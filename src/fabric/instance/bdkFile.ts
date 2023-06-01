@@ -132,6 +132,14 @@ export default class BdkFile {
     fs.copyFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/${hostname}.${domain}/tls/ca.crt`, `${this.bdkPath}/tlsca/${hostname}.${domain}/ca.crt`)
   }
 
+  public copyMspCaFolder (path: string) {
+    fs.copySync(path, `${this.bdkPath}/ca/msp`, { recursive: true })
+  }
+
+  public removeMspCaFolder () {
+    fs.rmSync(`${this.bdkPath}/ca/msp`, { force: true, recursive: true })
+  }
+
   public getPeerOrgTlsCertString (number: number, domain: string) {
     // TODO: if ca is more then 2 layer
     let tlsCert = fs.readFileSync(`${this.bdkPath}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls/ca.crt`).toString()
