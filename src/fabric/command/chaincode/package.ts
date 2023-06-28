@@ -4,6 +4,7 @@ import Chaincode from '../../service/chaincode'
 import { ChaincodePackageType } from '../../model/type/chaincode.type'
 import { logger, onCancel } from '../../../util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'package'
 
@@ -57,5 +58,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     const { chaincodeName, chaincodeVersion, path } = argv
     packageChannelInput = { name: chaincodeName, version: chaincodeVersion, path }
   }
+  const spinner = ora('Fabric Chaincode Package ...').start()
   await chaincode.package(packageChannelInput)
+  spinner.succeed(`Fabric Chaincode Package ${packageChannelInput.name}${packageChannelInput.version} Successfully!`)
 }

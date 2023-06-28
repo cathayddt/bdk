@@ -5,6 +5,7 @@ import prompts from 'prompts'
 import { onCancel, ParamsError } from '../../../util'
 import { getOrdererList, joinedChannelChoice } from '../../model/prompts/util'
 import { ChannelUpdateAnchorPeerType } from '../../model/type/channel.type'
+import ora from 'ora'
 
 export const command = 'update-anchorpeer'
 
@@ -94,5 +95,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     port,
   }
 
+  const spinner = ora('Fabric Channel Anchor Peer Update ...').start()
   await channel.updateAnchorPeer(updateChannelInput)
+  spinner.succeed('Fabric Channel Anchor Peer Update Successfully!')
 }

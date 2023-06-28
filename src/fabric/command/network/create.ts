@@ -10,6 +10,7 @@ import { peerQuestions } from '../../model/prompts/peerQuestion'
 import { ordererQuestions } from '../../model/prompts/ordererQuestion'
 import { testNetworkConfig } from '../../model/testNetworkConfig'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'create'
 
@@ -176,6 +177,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Network Create').start()
   network.createNetworkFolder()
 
   if (cryptogen || createFull) {
@@ -195,4 +197,6 @@ export const handler = async (argv: Arguments<OptType>) => {
   if (dockerCompose || createFull) {
     network.createDockerCompose(networkCreate)
   }
+
+  spinner.succeed('Fabric Network Create Successfully!')
 }

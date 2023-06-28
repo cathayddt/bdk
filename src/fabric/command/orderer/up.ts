@@ -4,6 +4,7 @@ import Orderer from '../../service/orderer'
 import config from '../../config'
 import { logger, onCancel } from '../../../util'
 import BdkFile from '../../instance/bdkFile'
+import ora from 'ora'
 
 export const command = 'up'
 
@@ -52,7 +53,9 @@ export const handler = async (argv: Arguments<OptType>) => {
 
   if (ordererHostNames.length > 0) {
     for (const ordererHostname of ordererHostNames) {
+      const spinner = ora('Fabric Orderer Up ...').start()
       await orderer.up({ ordererHostname })
+      spinner.succeed(`Fabric Orderer ${ordererHostname} Up Successfully!`)
     }
   } else {
     logger.error('[x] Please add argument in command!')

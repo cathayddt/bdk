@@ -60,10 +60,10 @@ bdk quorum network generate -i
 bdk quorum network get -i
 ```
 
-### Step 2：新增節點
+### Step 2：新增節點 (加入第二台機器)
 
 ```bash
-# 從第一台機器輸入指令，選擇 remote、validator，填入要加入節點的 enodeInfo、IP Address。
+# 從第一台機器輸入指令，選擇 remote、validator，填入要加入節點(第二台機器)的 enodeInfo、IP Address。
 bdk quorum network add -i
 
 # 選擇 network，取得 genesis.json、static-nodes.json 保留下來。
@@ -73,13 +73,35 @@ bdk quorum network get -i
 ### Step 3：加入網路
 
 ```bash
-# 從要加入的機器輸入指令，選擇要加入的節點，並依序輸入以下資訊，填入要加入網路的 IP Address、genesis.json、static-nodes.json。
+# 從要加入的機器(第二台機器)輸入指令，選擇要加入的節點(第一台機器)，並依序輸入以下資訊，填入要加入網路的 IP Address、genesis.json、static-nodes.json。
 bdk quorum network join -i
 ```
 
-> 欲加入第三台機器的節點，則需在第一台及第二台機器完成前述 `Step 2：新增節點` 的動作，再於第三台機器完成 `Step 3：加入網路`，第三個節點便可順利加入網路。
+### Step 4：新增節點 (加入第三台機器)
 
-### Step 4：確認節點狀態
+```bash
+# 從第一台機器輸入指令，選擇 remote、validator，填入要加入節點(第三台機器)的 enodeInfo、IP Address。
+bdk quorum network add -i
+
+# 選擇 network，取得 genesis.json、static-nodes.json 保留下來。
+bdk quorum network get -i
+```
+```bash
+# 從第二台機器輸入指令，選擇 remote、validator，填入要加入節點(第三台機器)的 enodeInfo、IP Address。
+bdk quorum network add -i
+
+# 選擇 network，取得 genesis.json、static-nodes.json 保留下來。
+bdk quorum network get -i
+```
+
+### Step 5：加入網路
+
+```bash
+# 從要加入的機器(第三台機器)輸入指令，選擇要加入的節點(第一台或第二台機器)，並依序輸入以下資訊，填入要加入網路的 IP Address、genesis.json、static-nodes.json。
+bdk quorum network join -i
+```
+
+### Step 6：確認節點狀態
 
 ```bash
 # 輸入指令，可確認以下節點狀態

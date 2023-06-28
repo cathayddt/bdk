@@ -2,6 +2,7 @@ import { Argv } from 'yargs'
 import Explorer from '../../service/explorer'
 import { logger } from '../../../util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'update'
 
@@ -16,5 +17,7 @@ export const handler = async () => {
 
   const explorer = new Explorer(config)
 
+  const spinner = ora('Fabric Explorer Update ...').start()
   await explorer.updateForMyOrg()
+  spinner.succeed('Fabric Explorer Update Successfully!')
 }

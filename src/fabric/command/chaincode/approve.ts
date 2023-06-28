@@ -6,6 +6,7 @@ import Chaincode from '../../service/chaincode'
 import Channel from '../../service/channel'
 import config from '../../config'
 import { getChaincodeList, getOrdererList, joinedChannelChoice } from '../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'approve'
 
@@ -141,5 +142,8 @@ export const handler = async (argv: Arguments<OptType>) => {
       approveChannelInput = { ...approveChannelInput, orderer: argv.orderer }
     }
   }
+
+  const spinner = ora('Fabric Chaincode Approve ...').start()
   await chaincode.approve(approveChannelInput)
+  spinner.succeed('Fabric Chaincode Approve Successfully!')
 }

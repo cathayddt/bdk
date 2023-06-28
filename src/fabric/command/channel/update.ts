@@ -4,6 +4,7 @@ import { Arguments, Argv } from 'yargs'
 import { onCancel, ParamsError } from '../../../util'
 import { getChannelEnvelopeList, getOrdererList } from '../../model/prompts/util'
 import Channel from '../../service/channel'
+import ora from 'ora'
 
 export const command = 'update'
 
@@ -70,5 +71,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Channel Update ...').start()
   await channel.update({ orderer, channelName })
+  spinner.succeed(`Fabric Channel ${channelName} Update Successfully!`)
 }

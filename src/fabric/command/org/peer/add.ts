@@ -4,6 +4,7 @@ import { Arguments, Argv } from 'yargs'
 import { onCancel, ParamsError } from '../../../../util'
 import Peer from '../../../service/peer'
 import { getChannelList } from '../../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'add'
 
@@ -69,5 +70,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Org Peer Add ...').start()
   await peer.addOrgToChannel({ channelName, orgName: peerOrgName })
+  spinner.succeed(`Fabric Org Peer ${peerOrgName} Add Successfully!`)
 }

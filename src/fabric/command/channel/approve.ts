@@ -4,6 +4,7 @@ import { onCancel, ParamsError } from '../../../util'
 import config from '../../config'
 import { getChannelEnvelopeList } from '../../model/prompts/util'
 import Channel from '../../service/channel'
+import ora from 'ora'
 
 export const command = 'approve'
 
@@ -47,5 +48,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Channel Approve ...').start()
   await channel.approve({ channelName })
+  spinner.succeed(`Fabric Channel ${channelName} Approve Successfully!`)
 }

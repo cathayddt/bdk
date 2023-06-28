@@ -6,6 +6,7 @@ import { onCancel, ParamsError } from '../../../../util'
 import Orderer from '../../../service/orderer'
 import { getChannelList, getOrdererList, joinedChannelChoice } from '../../../model/prompts/util'
 import Channel from '../../../service/channel'
+import ora from 'ora'
 
 export const command = 'add'
 
@@ -110,5 +111,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Orderer add ...').start()
   await ordererService.addConsenterToChannel({ orderer, channelName, orgName, hostname })
+  spinner.succeed('Fabric Orderer add Successfully!')
 }

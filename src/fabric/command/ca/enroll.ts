@@ -4,6 +4,7 @@ import { onCancel, ParamsError } from '../../../util'
 import Ca from '../../service/caService'
 import { CaEnrollType } from '../../model/type/caService.type'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'enroll'
 
@@ -131,9 +132,13 @@ export const handler = async (argv: CaEnrollParams) => {
       { onCancel },
     )
 
+    const spinner = ora('Fabric Ca Enroll ...').start()
     await ca.enroll(args)
+    spinner.succeed('Fabric Ca Enroll Successfully!')
   } else {
+    const spinner = ora('Fabric Ca Enroll ...').start()
     checkRequired(argv)
     await ca.enroll(argv)
+    spinner.succeed('Fabric Ca Enroll Successfully!')
   }
 }

@@ -124,3 +124,8 @@ export interface CaRegisterType extends CaServiceType {
   admin: string
   // tlsCertfile: string
 }
+
+export interface CaReenrollType extends CaServiceType {
+  // type: CaEnrollTypeEnum
+  caPath: string
+}

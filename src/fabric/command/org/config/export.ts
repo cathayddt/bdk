@@ -2,6 +2,7 @@ import { Arguments, Argv } from 'yargs'
 import { ParamsError } from '../../../../util'
 import Org from '../../../service/org'
 import config from '../../../config'
+import ora from 'ora'
 
 export const command = 'export'
 
@@ -28,5 +29,7 @@ export const handler = (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Org Config Export ...').start()
   org.exportConfig(out)
+  spinner.succeed('Fabric Org Config Export Successfully!')
 }

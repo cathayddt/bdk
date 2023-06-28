@@ -3,24 +3,21 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [2.0.3](https://github.com/cathayddt/bdk/releases/tag/2.0.3) - 2023-06-27
 
-[1.0.0]: https://github.com/cathayddt/bdk/releases/tag/v1.0.0
+### Features
 
-[1.0.1]: https://github.com/cathayddt/bdk/releases/tag/v1.0.1
+* Add vhs to create new demo file
+* Fabric ca reenroll
+* Add fabric backup commands
 
-[1.0.2]: https://github.com/cathayddt/bdk/releases/tag/v1.0.2
+### Fixes
 
-[1.0.3]: https://github.com/cathayddt/bdk/releases/tag/v1.0.3
+* Fabric backup export orderer and peer
+* Quorum docs
+* Fabric and quorum docs
 
-[1.0.4]: https://github.com/cathayddt/bdk/releases/tag/v1.0.4
-
-[2.0.0]: https://github.com/cathayddt/bdk/releases/tag/v2.0.0
-
-[2.0.1]: https://github.com/cathayddt/bdk/releases/tag/v2.0.1
-
-[2.0.2]: https://github.com/cathayddt/bdk/releases/tag/v2.0.2
-
-## [2.0.2][2.0.2] - 2023-03-
+## [2.0.2](https://github.com/cathayddt/bdk/releases/tag/v2.0.2) - 2023-03-
 
 ### new
 1. New Package: `ora` 
@@ -41,7 +38,7 @@ All notable changes to BDK project will be documented here.
 7. Modify: `requestTimeoutSeconds` from 4 to 60
 8. Modify: `bdk quorum network create` member node default value 0
 
-## [2.0.1][2.0.1] - 2022-12-
+## [2.0.1](https://github.com/cathayddt/bdk/releases/tag/v2.0.1) - 2022-12-
 
 ### new
 
@@ -56,7 +53,7 @@ All notable changes to BDK project will be documented here.
 - Refactor: `bdk quorum network create` ask to delete exist files before creating
 - Refactor: `bdk quorum network delete` delete node files
 
-## [2.0.0][2.0.0] - 2022-10-
+## [2.0.0](https://github.com/cathayddt/bdk/releases/tag/v2.0.0) - 2022-10-
 
 ### new
 
@@ -69,7 +66,7 @@ All notable changes to BDK project will be documented here.
 - Refactor: move Fabric commands from 'src/' to 'src/fabric'
 - Refactor: Fabric command form `bdk` to `bdk fabric`
 
-## [1.0.4][1.0.4] - 2022-02-
+## [1.0.4](https://github.com/cathayddt/bdk/releases/tag/v1.0.4) - 2022-02-
 
 ### new
 
@@ -86,7 +83,7 @@ All notable changes to BDK project will be documented here.
 
 - Fix bug: should createChannelArtifactFolder before convertChannelConfigtxToTx (#56)
 
-## [1.0.3][1.0.3] - 2022-01-24
+## [1.0.3](https://github.com/cathayddt/bdk/releases/tag/v1.0.3) - 2022-01-24
 
 ### new
 
@@ -97,7 +94,7 @@ All notable changes to BDK project will be documented here.
 - ICA expiry time #41
 - approve and update don't use arrow function #45
 
-## [1.0.2][1.0.2] - 2022-01-03
+## [1.0.2](https://github.com/cathayddt/bdk/releases/tag/v1.0.2) - 2022-01-03
 
 ### new
 
@@ -124,7 +121,7 @@ All notable changes to BDK project will be documented here.
 - Fix command: `bdk explorer` #29
 - Fix `bdk network create` generate file `org definition json` #44
 
-## [1.0.1][1.0.1] - 2021-11-29
+## [1.0.1](https://github.com/cathayddt/bdk/releases/tag/v1.0.1) - 2021-11-29
 
 ### new
 
@@ -138,7 +135,7 @@ All notable changes to BDK project will be documented here.
 
 - Fix ca file permission issues
 
-## [1.0.0][1.0.0] - 2021-11-02
+## [1.0.0](https://github.com/cathayddt/bdk/releases/tag/v1.0.0) - 2021-11-02
 
 ### new
 

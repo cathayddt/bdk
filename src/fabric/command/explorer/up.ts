@@ -3,6 +3,7 @@ import Explorer from '../../service/explorer'
 import { logger, onCancel } from '../../../util'
 import config from '../../config'
 import prompts from 'prompts'
+import ora from 'ora'
 
 export const command = 'up'
 
@@ -55,5 +56,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     explorerUpInput = argv
   }
 
+  const spinner = ora('Fabric Explorer Up ...').start()
   await explorer.upForMyOrg(explorerUpInput)
+  spinner.succeed(`Fabric Explorer Up Successfully! Host at: http://localhost:${explorerUpInput}`)
 }

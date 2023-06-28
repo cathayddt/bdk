@@ -9,21 +9,21 @@ e.g.
 ```
 bdk quorum network create -i
 ```
-![bdk quorum network create -i](images/bdk-quorum-network-create.gif)
+![bdk quorum network create -i](docs/vhs/bdk-quorum-network-create.gif)
 
 ```bash
 bdk fabric network create -i
 ```
 
-![bdk fabric network create -i](images/bdk-fabric-network-create.gif)
+![bdk fabric network create -i](docs/vhs/bdk-fabric-network-create.gif)
 
 ## 版本 (Releases)
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v2.0.2][v2.0.2] | [v2.0.2][v2.0.2] |
+| [v2.0.3][v2.0.3] | [v2.0.3][v2.0.3] |
 
-[v2.0.2]: https://github.com/cathayddt/bdk/releases/tag/v2.0.2
+[v2.0.3]: https://github.com/cathayddt/bdk/releases/tag/v2.0.3
 
 [更新內容 (Changelog)](CHANGELOG.md)
 

@@ -3,6 +3,7 @@ import prompts from 'prompts'
 import Orderer from '../../service/orderer'
 import { logger, onCancel } from '../../../util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'add'
 
@@ -44,7 +45,9 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
 
     if (ordererHostnames.length > 0) {
+      const spinner = ora('Fabric Orderer Add ...').start()
       orderer.add({ ordererHostnames, genesisFileName: 'genesis' })
+      spinner.succeed('Fabric Orderer Add Successfully!')
     } else {
       logger.error('[x] Please add argument in command!')
     }

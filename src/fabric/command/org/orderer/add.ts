@@ -5,6 +5,7 @@ import { Arguments, Argv } from 'yargs'
 import { onCancel, ParamsError } from '../../../../util'
 import Orderer from '../../../service/orderer'
 import { getChannelList, getOrdererList } from '../../../model/prompts/util'
+import ora from 'ora'
 
 export const command = 'add'
 
@@ -92,5 +93,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
+  const spinner = ora('Fabric Org Orderer Add ...').start()
   await ordererService.addOrgToChannel({ orderer, channelName, orgName })
+  spinner.succeed(`Fabric Org Orderer Add ${channelName} Successfully!`)
 }

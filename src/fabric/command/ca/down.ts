@@ -3,6 +3,7 @@ import prompts from 'prompts'
 import Ca from '../../service/caService'
 import config from '../../config'
 import { CaDownType } from '../../model/type/caService.type'
+import ora from 'ora'
 
 export const command = 'down'
 
@@ -29,8 +30,12 @@ export const handler = async (argv: CaDownParams) => {
         message: 'What do you want to call this CA?',
       },
     ])
+    const spinner = ora('Fabric Ca Down ...').start()
     await ca.down({ caName: info.caName })
+    spinner.succeed(`Fabric Ca Down ${info.caName} Successfully!`)
   } else {
+    const spinner = ora('Fabric Ca Down ...').start()
     await ca.down({ caName: argv.caName })
+    spinner.succeed(`Fabric Ca Down ${argv.caName} Successfully!`)
   }
 }

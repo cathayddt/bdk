@@ -6,7 +6,7 @@ import Ca from '../../../src/fabric/service/caService'
 import config from '../../../src/fabric/config'
 import { CaEnrollCommandTypeEnum, CaRegisterTypeEnum } from '../../../src/fabric/model/type/caService.type'
 
-describe('CA service:', function () {
+describe('Fabric.CA', function () {
   this.timeout(10000)
 
   let caService: Ca
@@ -175,11 +175,28 @@ describe('CA service:', function () {
     admin: 'admin',
   }
 
+  const enrollInvalidArgv = {
+    upstream: 'ica.org0.cathaybc.com',
+    upstreamPort: 7154,
+    clientId: 'peer0.org0.bdk.example.com',
+    clientSecret: 'org0peerpw',
+    type: 'invalidType',
+    role: 'peer',
+    orgHostname: 'org0.bdk.example.com',
+  }
+
+  const reenrollOrderer0Argv = {
+    clientId: 'orderer0.org0orderer.bdk.example.com',
+    clientSecret: 'org0ordererpw',
+    upstream: 'ica.org0.cathaybc.com',
+    upstreamPort: 7154,
+  }
+
   before(() => {
     caService = new Ca(config)
   })
 
-  describe('enroll && register ica', function () {
+  describe('Fabric.CA.enrollRCA', function () {
     after(() => {
       fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
     })
@@ -206,7 +223,7 @@ describe('CA service:', function () {
     })
   })
 
-  describe('enroll && register ica', function () {
+  describe('Fabric.CA.enrollICA', function () {
     before((done) => {
       caService.up(rcaArgv).then(() => {
         const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
@@ -251,7 +268,7 @@ describe('CA service:', function () {
     })
   })
 
-  describe('enroll && register org', function () {
+  describe('Fabric.CA.enrollOrg', function () {
     this.timeout(60000)
     before((done) => {
       caService.up(rcaArgv).then(() => {
@@ -339,6 +356,65 @@ describe('CA service:', function () {
       // yaml
       assert.strictEqual(fs.existsSync(`${caPath}/${enrollPeer0Argv.clientId}@${enrollPeer0Argv.upstream}/fabric-ca-client-config.yaml`), true)
       assert.strictEqual(fs.existsSync(`${peerOrgPath}/peers/${enrollPeer0Argv.clientId}/fabric-ca-client-config.yaml`), true)
+    })
+
+    it('enroll wrong role', async () => {
+      await assert.rejects(async () => {
+        await caService.enroll(enrollInvalidArgv as any)
+      }, Error)
+    })
+
+    it('enroll wrong tls role ', async () => {
+      await assert.rejects(async () => {
+        await caService.enrollSteps().enrollTls(enrollInvalidArgv as any)
+      }, Error)
+    })
+
+    it('enroll wrong format', async () => {
+      await caService.enrollSteps().format(enrollInvalidArgv as any)
+      await caService.enrollSteps().format({ ...enrollPeerOrgArgv, role: 'invalid' })
+    })
+  })
+
+  describe('Fabric.CA.reenroll', function () {
+    this.timeout(60000)
+    before((done) => {
+      caService.up(rcaArgv).then(() => {
+        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
+          caService.enroll(enrollRcaClientArgv).then(() => {
+            caService.register(registerIcaArgv).then(() => {
+              caService.up(icaArgv).then(() => {
+                const socket = net.connect(icaArgv.basic.port, '127.0.0.1', () => {
+                  done()
+                })
+                socket.on('error', (err) => { assert.fail(`ica connect test error: ${err.message}`) })
+              }).catch((err) => { assert.fail(`ica up error: ${err.message}`) })
+            }).catch((err) => { assert.fail(`rca register ica error: ${err.message}`) })
+          }).catch((err) => { assert.fail(`rca enroll client error: ${err.message}`) })
+        })
+        socket.on('error', (err) => { assert.fail(`rca connect test error: ${err.message}`) })
+      }).catch((err) => { assert.fail(`rca up error: ${err.message}`) })
+    })
+
+    after((done) => {
+      caService.down({ caName: rcaArgv.basic.caName }).then(() => {
+        caService.down({ caName: icaArgv.basic.caName }).then(() => {
+          fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+          done()
+        }).catch((err) => { assert.fail(`ica down error: ${err.message}`) })
+      }).catch((err) => { assert.fail(`rca down error: ${err.message}`) })
+    })
+
+    it('reenroll orderer ca', async () => {
+      await caService.enroll(enrollOrdererClientArgv)
+      await caService.register(registerOrdererOrgArgv)
+      await caService.enroll(enrollOrdererOrgArgv)
+      await caService.register(registerOrderer0Argv)
+      await caService.enroll(enrollOrderer0Argv)
+
+      const ordererOrgPath = `${config.infraConfig.bdkPath}/${config.networkName}/ordererOrganizations/${enrollOrdererOrgArgv.orgHostname}`
+
+      await caService.reenroll({ caPath: `${ordererOrgPath}/msp`, ...reenrollOrderer0Argv })
     })
   })
 })

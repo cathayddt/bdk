@@ -6,6 +6,7 @@ import Chaincode from '../../service/chaincode'
 import Channel from '../../service/channel'
 import { committedChaincodeChoice, joinedChannelChoice } from '../../model/prompts/util'
 import config from '../../config'
+import ora from 'ora'
 
 export const command = 'query'
 
@@ -74,9 +75,12 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   }
 
+  const spinner = ora('Fabric Chaincode Query ...').start()
   const queryResult = await chaincode.query(queryChannelInput)
   if (!('stdout' in queryResult)) {
     throw new Error('command only for docker infra')
   }
+  logger.info('\n')
   logger.info(`${JSON.stringify(Chaincode.parser.query(queryResult))}`)
+  spinner.succeed('Fabric Chaincode Query Successfully!')
 }

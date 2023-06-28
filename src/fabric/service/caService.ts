@@ -5,6 +5,7 @@ import {
   CaEnrollTypeEnum,
   CaDownType,
   CaEnrollCommandTypeEnum,
+  CaReenrollType,
 } from '../model/type/caService.type'
 import CaInstance from '../instance/ca'
 import FabricCa from '../instance/fabricCaClient'
@@ -56,6 +57,23 @@ export default class Ca extends AbstractService {
       await this.enrollSteps().enrollTls(arg)
     }
     this.enrollSteps().format(arg)
+  }
+
+  /**
+   * @description 更換 CA 機器的憑證
+   */
+  public async reenroll (arg: CaReenrollType) {
+    // fs copy msp data to docker image volume
+    this.bdkFile.removeMspCaFolder()
+    this.bdkFile.copyMspCaFolder(arg.caPath)
+    // docker-compose restart ca
+    await (new FabricCa(this.config, this.infra)).reenroll(
+      CaEnrollTypeEnum.msp,
+      arg.clientId,
+      arg.clientSecret,
+      arg.upstream,
+      arg.upstreamPort,
+    )
   }
 
   /**
