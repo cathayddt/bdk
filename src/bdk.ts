@@ -27,6 +27,7 @@ const argv = yargs
   .commandDir('fabric')
   .commandDir('quorum')
   .commandDir('hello')
+  .commandDir('ui')
   .strict()
   .demandCommand()
   .completion()
