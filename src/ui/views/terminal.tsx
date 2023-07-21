@@ -1,12 +1,19 @@
 import React from 'react'
 import { Text, Box } from 'ink'
 import { execSync } from 'child_process'
-
-export default function Terminal () {
+interface TerminalProps {
+  type: string
+}
+export default function Terminal (props: TerminalProps) {
   const [output, setOutput] = React.useState('')
   React.useEffect(() => {
-    setOutput(execSync('bdk fabric --help').toString())
-  }, [setOutput])
+    if (props.type === 'Fabric') {
+      setOutput(execSync('bdk fabric --help').toString())
+    }
+    if (props.type === 'Quorum') {
+      setOutput(execSync('bdk quorum --help').toString())
+    }
+  }, [props.type])
 
   return (
     <Box borderStyle="single" flexDirection="column" flexGrow={1}>
