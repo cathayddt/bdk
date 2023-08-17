@@ -4,6 +4,7 @@ import assert from 'assert'
 import Network from '../../../src/quorum/service/network'
 import Explorer from '../../../src/quorum/service/explorer'
 import config from '../../../src/quorum/config'
+import { ExplorerCreateType } from '../../../src/quorum/model/type/explorer.type'
 
 describe('Quorum.Explorer.Service', function () {
   this.timeout(600000)
@@ -12,13 +13,17 @@ describe('Quorum.Explorer.Service', function () {
   const dockerdOption = { all: true }
   const network = new Network(config)
   const explorer = new Explorer(config)
-  const port = 9000
+  const explorerCreateOptions: ExplorerCreateType = {
+    httpModeEnabled: false,
+    nodeName: 'validator0',
+    port: 9000,
+  }
 
   describe('Quorum.Explorer.create', () => {
     it('should create and start the explorer', async () => {
       const initContainers = await docker.listContainers(dockerdOption)
       await network.createBdkFolder()
-      await explorer.create(port)
+      await explorer.create(explorerCreateOptions)
       const upContainers = await docker.listContainers(dockerdOption)
 
       assert.strictEqual(upContainers.length, initContainers.length + 2)

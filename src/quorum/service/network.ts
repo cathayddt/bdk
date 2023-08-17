@@ -505,7 +505,7 @@ export default class Network extends AbstractService {
       autoRemove: true,
       user: false,
       image: 'quorumengineering/quorum',
-      tag: '22.7.4',
+      tag: '23.4.0',
       volumes: [`${this.bdkFile.getBdkPath()}/${option}/data/geth.ipc:/root/geth.ipc`],
       commands: [
         'attach',

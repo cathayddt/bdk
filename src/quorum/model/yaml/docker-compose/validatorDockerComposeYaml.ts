@@ -4,7 +4,7 @@ class ValidatorDockerComposeYaml extends DockerComposeYaml {
   public addValidator (bdkPath: string, validatorNum: number, rpcPort: number, chainId: number, peerPort: number) {
     this.addNetwork('quorum', {})
     this.addService(`validator${validatorNum}`, {
-      image: 'quorumengineering/quorum:22.7.4',
+      image: 'quorumengineering/quorum:23.4.0',
       // eslint-disable-next-line no-template-curly-in-string
       user: '${UID}:${GID}',
       container_name: `validator${validatorNum}`,
