@@ -1,18 +1,14 @@
 import React from 'react'
 import { Text, Box } from 'ink'
-import { execSync } from 'child_process'
+import CommandContext from '../services/commandContext'
 interface TerminalProps {
   type: string
 }
 export default function Terminal (props: TerminalProps) {
+  const commandContext = new CommandContext()
   const [output, setOutput] = React.useState('')
   React.useEffect(() => {
-    if (props.type === 'Fabric') {
-      setOutput(execSync('bdk fabric --help').toString())
-    }
-    if (props.type === 'Quorum') {
-      setOutput(execSync('bdk quorum --help').toString())
-    }
+    setOutput(commandContext.getCommandHelp(props.type))
   }, [props.type])
 
   return (
