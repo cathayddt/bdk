@@ -2,14 +2,15 @@ import { logger } from '../../util'
 import { AbstractService } from './Service.abstract'
 import ExplorerInstance from '../instance/explorer'
 import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
+import { ExplorerCreateType } from '../model/type/explorer.type'
 
 export default class Explorer extends AbstractService {
   /**
    * @description 啟動 explorer
    */
-  public async create (port: number) {
-    logger.debug(`Explorer up: ${port}`)
-    this.createExplorerDockerCompose(port)
+  public async create (payload: ExplorerCreateType) {
+    logger.debug(`Explorer up: ${payload.port}`)
+    this.createExplorerDockerCompose(payload)
     logger.debug('Starting explorer container')
     return await (new ExplorerInstance(this.config, this.infra).up())
   }
@@ -19,8 +20,13 @@ export default class Explorer extends AbstractService {
     this.removeBdkFiles(this.getExplorerFiles())
   }
 
-  private createExplorerDockerCompose (port: number) {
-    const explorerDockerComposeYaml = new ExplorerDockerComposeYaml(this.bdkFile.getBdkPath(), port)
+  private createExplorerDockerCompose (payload: ExplorerCreateType) {
+    const explorerDockerComposeYaml = new ExplorerDockerComposeYaml(
+      this.bdkFile.getBdkPath(),
+      payload.httpModeEnabled,
+      payload.nodeName,
+      payload.port,
+    )
     this.bdkFile.createExplorerDockerComposeYaml(explorerDockerComposeYaml)
   }
 

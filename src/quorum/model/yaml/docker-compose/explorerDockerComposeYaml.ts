@@ -1,7 +1,12 @@
 import DockerComposeYaml from './dockerComposeYaml'
 
 class ExplorerDockerComposeYaml extends DockerComposeYaml {
-  constructor (bdkPath: string, port: number = 26000) {
+  constructor (
+    bdkPath: string,
+    httpModeEnabled: boolean = false,
+    nodeName: string,
+    port: number = 26000,
+  ) {
     super()
     this.addNetwork('quorum', {})
     this.addVolume('blockscoutpostgres', {})
@@ -23,12 +28,18 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           'COIN=""',
           'SHOW_PRICE_CHART=false',
           'ETHEREUM_JSONRPC_VARIANT=geth',
-          'ETHEREUM_JSONRPC_TRANSPORT=ipc',
-          'ETHEREUM_JSONRPC_HTTP_URL=http://validator0:8545',
-          'ETHEREUM_JSONRPC_TRACE_URL=http://validator0:8545',
-          'ETHEREUM_JSONRPC_WS_URL=ws://validator0:8546',
-          'IPC_PATH=/root/geth.ipc',
-        ],
+        ]
+          .concat(
+            httpModeEnabled ? [
+              'ETHEREUM_JSONRPC_TRANSPORT=http',
+              `ETHEREUM_JSONRPC_HTTP_URL=http://${nodeName}:8545`,
+              `ETHEREUM_JSONRPC_TRACE_URL=http://${nodeName}:8545`,
+              `ETHEREUM_JSONRPC_WS_URL=ws://${nodeName}:8546`,
+            ] : [
+              'ETHEREUM_JSONRPC_TRANSPORT=ipc',
+              'IPC_PATH=/root/geth.ipc',
+            ],
+          ),
         entrypoint: ['/bin/sh', '-c', 'cd /opt/app/; echo $$MIX_ENV && mix do ecto.create, ecto.migrate; mix phx.server;'],
         depends_on: {
           blockscoutpostgres: {
@@ -40,7 +51,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           `${port}:4000`,
         ],
         networks: ['quorum'],
-        volumes: [`${bdkPath}/validator0/data/geth.ipc:/root/geth.ipc`],
+        volumes: (httpModeEnabled) ? [] : [`${bdkPath}/${nodeName}/data/geth.ipc:/root/geth.ipc`],
       },
     )
     this.addService(
