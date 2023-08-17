@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
+import { ItemProps } from '../models/type/ui.type'
 
-export default class commandContext {
+export default class CommandContext {
   public getCommandContext (command: string): (string|undefined)[] {
     const text = execSync(`${command} --help`).toString()
 
@@ -12,19 +13,32 @@ export default class commandContext {
       const commandsText = match[1]
       const commands = commandsText.match(commandsRegex)
         ?.map((match) => `${command} ${match.trim().split(/\s+/).pop()}`) ?? []
-      console.log(commands)
       return commands
     }
     return []
   }
 
-  public getCommandOutput (command: string): string {
-    let output
-    if (this.checkInteractive(command)) {
-      output = execSync(`${command} --interactive`).toString()
-    }
-    output = execSync(command).toString()
+  public getCommandHelp (command: string): string {
+    const output = execSync(`${command} --help`).toString()
     return output
+  }
+
+  public executeCommand (command: string): string {
+    // @TODO: support interactive mode
+    // if (this.checkInteractive(command)) {
+    //   output = execSync(`${command} --interactive`).toString()
+    // }
+    const output = execSync(command).toString()
+    return output
+  }
+
+  public makeItem (command: string): ItemProps[] {
+    const commands = this.getCommandContext(command)
+    // map commands to key value pair and ignore undefined
+    const items = commands.map((command) => {
+      if (command) return { label: command, value: command }
+    }) as ItemProps[]
+    return items
   }
 
   private checkInteractive (command: string): boolean {
