@@ -4,7 +4,7 @@ class MemberDockerComposeYaml extends DockerComposeYaml {
   public addMember (bdkPath: string, memberNum: number, rpcPort: number, chainId: number, peerPort: number) {
     this.addNetwork('quorum', {})
     this.addService(`member${memberNum}`, {
-      image: 'quorumengineering/quorum:22.7.4',
+      image: 'quorumengineering/quorum:23.4.0',
       // eslint-disable-next-line no-template-curly-in-string
       user: '${UID}:${GID}',
       container_name: `member${memberNum}`,
