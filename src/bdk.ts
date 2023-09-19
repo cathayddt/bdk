@@ -26,6 +26,7 @@ const argv = yargs
   })
   .commandDir('fabric')
   .commandDir('quorum')
+  .commandDir('wallet')
   .commandDir('hello')
   .commandDir('ui')
   .strict()
