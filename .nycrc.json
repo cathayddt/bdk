@@ -8,7 +8,8 @@
   "statements": 0,
   "include": [
     "src/fabric/service/**.ts",
-    "src/quorum/service/**.ts"
+    "src/quorum/service/**.ts",
+    "src/wallet/service/**.ts"
   ],
   "exclude":[
     "src/fabric/service/Service.abstract.ts",

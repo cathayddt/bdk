@@ -501,17 +501,6 @@ export default class Network extends AbstractService {
   }
 
   /** @ignore */
-  public createWalletAddress () {
-    // TODO: use Shawn's code generate key
-    const nodekey = ethers.Wallet.createRandom()
-    const privateKey = nodekey.privateKey.replace(/^0x/, '')
-    const publicKey = nodekey.publicKey.replace(/^0x04/, '')
-    const address = nodekey.address.replace(/^0x/, '').toLowerCase()
-
-    return { privateKey, publicKey, address }
-  }
-
-  /** @ignore */
   public createBdkFolder () {
     return this.bdkFile.createBdkFolder()
   }
