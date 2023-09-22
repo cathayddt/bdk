@@ -28,6 +28,8 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           'COIN=""',
           'SHOW_PRICE_CHART=false',
           'ETHEREUM_JSONRPC_VARIANT=geth',
+          'DISABLE_EXCHANGE_RATES=true',
+          'INDEXER_DISABLE_INTERNAL_TRANSACTIONS_FETCHER=true',
         ]
           .concat(
             httpModeEnabled ? [
