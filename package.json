@@ -1,6 +1,6 @@
 {
   "name": "@cathayddt/bdk",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Blockchain Deploy Kit",
   "homepage": "https://github.com/cathayddt/bdk#readme",
   "bugs": {
@@ -42,7 +42,7 @@
     "test:fabric": "nyc npm run test -- --grep Fabric",
     "test:coverage": "nyc npm run test",
     "test:json": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter json --require ts-node/register ./test/**/*.test.ts --exit > test-results.json",
-    "git:changelog": "git-cliff --unreleased --tag 2.0.3 --prepend CHANGELOG.md",
+    "git:changelog": "git-cliff --unreleased --tag 2.0.4 --prepend CHANGELOG.md",
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {

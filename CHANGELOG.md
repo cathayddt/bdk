@@ -3,6 +3,22 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [2.0.4](https://github.com/cathayddt/bdk/releases/tag/2.0.4) - 2023-09-25
+
+### Features
+
+* Add bdk wallet create function [#81](https://github.com/cathayddt/bdk/issues/81)
+* Genesis.json model [#80](https://github.com/cathayddt/bdk/issues/80)
+* Select and excute command [#77](https://github.com/cathayddt/bdk/issues/77)
+* Handle select input and change terminal display [#76](https://github.com/cathayddt/bdk/issues/76)
+* Ink ui template with commands [#74](https://github.com/cathayddt/bdk/issues/74)
+
+### Fixes
+
+* Explorer indexer error [#82](https://github.com/cathayddt/bdk/issues/82)
+* Add export type in index.ts [#52](https://github.com/cathayddt/bdk/issues/52)
+* Approve and update don't use arrow function [#45](https://github.com/cathayddt/bdk/issues/45)
+
 ## [2.0.3](https://github.com/cathayddt/bdk/releases/tag/2.0.3) - 2023-06-27
 
 ### Features
