@@ -1,0 +1,16 @@
+name: ❓ Question
+description: Ask a question in bdk
+labels: ['type:question', 'priority:low']
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for questions in bdk. Feel free to ask any questions about bdk.
+
+  - type: textarea
+    attributes:
+      label: What is the question?
+      description: A clear and concise description of what the question is.
+    validations:
+      required: true

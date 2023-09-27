@@ -1,0 +1,34 @@
+name: 📃 Docs Improvement
+description: Docs error in bdk
+labels: ['type:docs', 'priority:low']
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for the docs/example error in bdk. If you have a question, please ask in questions section in issues.
+
+  - type: markdown
+    attributes:
+      value: Thank you for helping us improve the docs!
+
+  - type: textarea
+    attributes:
+      label: What is the improvement or update you wish to see?
+      description: 'Example: I would like to see more examples of how to use quorum node.'
+    validations:
+      required: true
+  
+  - type: textarea
+    attributes:
+      label: Is there more context that might help us understand?
+      description: A clear description about the suggestion.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Does the docs page already exist? Please link to it.
+      description: 'Example: https://github.com/cathayddt/bdk/wiki/link'
+    validations:
+      required: false
