@@ -1,0 +1,81 @@
+name: 🐛 Bug Report
+description: Report a bug in bdk
+labels: ['type:bug', 'priority:high']
+assignees: 'kidneyweakx'
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for the unexpected errors or bugs in bdk. If you have a question, please ask in questions section in issues.
+
+  - type: dropdown
+    attributes:
+      label: 影響範圍 Which area(s) are affected? (Select all that apply)
+      multiple: true
+      options:
+        - 'Not sure'
+        - 'Fabric'
+        - 'Fabric-CA'
+        - 'Fabric-Chaincode'
+        - 'Fabric-Explorer'
+        - 'Quorum'
+        - 'Quorum-Remote'
+        - 'Quorum-Explorer'
+        - 'Docker'
+        - 'Dockerode'
+        - 'Node.js'
+        - 'Workflows(CI/CD)'
+
+  - type: textarea
+    attributes:
+      label: 測試環境 Provide environment information
+      description: Please list your operating system, Node.js version, npm version, 
+      render: bash
+      placeholder: |
+        BDK:
+          Version: 2.0.4
+        Operating System:
+          Platform: macOS
+          Arch: arm64
+          Version: Darwin Kernel Version 22.5.0
+        Binaries:
+          Node: 16.13.2
+          npm: 9.5.1
+        Docker:
+          client: 24.0.5
+          compose: 2.20.2-desktop.1
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 重現步驟 To Reproduce
+      description: A step-by-step description of how to reproduce the issue, based on the linked reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
+      placeholder: |
+        1. Start quorum node
+        2. Start quorum explorer
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 應呈現結果 Expected Behavior
+      description: Please describe the behavior expected.
+      placeholder: |
+        Should open a explorer in browser
+
+  - type: textarea
+    attributes:
+      label: 實際呈現結果 Resulted Behavior
+      description: Please describe the behavior that actually occurred.
+      placeholder: |
+         explorer not open in browser
+
+  - type: checkboxes
+    attributes:
+      label: 驗證版本 Verify bdk release
+      description: 'Please run `bdk --version` besure you are using the latest version.'
+      options:
+        - label: I verified that my version is the stable release or 1.0.4
+          required: true

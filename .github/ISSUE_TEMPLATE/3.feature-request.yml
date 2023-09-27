@@ -1,0 +1,29 @@
+name: 🛠️ Feature Request
+description: Request a feature in bdk
+labels: ['type:feature', 'priority:medium']
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for feature requests in bdk. If you have a question, please ask in questions section in issues.
+
+  - type: textarea
+    attributes:
+      label: What is the problem that you are trying to solve?
+      description: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 新功能 Feature Request
+      description: Reason for this Feature
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 可能的解法 (Proposed Solution
+    validations:
+      required: true
