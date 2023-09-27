@@ -1,0 +1,29 @@
+name: test-report
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+permissions:
+  contents: read
+  actions: read
+  checks: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build:console
+    - run: npm run test:json
+      
+    - uses: dorny/test-reporter@v1
+      if: success() || failure()  
+      with:
+        name: mocha-report                 # Name of the check run which will be created
+        path: 'test-*.json'                # Path to test results (inside artifact .zip)
+        reporter: mocha-json               # Format of test results
