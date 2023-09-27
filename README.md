@@ -1,4 +1,17 @@
-# Blockchain Deployment Kit
+<div align="center">
+<h1>Blockchain Development Kit</h1>
+<pre>
+            ::::::::    :::::::     :::    :::
+         :+:   :+:   :+:   :+:   :+:   :+:
+      +:+    +:+  +:+    +:+  +:+  +:+
+   +#++:++#+   +#+    +:+  +#++:++
+  +#+    +#+  +#+    +#+  +#+  +#+
+ #+#   #+#   #+#   #+#   #+#   #+#
+########    ########    ###    ###
+</pre>
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE) [![codeql-analysis](https://github.com/cathayddt/bdk/actions/workflows/codeql.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/codeql.yml) [![test-report](https://github.com/cathayddt/bdk/actions/workflows/test-report.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/test-report.yml) [![unit-test](https://github.com/cathayddt/bdk/actions/workflows/unit-test.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/unit-test.yml)
+</div>
 
 提供指令快速建立、管理、監控 blockchain，最大的特色是可以使用互動式的問答，讓使用者可以依續性的問答來完成指令所需要的指令，在每個 BDK 指令的後面，加入 `-i` 或是 `--interactive` 的參數，來使用互動式問答
 
@@ -21,9 +34,9 @@ bdk fabric network create -i
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v2.0.3][v2.0.3] | [v2.0.3][v2.0.3] |
+| [v2.0.4][v2.0.4] | [v2.0.4][v2.0.4] |
 
-[v2.0.3]: https://github.com/cathayddt/bdk/releases/tag/v2.0.3
+[v2.0.4]: https://github.com/cathayddt/bdk/releases/tag/v2.0.4
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
@@ -32,7 +45,7 @@ bdk fabric network create -i
 - 指令文件 CLI Documentation (Work in Progress)
 - [Fabric 使用範例 (Examples)](docs/fabric/EXAMPLE.md)
 - [Quorum 使用範例 (Examples)](docs/quorum/EXAMPLE.md)
-- [開發指南 (Contributing)](CONTRIBUTING.md)
+- [開發指南 (Contributing)](.github/CONTRIBUTING.md)
 - [資安通報 (Security Issues)](SECURITY.md)
 
 ## 安裝流程 (Getting Started)
@@ -42,6 +55,7 @@ bdk fabric network create -i
 - [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v16, npm v8
 - [docker](https://docs.docker.com/engine/install)
 - [docker-compose](https://docs.docker.com/compose/install) >= 1.27
+- [docker-desktop(MacOS)](https://www.docker.com/products/docker-desktop/) Need Allow Docker Sockers in Advanced Options 
 - eslint (vscode plugin, dev-only)
 
 ### 主程式安裝 (Installation)

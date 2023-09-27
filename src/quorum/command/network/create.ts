@@ -7,6 +7,8 @@ import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
 import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import ora from 'ora'
+import Wallet from '../../../wallet/service/wallet'
+import { WalletType } from '../../../wallet/model/type/wallet.type'
 
 export const command = 'create'
 
@@ -24,6 +26,7 @@ export const builder = (yargs: Argv<OptType>) => {
 
 export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
+  const wallet = new Wallet()
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
     network.createBdkFolder()
@@ -102,10 +105,10 @@ export const handler = async (argv: Arguments<OptType>) => {
 
           walletAddress = address
         } else {
-          const { address, privateKey } = await network.createWalletAddress()
+          const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
           walletAddress = address
           ora().stopAndPersist({
-            text: `Your wallet address: 0x${walletAddress}`,
+            text: `Your ${WalletType.ETHEREUM} wallet address: 0x${walletAddress}`,
             symbol: '🔑',
           })
           ora().stopAndPersist({
@@ -121,7 +124,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
         return { chainId, validatorNumber, memberNumber, alloc }
       } else {
-        const { address, privateKey } = await network.createWalletAddress()
+        const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         return defaultNetworkConfig(address, privateKey)
       }
     })()

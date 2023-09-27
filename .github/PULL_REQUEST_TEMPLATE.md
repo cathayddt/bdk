@@ -1,15 +1,23 @@
 # PULL REQUEST
 
+## Before 
+<!-- Please check the one that applies to this PR using "x". -->
+- [ ] 遵守 Commit 規範 (follow [commit convention](https://github.com/cathayddt/bdk/blob/master/.github/COMMIT_CONVENTION.md))
+- [ ] 遵守 Contributing 規範 (follow [contributing](https://github.com/cathayddt/bdk/blob/master/.github/CONTRIBUTING.md))
+
 ## 說明 (Description)
+<!-- If this PR contains a breaking change, please describe the impact and migration path for existing applications below. -->
 
-請簡單說明此PR的更動、被修復的問題以及相關的原因，並請列出這個更動所需要的任何相依模組/套件。
+<!--請簡單說明此PR的更動、被修復的問題以及相關的原因，並請列出這個更動所需要的任何相依模組/套件。
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.-->
 
 ## 相關問題 (Linked Issues)
-- #(issue1)
-- #(issue2)
-- #(issue3)
+<!--
+- Related issues linked `fixes #number`
+- Tests added. Pass Coverage.
+- Errors have a helpful link.
+-->
 
 ## 貢獻種類 (Type of change)
 
@@ -19,7 +27,7 @@ Please include a summary of the change and which issue is fixed. Please also inc
 - [ ] Doc change (需要更新文件 this change requires a documentation update)
 
 **測試環境 (Test Configuration)**:
-* OS:
+* OS: 
 * NodeJS Version:
 * NPM Version:
 * Docker Version:

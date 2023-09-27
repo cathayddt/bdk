@@ -1,8 +1,22 @@
 {
   "extends": [
+    "plugin:react/recommended",
     "./node_modules/ericlint"
   ],
+  "rules": {
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error",
+    "react/react-in-jsx-scope": "error"
+  },
   "parserOptions": {
     "project": "tsconfig.eslint.json"
+  },
+  "plugins": [
+    "react"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }

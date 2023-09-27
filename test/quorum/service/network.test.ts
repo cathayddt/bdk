@@ -8,6 +8,8 @@ import fs from 'fs'
 import { resolve } from 'path'
 import { sleep, TimeLimitError } from '../../../src/util'
 import { JoinNodeType } from '../../../src/quorum/model/type/network.type'
+import Wallet from '../../../src/wallet/service/wallet'
+import { WalletType } from '../../../src/wallet/model/type/wallet.type'
 
 describe.skip('Quorum.Network.Service', function () {
   this.timeout(1000000)
@@ -18,7 +20,8 @@ describe.skip('Quorum.Network.Service', function () {
   const filePath = resolve(`${bdkPath}/bdk-quorum-network`)
 
   const network = new Network(config)
-  const { address } = network.createWalletAddress()
+  const wallet = new Wallet()
+  const { address } = wallet.createWalletAddress(WalletType.ETHEREUM)
   const networkCreateConfig = {
     validatorNumber: 2,
     memberNumber: 2,
