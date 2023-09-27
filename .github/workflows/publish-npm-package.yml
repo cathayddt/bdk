@@ -30,11 +30,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-      # how to fix the package name
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@cathaybc'
       - run: |
           sed -i 's/"name": "@cathayddt\/bdk"/"name": "@cathaybc\/bdk"/' package.json
           npm install
       - run: npm run build:console
-      - run: npm publish
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
