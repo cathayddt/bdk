@@ -24,6 +24,6 @@ body:
 
   - type: textarea
     attributes:
-      label: 可能的解法 (Proposed Solution
+      label: 可能的解法 Proposed Solution
     validations:
       required: true
