@@ -12,11 +12,11 @@ export default function Terminal (props: TerminalProps) {
   }, [props.type])
 
   return (
-    <Box borderStyle="single" flexDirection="column" flexGrow={1}>
+    <>
       <Text>Command output:</Text>
       <Box marginTop={1}>
-        <Text>{output}</Text>
+        <Text wrap="truncate-end">{output}</Text>
       </Box>
-    </Box>
+    </>
   )
 }

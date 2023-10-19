@@ -1,59 +1,93 @@
-import React, { useState } from 'react'
-import { Box, Text, useApp, useInput } from 'ink'
-import Logo from './logo'
-import Command from './command'
-import DockerLogs from './dockerLogs'
-import Terminal from './terminal'
-import SelectInput from 'ink-select-input'
-import CommandContext from '../services/commandContext'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/react-in-jsx-scope */
+import { useState, useEffect } from 'react'
+import { Box, Text, useApp, useInput, useStdout } from 'ink'
+import Logo from '../components/logo'
+import Select from '../components/selectInput'
+import Option from '../components/option'
+import DockerLogs from '../components/dokcerlogs'
 
 export default function App () {
   const { exit } = useApp()
-  const commandContext = new CommandContext()
-  const [type, setType] = useState('bdk fabric')
-  const [items, setItems] = useState([
-    {
-      label: 'Fabric',
-      value: 'bdk fabric',
-    },
-    {
-      label: 'Quorum',
-      value: 'bdk quorum',
-    },
-  ])
+
   useInput((input, key) => {
     if (input === 'q' || (key.ctrl && input === 'c') || key.escape) {
       exit()
     }
   })
 
-  const selectChain = (item:any) => {
-    setType(item.value)
-  }
+  const { stdout }: any = useStdout()
+  const [width, setWidth] = useState(stdout.columns || 80)
+  const [height, setHeight] = useState(stdout.rows || 24)
+  const [windowSize, setWindowSize] = useState({
+    columns: process.stdout.columns,
+    rows: process.stdout.rows,
+  })
 
-  const handleCommand = (item: any) => {
-    const commandList = commandContext.makeItem(item.value)
-    if (commandList.length === 0) {
-      commandContext.executeCommand(item.value)
-    } else setItems(commandList)
-  }
+  useEffect(() => {
+    const handleResize = () => {
+      setWidth(stdout.columns)
+      setHeight(stdout.rows)
+    }
+
+    process.stdout.on('resize', handleResize)
+    return () => {
+      process.stdout.off('resize', handleResize)
+    }
+  }, [stdout.columns, stdout.rows])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        columns: process.stdout.columns,
+        rows: process.stdout.rows,
+      })
+    }
+
+    process.stdout.on('resize', handleResize)
+
+    return () => {
+      process.stdout.off('resize', handleResize)
+    }
+  }, [])
+
+  const [networkType, setNetworkType] = useState('bdk fabric')
 
   return (
-    <Box borderStyle='single' flexDirection='column' height={50}>
-      <Box flexDirection='row' height={90}>
-        <Box flexDirection='column' width="50%">
-          <Logo />
-          <Command />
-          <SelectInput items={items} onHighlight={selectChain} onSelect={handleCommand}/>
-          <DockerLogs />
-        </Box>
-        <Box width="50%">
-          <Terminal type={type}/>
+    <Box flexDirection='row' width={width} height={height}>
+      <Box width="45%" borderStyle='single' flexDirection='column' borderColor={'white'}>
+        <Option networkType={networkType} />
+        <Box height="5%" marginTop={30} paddingTop={1} flexDirection='row' justifyContent='space-between'>
+          <Text color={'yellow'}>Press q to exit</Text>
         </Box>
       </Box>
-      <Box flexDirection='column'>
+      <Box width="55%" flexDirection='column'>
+        <Box height="30%" flexDirection='row'>
+          <Select networkType={networkType} setNetworkType={setNetworkType} />
+          <Box flexDirection='row' width={width} height={height}>
+            <Box width="45%" borderStyle='single' flexDirection='column' borderColor={'white'}>
+              <Option networkType={networkType} />
+              <Box height="5%" marginTop={30} paddingTop={1} flexDirection='row' justifyContent='space-between'>
+                <Text color={'yellow'}>Press q to exit</Text>
+              </Box>
+            </Box>
+            <Box width="55%" flexDirection='column'>
+              <Box height="30%" flexDirection='row'>
+                <Select networkType={networkType} setNetworkType={setNetworkType} />
+                <Logo />
+              </Box>
+              <Box height="70%" borderStyle='bold' borderColor={'white'} flexDirection='column'>
+                <Box height="10%" borderColor={'white'} borderStyle='bold' justifyContent='center'>
+                  <Text color={'white'}>Running Docker Container</Text>
+                </Box>
+                <Box height="90%">
+                  <DockerLogs />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       </Box>
-      <Text bold={true} color='yellow'>-- Press q to exit --</Text>
     </Box>
   )
 }
