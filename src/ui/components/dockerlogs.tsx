@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Text, Box } from 'ink'
 import Docker from 'dockerode'
 
 export default function DockerLogs () {
   const docker = new Docker()
-  const [containers, setContainers] = React.useState([])
+  const [containers, setContainers] = useState([])
 
   const listContainers = () => {
     docker.listContainers({ all: true }, (err: any, containerList: any) => {
@@ -16,7 +16,7 @@ export default function DockerLogs () {
     })
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     listContainers()
 
     // renew state every 10 seconds

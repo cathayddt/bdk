@@ -1,5 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Text, Box } from 'ink'
 import SelectInput from 'ink-select-input'
 import CommandContext from '../services/commandContext'
