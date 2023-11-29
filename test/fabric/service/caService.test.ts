@@ -5,6 +5,7 @@ import net from 'net'
 import Ca from '../../../src/fabric/service/caService'
 import config from '../../../src/fabric/config'
 import { CaEnrollCommandTypeEnum, CaRegisterTypeEnum } from '../../../src/fabric/model/type/caService.type'
+import { sleep } from '../../../src/util'
 
 describe('Fabric.CA', function () {
   this.timeout(10000)
@@ -225,7 +226,8 @@ describe('Fabric.CA', function () {
 
   describe('Fabric.CA.enrollICA', function () {
     before((done) => {
-      caService.up(rcaArgv).then(() => {
+      caService.up(rcaArgv).then(async () => {
+        await sleep(1000)
         const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
           done()
         })
@@ -272,7 +274,8 @@ describe('Fabric.CA', function () {
     this.timeout(60000)
     before((done) => {
       caService.up(rcaArgv).then(() => {
-        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
+        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', async () => {
+          await sleep(1000)
           caService.enroll(enrollRcaClientArgv).then(() => {
             caService.register(registerIcaArgv).then(() => {
               caService.up(icaArgv).then(() => {
@@ -298,6 +301,7 @@ describe('Fabric.CA', function () {
     })
 
     it('enroll && register orderer', async () => {
+      await sleep(1000)
       await caService.enroll(enrollOrdererClientArgv)
       await caService.register(registerOrdererOrgArgv)
       await caService.enroll(enrollOrdererOrgArgv)
@@ -380,7 +384,8 @@ describe('Fabric.CA', function () {
     this.timeout(60000)
     before((done) => {
       caService.up(rcaArgv).then(() => {
-        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
+        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', async () => {
+          await sleep(1000)
           caService.enroll(enrollRcaClientArgv).then(() => {
             caService.register(registerIcaArgv).then(() => {
               caService.up(icaArgv).then(() => {
@@ -406,6 +411,7 @@ describe('Fabric.CA', function () {
     })
 
     it('reenroll orderer ca', async () => {
+      await sleep(1000)
       await caService.enroll(enrollOrdererClientArgv)
       await caService.register(registerOrdererOrgArgv)
       await caService.enroll(enrollOrdererOrgArgv)

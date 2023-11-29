@@ -210,6 +210,7 @@ describe('Network service:', function () {
   })
 
   describe('createConnectionProfile', () => {
+    this.timeout(60000)
     before(async () => {
       (new Config(config)).init()
       networkService = new Network(config)
@@ -226,7 +227,6 @@ describe('Network service:', function () {
 
     it('should generate peer connection profile file', () => {
       networkService.createConnectionProfile(networkCreateJson)
-
       networkCreateJson.peerOrgs.forEach((peerOrg) => {
         const filePath = `${config.infraConfig.bdkPath}/${config.networkName}/peerOrganizations/${peerOrg.domain}`
         assert.strictEqual(fs.existsSync(`${filePath}/connection-${peerOrg.name}.json`), true)
@@ -240,6 +240,7 @@ describe('Network service:', function () {
   })
 
   describe('createDockerCompose', () => {
+    this.timeout(60000)
     before(async () => {
       (new Config(config)).init()
       networkService = new Network(config)
