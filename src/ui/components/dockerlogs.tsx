@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Text, Box } from 'ink'
+import { Text, Box, Newline } from 'ink'
 import Docker from 'dockerode'
 
 export default function DockerLogs () {
@@ -35,7 +35,10 @@ export default function DockerLogs () {
           <Text>Image: {container.Image}</Text>
           <Text>Name: {container.Names.join(', ')}</Text>
           <Text>Status: {container.Status}</Text>
+          <Text>State: {container.State}</Text>
+          <Text>Created: {container.Created}</Text>
           {/* <Text>Ports: {container.Ports.map((port:any) => `${port.PrivatePort}:${port.PublicPort}`).join(', ')}</Text> */}
+          <Newline/>
         </Box>
       ))}
     </Box>

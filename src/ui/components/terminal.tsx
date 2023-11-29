@@ -8,7 +8,13 @@ export default function Terminal (props: TerminalProps) {
   const commandContext = new CommandContext()
   const [output, setOutput] = useState('')
   useEffect(() => {
-    setOutput(commandContext.getCommandHelp(props.type))
+    const fetchCommandHelp = async () => {
+      const result = await commandContext.getCommandHelp(props.type)
+      setOutput(result)
+    }
+    fetchCommandHelp().catch((err) => {
+      console.log(err)
+    })
   }, [props.type])
 
   return (
