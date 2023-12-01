@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text, useApp, useInput, useStdout } from 'ink'
 import Logo from '../components/logo'
-import Select from '../components/selectInput'
-import Option from '../components/option'
 import DockerLogs from '../components/dockerlogs'
+import Option from '../components/option'
+import Select from '../components/selectInput'
 
 export default function App () {
   const { exit } = useApp()
@@ -61,7 +61,7 @@ export default function App () {
       </Box>
       <Box width="55%" flexDirection='column'>
         <Box height="30%" flexDirection='row'>
-          <Select networkType={networkType} setNetworkType={setNetworkType} />
+          <Select setNetworkType={setNetworkType} />
           <Logo />
         </Box>
         <Box height="70%" borderStyle='bold' borderColor={'white'} flexDirection='column'>

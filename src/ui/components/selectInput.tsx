@@ -3,9 +3,10 @@ import { Text, Box } from 'ink'
 import SelectInput from 'ink-select-input'
 import CommandContext from '../services/commandContext'
 
-export default function Select ({ setNetworkType }:any) {
+export default function Select ({ setNetworkType }: any) {
   const commandContext = new CommandContext()
 
+  const [isCommandExecuting, setIsCommandExecuting] = useState(false)
   const [items, setItems] = useState([
     {
       label: 'Fabric',
@@ -21,11 +22,16 @@ export default function Select ({ setNetworkType }:any) {
     setNetworkType(item.value)
   }
 
-  const handleCommand = (item: any) => {
-    const commandList = commandContext.makeItem(item.value)
+  const handleCommand = async (item: any) => {
+    if (isCommandExecuting) return
+    setIsCommandExecuting(true)
+    await new Promise(resolve => setImmediate(resolve))
+
+    const commandList = await commandContext.makeItem(item.value)
     if (commandList.length === 0) {
-      commandContext.executeCommand(item.value)
+      await commandContext.executeCommand(item.value)
     } else setItems(commandList)
+    setIsCommandExecuting(false)
   }
 
   return (
@@ -34,7 +40,7 @@ export default function Select ({ setNetworkType }:any) {
 
         <Text color={'white'} bold>Choose a type of network to deploy:</Text>
         <Box marginTop={1}>
-          <SelectInput items={items} onHighlight={selectChain} onSelect={handleCommand}/>
+          <SelectInput items={items} onHighlight={selectChain} onSelect={handleCommand} />
         </Box>
       </Box>
     </>
