@@ -37,7 +37,6 @@ export default function Select ({ setNetworkType }: any) {
   return (
     <>
       <Box width={50} height={16} marginBottom={2} borderStyle='single' borderColor="#FFFFFF" flexDirection='column'>
-
         <Text color={'white'} bold>Choose a type of network to deploy:</Text>
         <Box marginTop={1}>
           <SelectInput items={items} onHighlight={selectChain} onSelect={handleCommand} />

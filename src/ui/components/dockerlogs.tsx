@@ -18,10 +18,7 @@ export default function DockerLogs () {
 
   useEffect(() => {
     listContainers()
-
-    // renew state every 10 seconds
     const interval = setInterval(listContainers, 10000)
-
     return () => {
       clearInterval(interval)
     }
@@ -37,7 +34,7 @@ export default function DockerLogs () {
           <Text>Status: {container.Status}</Text>
           <Text>State: {container.State}</Text>
           <Text>Created: {container.Created}</Text>
-          {/* <Text>Ports: {container.Ports.map((port:any) => `${port.PrivatePort}:${port.PublicPort}`).join(', ')}</Text> */}
+          <Text>Ports: {container.Ports.map((port:any) => `${port.PrivatePort}:${port.PublicPort}`).join(', ')}</Text>
           <Newline/>
         </Box>
       ))}
