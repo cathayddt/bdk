@@ -1,7 +1,7 @@
 import Dockerode from 'dockerode'
 import { logger } from '../../util/logger'
 import { DockerError } from '../../util/error'
-import { execSync } from 'child_process'
+import { ContainerListProps } from '../models/type/ui.type'
 
 export default class ContainerContext {
   private dockerode: Dockerode
@@ -16,11 +16,17 @@ export default class ContainerContext {
       })
   }
 
-  public async getContainers () {
-    return await this.dockerode.listContainers()
-  }
-
-  public listContainers () {
-    return execSync('docker ps -a').toString()
+  public async getContainers (): Promise<ContainerListProps[]> {
+    const containers = await this.dockerode.listContainers({
+      all: true,
+    })
+    return Promise.resolve(containers.map(container => ({
+      id: container.Id,
+      names: container.Names,
+      image: container.Image,
+      status: container.Status,
+      state: container.State,
+      created: container.Created,
+    })))
   }
 }

@@ -1,43 +1,50 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Text, Box, Newline } from 'ink'
-import Docker from 'dockerode'
+import ContainerContext from '../services/containerContext'
+import { ContainerListProps } from '../models/type/ui.type'
 
 export default function DockerLogs () {
-  const docker = new Docker()
-  const [containers, setContainers] = useState([])
-
-  const listContainers = () => {
-    docker.listContainers({ all: true }, (err: any, containerList: any) => {
-      if (err) {
-        console.error('Error:', err)
-      } else {
-        setContainers(containerList)
-      }
-    })
-  }
+  const containerContext = new ContainerContext()
+  const [containers, setContainers] = useState<ContainerListProps[]>([])
 
   useEffect(() => {
-    listContainers()
-    const interval = setInterval(listContainers, 10000)
+    const fetchContainers = async () => {
+      try {
+        const result = await containerContext.getContainers()
+        if (result !== containers) setContainers(result)
+      } catch (error) {
+        console.error(`Error fetching containers: ${error}`)
+      }
+    }
+
+    const interval = setInterval(fetchContainers, 3000)
     return () => {
       clearInterval(interval)
     }
-  }, [])
+  }, [containers])
+
+  const memoizedContainers = useMemo(() => containers, [containers])
 
   return (
     <Box flexDirection="column">
-      {containers.map((container: any) => (
-        <Box key={container.Id} flexDirection="column">
-          <Text bold>Container ID: {container.Id}</Text>
-          <Text>Image: {container.Image}</Text>
-          <Text>Name: {container.Names.join(', ')}</Text>
-          <Text>Status: {container.Status}</Text>
-          <Text>State: {container.State}</Text>
-          <Text>Created: {container.Created}</Text>
-          <Text>Ports: {container.Ports.map((port:any) => `${port.PrivatePort}:${port.PublicPort}`).join(', ')}</Text>
-          <Newline/>
-        </Box>
-      ))}
+      {memoizedContainers.map((container: any) => {
+        const statusColor = container.state === 'running' ? 'green' : 'red'
+        return (
+          <Box key={container.id} flexDirection="column">
+            <Box flexDirection="row">
+              <Text color={statusColor}>State: {container.state}</Text>
+              <Text> </Text>
+              <Text bold>Container ID: {container.id}</Text>
+            </Box>
+            <Box flexDirection="row">
+              <Text>Name: {container.names.join(', ')}</Text>
+              <Text> </Text>
+              <Text>Image: {container.image}</Text>
+            </Box>
+            <Newline/>
+          </Box>
+        )
+      })}
     </Box>
   )
 }
