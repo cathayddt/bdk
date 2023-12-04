@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Text, Box } from 'ink'
 import SelectInput from 'ink-select-input'
 import CommandContext from '../services/commandContext'
+import { debounce } from '../../util'
 
 export default function Select ({ setNetworkType }: any) {
   const commandContext = new CommandContext()
@@ -18,9 +19,9 @@ export default function Select ({ setNetworkType }: any) {
     },
   ])
 
-  const selectChain = (item: any) => {
+  const selectChain = debounce((item: any) => {
     setNetworkType(item.value)
-  }
+  }, 350)
 
   const handleCommand = async (item: any) => {
     if (isCommandExecuting) return
