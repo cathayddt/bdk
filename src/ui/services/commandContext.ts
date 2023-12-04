@@ -16,8 +16,12 @@ export default class CommandContext {
         const commandsRegex = this.makeRegex(command)
         if (match) {
           const commandsText = match[1]
-          const commands = commandsText.match(commandsRegex)
-            ?.map((match) => `${command} ${match.trim().split(/\s+/).pop()}`) ?? []
+          const commands =
+            commandsText
+              .match(commandsRegex)
+              ?.map(
+                (match) => `${command} ${match.trim().split(/\s+/).pop()}`,
+              ) ?? []
           resolve(commands)
         } else {
           resolve([])

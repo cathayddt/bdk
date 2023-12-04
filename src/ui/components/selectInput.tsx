@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Text, Box } from 'ink'
 import SelectInput from 'ink-select-input'
 import CommandContext from '../services/commandContext'
+import { debounce } from '../../util'
 
 export default function Select ({ setNetworkType }: any) {
   const commandContext = new CommandContext()
@@ -18,9 +19,9 @@ export default function Select ({ setNetworkType }: any) {
     },
   ])
 
-  const selectChain = (item: any) => {
+  const selectChain = debounce((item: any) => {
     setNetworkType(item.value)
-  }
+  }, 350)
 
   const handleCommand = async (item: any) => {
     if (isCommandExecuting) return
@@ -37,7 +38,6 @@ export default function Select ({ setNetworkType }: any) {
   return (
     <>
       <Box width={50} height={16} marginBottom={2} borderStyle='single' borderColor="#FFFFFF" flexDirection='column'>
-
         <Text color={'white'} bold>Choose a type of network to deploy:</Text>
         <Box marginTop={1}>
           <SelectInput items={items} onHighlight={selectChain} onSelect={handleCommand} />

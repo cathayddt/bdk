@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { Box, Text, useApp, useInput, useStdout } from 'ink'
 import Logo from '../components/logo'
 import DockerLogs from '../components/dockerlogs'
-import Option from '../components/option'
 import Select from '../components/selectInput'
+
+const Terminal = lazy(() => import('../components/terminal'))
 
 export default function App () {
   const { exit } = useApp()
@@ -53,12 +54,14 @@ export default function App () {
 
   return (
     <Box flexDirection='row' width={width} height={height}>
-      <Box width="45%" borderStyle='single' flexDirection='column' borderColor={'white'}>
-        <Option networkType={networkType} />
-        <Box height="5%" marginTop={30} paddingTop={1} flexDirection='row' justifyContent='space-between'>
-          <Text color={'yellow'}>Press q to exit</Text>
+      <Suspense fallback={<Text>Loading ....</Text>}>
+        <Box width="45%" borderStyle='single' flexDirection='column' borderColor={'white'}>
+          <Terminal type={networkType} />
+          <Box height="5%" marginTop={30} paddingTop={1} flexDirection='row' justifyContent='space-between'>
+            <Text color={'yellow'}>Press q to exit</Text>
+          </Box>
         </Box>
-      </Box>
+      </Suspense>
       <Box width="55%" flexDirection='column'>
         <Box height="30%" flexDirection='row'>
           <Select setNetworkType={setNetworkType} />

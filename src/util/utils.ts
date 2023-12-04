@@ -1,4 +1,5 @@
 import format from 'string-format'
+import NodeJS from 'node:process'
 
 export interface Map {
   [key: string]: any
@@ -28,3 +29,13 @@ export function tarDateFormat (date: Date): string {
 export const randomFromArray = <T> (x: Array<T>) => x[Math.floor(Math.random() * x.length)]
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+export const debounce = <T extends (...args: any[]) => any>(fn: T, delay = 500) => {
+  let timer: NodeJS.Timeout | null = null
+  return (...args: Parameters<T>): any => {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
