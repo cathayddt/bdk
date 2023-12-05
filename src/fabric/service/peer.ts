@@ -79,7 +79,7 @@ export default class Peer extends AbstractService {
     const { peerOrgs } = dto
     peerOrgs.forEach((peerOrg: NetworkCreatePeerOrgType) => {
       logger.debug(`Peer create copyTLSCa: ${peerOrg.name}`)
-      for (let i = 0; i < peerOrg.peerCount; i++) {
+      for (let i = 0; i < peerOrg.peerCount; i += 1) {
         this.bdkFile.copyPeerOrgTLSCa(`peer${i}`, peerOrg.domain)
       }
     })
@@ -98,7 +98,7 @@ export default class Peer extends AbstractService {
       connectionProfileYaml.setName(`${this.config.networkName}-${peerOrg.name}`)
       connectionProfileYaml.setClientOrganization(peerOrg.name)
 
-      for (let i = 0; i < peerOrg.peerCount; i++) {
+      for (let i = 0; i < peerOrg.peerCount; i += 1) {
         connectionProfileYaml.addPeer(
           peerOrg.name,
           `peer${i}.${peerOrg.domain}`,
@@ -142,7 +142,7 @@ export default class Peer extends AbstractService {
    * @returns  peer org 的 docker compose yaml 檔案（在 ~/.bdk/[blockchain network 名稱]/docker-compose/[domain 的名稱]/docker-compose-peer-[peer 的 hostname].[peer org 的名稱].yaml）
    */
   public createPeerOrgDockerComposeYaml (peerName: string, peerDomain: string, peerCount: number, ports?: NetworkPeerPortType[]) {
-    for (let i = 0; i < peerCount; i++) {
+    for (let i = 0; i < peerCount; i += 1) {
       const bootstrapPeerNumber = (i + 1) % peerCount
       const peerDockerComposeYaml = new PeerDockerComposeYaml()
 

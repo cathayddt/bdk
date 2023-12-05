@@ -69,7 +69,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
       const ordererOrgs = []
       const ordererOrgNames = []
-      for (let i = 0; i < ordererOrg.count; i++) {
+      for (let i = 0; i < ordererOrg.count; i += 1) {
         const networkCreateOrdererOrg = await ordererQuestions(i)
 
         ordererOrgs.push(networkCreateOrdererOrg)
@@ -94,7 +94,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
       const peerOrgs = []
       const peerOrgNames = []
-      for (let i = 0; i < peerOrg.count; i++) {
+      for (let i = 0; i < peerOrg.count; i += 1) {
         const networkCreatePeerOrg = await peerQuestions(i)
 
         peerOrgs.push(networkCreatePeerOrg)

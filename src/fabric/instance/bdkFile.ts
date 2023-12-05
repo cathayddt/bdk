@@ -253,7 +253,7 @@ export default class BdkFile {
 
   public createExportOrgDefinitionJson (exportOrgJson: OrgJsonType, file: string) {
     const splitFilePath = file.split('/', 3)
-    for (let i = 0; i < splitFilePath.length - 1; i++) {
+    for (let i = 0; i < splitFilePath.length - 1; i += 1) {
       fs.mkdirSync(`${splitFilePath[i]}`, { recursive: true })
     }
     fs.writeFileSync(`${file}`, JSON.stringify(exportOrgJson))
@@ -343,7 +343,7 @@ export default class BdkFile {
     )
     fs.copySync(
       `${this.orgPath}/orderers/${ordererName}/msp/cacerts`,
-     `${this.orgPath}/orderers/${ordererName}/msp/tlscacerts`,
+      `${this.orgPath}/orderers/${ordererName}/msp/tlscacerts`,
     )
     fs.copySync(
       `${this.orgPath}/orderers/${ordererName}/msp/intermediatecerts`,
@@ -371,8 +371,8 @@ export default class BdkFile {
     userList.forEach((user) => {
       if (user.toLocaleLowerCase().startsWith('admin')) {
         fs.copySync(
-        `${this.orgPath}/users/${user}/msp/signcerts/`,
-        `${this.orgPath}/orderers/${ordererName}/msp/admincerts`,
+          `${this.orgPath}/users/${user}/msp/signcerts/`,
+          `${this.orgPath}/orderers/${ordererName}/msp/admincerts`,
         )
       }
     })
@@ -425,8 +425,8 @@ export default class BdkFile {
     userList.forEach((user) => {
       if (user.toLocaleLowerCase().startsWith('admin')) {
         fs.copySync(
-        `${this.orgPath}/users/${user}/msp/signcerts/`,
-        `${this.orgPath}/peers/${peerName}/msp/admincerts`,
+          `${this.orgPath}/users/${user}/msp/signcerts/`,
+          `${this.orgPath}/peers/${peerName}/msp/admincerts`,
         )
       }
     })
@@ -453,8 +453,8 @@ export default class BdkFile {
     if (userName.toLocaleLowerCase().startsWith('admin') && fs.existsSync(`${this.orgPath}/${type}s/`)) {
       fs.readdirSync(`${this.orgPath}/${type}s/`).forEach((hostname) => {
         fs.copySync(
-        `${this.orgPath}/users/${userName}/msp/signcerts/`,
-        `${this.orgPath}/${type}s/${hostname}/msp/admincerts`,
+          `${this.orgPath}/users/${userName}/msp/signcerts/`,
+          `${this.orgPath}/${type}s/${hostname}/msp/admincerts`,
         )
       })
     }

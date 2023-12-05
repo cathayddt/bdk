@@ -17,17 +17,17 @@ export default class Network extends AbstractService {
    */
   public async create (networkCreateConfig: NetworkCreateType) {
     const validatorAddressList: Buffer[] = []
-    for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
+    for (let i = 0; i < networkCreateConfig.validatorNumber; i += 1) {
       const { address } = this.createKey(`artifacts/validator${i}`)
       validatorAddressList.push(Buffer.from(address, 'hex'))
     }
-    for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
+    for (let i = 0; i < networkCreateConfig.memberNumber; i += 1) {
       this.createKey(`artifacts/member${i}`)
     }
 
     const extraDataContent = [new Uint8Array(32), validatorAddressList, [], null, []]
     const extraDataCoded = RLP.encode(extraDataContent)
-    const extraData = '0x' + Buffer.from(extraDataCoded).toString('hex')
+    const extraData = `0x${Buffer.from(extraDataCoded).toString('hex')}`
 
     const alloc: {[address: string]: {balance: string}} = {}
     networkCreateConfig.alloc.forEach(x => {
@@ -47,14 +47,14 @@ export default class Network extends AbstractService {
     const staticNodesJson = []
     const bdkPath = this.bdkFile.getBdkPath()
 
-    for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
+    for (let i = 0; i < networkCreateConfig.validatorNumber; i += 1) {
       const validatorPublicKey = this.bdkFile.getValidatorPublicKey(i)
-      const validatorNode = `enode://${validatorPublicKey}@validator${i}:` + (30303 + i)
+      const validatorNode = `enode://${validatorPublicKey}@validator${i}:${30303 + i}`
       staticNodesJson.push(validatorNode)
     }
-    for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
+    for (let i = 0; i < networkCreateConfig.memberNumber; i += 1) {
       const memberPublicKey = this.bdkFile.getMemberPublicKey(i)
-      const memberNode = `enode://${memberPublicKey}@member${i}:` + (30403 + i)
+      const memberNode = `enode://${memberPublicKey}@member${i}:${30403 + i}`
       staticNodesJson.push(memberNode)
     }
 
@@ -63,7 +63,7 @@ export default class Network extends AbstractService {
 
     // Process validator node
     const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
-    for (let i = 0; i < networkCreateConfig.validatorNumber; i++) {
+    for (let i = 0; i < networkCreateConfig.validatorNumber; i += 1) {
       this.bdkFile.copyGenesisJsonToValidator(i)
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
@@ -81,7 +81,7 @@ export default class Network extends AbstractService {
     // Process Member node
     if (networkCreateConfig.memberNumber > 0) {
       const memberDockerComposeYaml = new MemberDockerComposeYaml()
-      for (let i = 0; i < networkCreateConfig.memberNumber; i++) {
+      for (let i = 0; i < networkCreateConfig.memberNumber; i += 1) {
         this.bdkFile.copyGenesisJsonToMember(i)
         this.bdkFile.copyStaticNodesJsonToMember(i)
         this.bdkFile.copyPermissionedNodesJsonToMember(i)
@@ -105,7 +105,7 @@ export default class Network extends AbstractService {
     const enodeInfo = String(this.getNodeInfo(joinNodeConfig.node, 'enodeInfo'))
     const publicKey = String(this.getNodeInfo(joinNodeConfig.node, 'publicKey'))
 
-    for (let i = 0; i < joinNodeConfig.staticNodesJson.length; i++) {
+    for (let i = 0; i < joinNodeConfig.staticNodesJson.length; i += 1) {
       if (joinNodeConfig.staticNodesJson[i].includes(publicKey)) {
         staticNodesJson.push(enodeInfo)
       } else {
@@ -178,8 +178,8 @@ export default class Network extends AbstractService {
     const validatorCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(validator)[0-9]+/g)).length
 
     // propose
-    for (let i = 0; i < validatorCount; i++) {
-      await this.quorumCommand(`istanbul.propose("${addValidatorRemoteConfig.validatorAddress}", true)`, 'validator' + i)
+    for (let i = 0; i < validatorCount; i += 1) {
+      await this.quorumCommand(`istanbul.propose("${addValidatorRemoteConfig.validatorAddress}", true)`, `validator${i}`)
     }
 
     const staticNodesJson = this.bdkFile.getStaticNodesJson()
@@ -190,14 +190,14 @@ export default class Network extends AbstractService {
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
 
     // for loop to copy static-nodes.json to validator
-    for (let i = 0; i < validatorCount; i++) {
+    for (let i = 0; i < validatorCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
     }
 
     // for loop to copy static-nodes.json to member
     const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
-    for (let i = 0; i < memberCount; i++) {
+    for (let i = 0; i < memberCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
     }
@@ -213,14 +213,14 @@ export default class Network extends AbstractService {
 
     // for loop to copy static-nodes.json to validator
     const validatorCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(validator)[0-9]+/g)).length
-    for (let i = 0; i < validatorCount; i++) {
+    for (let i = 0; i < validatorCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
     }
 
     // for loop to copy static-nodes.json to member
     const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
-    for (let i = 0; i < memberCount; i++) {
+    for (let i = 0; i < memberCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
     }
@@ -230,25 +230,25 @@ export default class Network extends AbstractService {
     const staticNodesJson = []
 
     // Add node to static-nodes.json
-    for (let i = 0; i < networkGenerateConfig.validatorNumber; i++) {
+    for (let i = 0; i < networkGenerateConfig.validatorNumber; i += 1) {
       const { publicKey } = this.createKey(`artifacts/validator${i}`)
-      const validatorNode = `enode://${publicKey}@validator${i}:` + (30303 + i)
+      const validatorNode = `enode://${publicKey}@validator${i}:${30303 + i}`
       staticNodesJson.push(validatorNode)
     }
-    for (let i = 0; i < networkGenerateConfig.memberNumber; i++) {
+    for (let i = 0; i < networkGenerateConfig.memberNumber; i += 1) {
       const { publicKey } = this.createKey(`artifacts/member${i}`)
-      const memberNode = `enode://${publicKey}@member${i}:` + (30403 + i)
+      const memberNode = `enode://${publicKey}@member${i}:${30403 + i}`
       staticNodesJson.push(memberNode)
     }
     this.bdkFile.createStaticNodesJson(staticNodesJson)
 
     // Process validator & member node
-    for (let i = 0; i < networkGenerateConfig.validatorNumber; i++) {
+    for (let i = 0; i < networkGenerateConfig.validatorNumber; i += 1) {
       this.bdkFile.copyPrivateKeyToValidator(i)
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
     }
-    for (let i = 0; i < networkGenerateConfig.memberNumber; i++) {
+    for (let i = 0; i < networkGenerateConfig.memberNumber; i += 1) {
       this.bdkFile.copyPrivateKeyToMember(i)
       this.bdkFile.copyPublicKeyToMember(i)
       this.bdkFile.copyAddressToMember(i)
@@ -259,17 +259,17 @@ export default class Network extends AbstractService {
     // count validator number
     const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
     const validatorNum = validatorCount
-    const newValidator = 'validator' + validatorNum
+    const newValidator = `validator${validatorNum}`
     const { publicKey, address } = this.createKey(`artifacts/${newValidator}`)
-    const validatorNode = `enode://${publicKey}@${newValidator}:` + (30303 + validatorNum)
+    const validatorNode = `enode://${publicKey}@${newValidator}:${30303 + validatorNum}`
     const chainId = parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0'))
 
     this.bdkFile.copyPrivateKeyToValidator(validatorNum)
     this.bdkFile.copyPublicKeyToValidator(validatorNum)
     this.bdkFile.copyAddressToValidator(validatorNum)
 
-    for (let i = 0; i < validatorNum; i++) {
-      await this.quorumCommand(`istanbul.propose("0x${address}", true)`, 'validator' + i)
+    for (let i = 0; i < validatorNum; i += 1) {
+      await this.quorumCommand(`istanbul.propose("0x${address}", true)`, `validator${i}`)
     }
 
     this.bdkFile.copyGenesisJsonToValidator(validatorNum)
@@ -282,7 +282,7 @@ export default class Network extends AbstractService {
 
     // for loop to copy static-nodes.json to validator
     const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
-    for (let i = 0; i < validatorNum + 1; i++) {
+    for (let i = 0; i < validatorNum + 1; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
       validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i)
@@ -291,7 +291,7 @@ export default class Network extends AbstractService {
 
     // for loop to copy static-nodes.json to member
     const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
-    for (let i = 0; i < memberCount; i++) {
+    for (let i = 0; i < memberCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
     }
@@ -324,9 +324,9 @@ export default class Network extends AbstractService {
     // count member number
     const memberCount = (await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g))).length
     const memberNum = memberCount
-    const newMember = 'member' + memberNum
+    const newMember = `member${memberNum}`
     const { publicKey } = this.createKey(`artifacts/${newMember}`)
-    const memberNode = `enode://${publicKey}@${newMember}:` + (30403 + memberNum)
+    const memberNode = `enode://${publicKey}@${newMember}:${30403 + memberNum}`
     const chainId = parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0'))
 
     this.bdkFile.copyPrivateKeyToMember(memberNum)
@@ -343,14 +343,14 @@ export default class Network extends AbstractService {
 
     // for loop to copy static-nodes.json to validator
     const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
-    for (let i = 0; i < validatorCount; i++) {
+    for (let i = 0; i < validatorCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
     }
 
     // for loop to copy static-nodes.json to member
     const memberDockerComposeYaml = new MemberDockerComposeYaml()
-    for (let i = 0; i < memberCount + 1; i++) {
+    for (let i = 0; i < memberCount + 1; i += 1) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
       memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i)

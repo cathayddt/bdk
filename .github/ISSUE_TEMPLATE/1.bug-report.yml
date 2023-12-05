@@ -34,7 +34,7 @@ body:
       render: bash
       placeholder: |
         BDK:
-          Version: 2.0.4
+          Version: x.x.x
         Operating System:
           Platform: macOS
           Arch: arm64

@@ -19,7 +19,7 @@ export interface ExplorerCreateType {
  * @requires pass - explorer 的預設密碼
  * @requires port - explorer 的 port
  */
-export interface ExplorerUpForMyOrgType{
+export interface ExplorerUpForMyOrgType {
   user: string
   pass: string
   port: number
@@ -28,7 +28,7 @@ export interface ExplorerUpForMyOrgType{
 /**
  * @ignore
  */
-export interface ExplorerUpForMyOrgStepUpType extends ExplorerUpForMyOrgType{
+export interface ExplorerUpForMyOrgStepUpType extends ExplorerUpForMyOrgType {
   channels: ExplorerChannelType // {'my_channel': {hostname: 'peer0'}}
 }
 

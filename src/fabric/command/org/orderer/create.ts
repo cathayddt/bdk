@@ -59,7 +59,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
       const ordererOrgs: NetworkCreateOrdererOrgType[] = []
       const ordererOrgNames: string[] = []
-      for (let i = 0; i < ordererOrg.count; i++) {
+      for (let i = 0; i < ordererOrg.count; i += 1) {
         const cryptoConfigOrdererOrg = await ordererQuestions(i)
 
         ordererOrgs.push(cryptoConfigOrdererOrg)

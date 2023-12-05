@@ -3,6 +3,18 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v2.0.5](https://github.com/cathayddt/bdk/releases/tag/v2.0.5) - 2023-12-05
+
+### Features
+
+* Lazy loading in command change [#92](https://github.com/cathayddt/bdk/issues/92)
+* Bdk ui redesign [#89](https://github.com/cathayddt/bdk/issues/89)
+
+### Fixes
+
+* Update docker logs component [#93](https://github.com/cathayddt/bdk/issues/93)
+* Ui selectInput delay [#91](https://github.com/cathayddt/bdk/issues/91)
+
 ## [2.0.4](https://github.com/cathayddt/bdk/releases/tag/2.0.4) - 2023-09-27
 
 ### Features
