@@ -26,7 +26,7 @@
 
 //   const isContainerAlive = async function (port: number): Promise<boolean> {
 //     const totalRetryTime = 3
-//     for (let retrytime = 0; retrytime < totalRetryTime; retrytime++) {
+//     for (let retrytime = 0; retrytime < totalRetryTime; retrytime+= 1) {
 //       try {
 //         const result = await axios.get(`https://localhost:${port}/healthz`,
 //           {

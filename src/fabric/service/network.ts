@@ -81,13 +81,13 @@ export default class Network extends AbstractService {
     logger.debug(`Network create copyTLSCa: ${this.config.networkName}`)
 
     dto.ordererOrgs && dto.ordererOrgs.forEach((ordererOrg: NetworkCreateOrdererOrgType) => {
-      for (let i = 0; i < ordererOrg.hostname.length; i++) {
+      for (let i = 0; i < ordererOrg.hostname.length; i += 1) {
         this.bdkFile.copyOrdererOrgTLSCa(ordererOrg.hostname[i], ordererOrg.domain)
       }
     })
 
     dto.peerOrgs && dto.peerOrgs.forEach((peerOrg: NetworkCreatePeerOrgType) => {
-      for (let i = 0; i < peerOrg.peerCount; i++) {
+      for (let i = 0; i < peerOrg.peerCount; i += 1) {
         this.bdkFile.copyPeerOrgTLSCa(`peer${i}`, peerOrg.domain)
       }
     })

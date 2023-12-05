@@ -52,7 +52,7 @@ describe('Fabric.Backup', function () {
 
   describe('Fabric.Backup.export', () => {
     it('should create a peer backup tarball for a single node', async () => {
-      const peer = minimumNetwork.getPeer().hostname + '.' + minimumNetwork.getPeer().orgDomain
+      const peer = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`
       const nodeName = [peer]
       backup.export(nodeName)
       await sleep(1000)
@@ -66,14 +66,14 @@ describe('Fabric.Backup', function () {
 
     it('should have error when tarball error', async () => {
       const stub = sinon.stub(tar, 'c').throws(new BackupError('tarball error'))
-      const orderer = minimumNetwork.getOrderer().hostname + '.' + minimumNetwork.getOrderer().orgDomain
+      const orderer = `${minimumNetwork.getOrderer().hostname}.${minimumNetwork.getOrderer().orgDomain}`
       const nodeName = [orderer]
       await assert.rejects(async () => { await backup.export(nodeName) }, BackupError)
       stub.restore()
     })
 
     it('should create a orderer backup tarball for a single node', async () => {
-      const orderer = minimumNetwork.getOrderer().hostname + '.' + minimumNetwork.getOrderer().orgDomain
+      const orderer = `${minimumNetwork.getOrderer().hostname}.${minimumNetwork.getOrderer().orgDomain}`
       const nodeName = [orderer]
       backup.export(nodeName)
       await sleep(1000)
@@ -87,7 +87,7 @@ describe('Fabric.Backup', function () {
 
     it('should have error when tarball error', async () => {
       const stub = sinon.stub(tar, 'c').throws(new BackupError('tarball error'))
-      const peer = minimumNetwork.getPeer().hostname + '.' + minimumNetwork.getPeer().orgDomain
+      const peer = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`
       const nodeName = [peer]
       await assert.rejects(async () => { await backup.export(nodeName) }, BackupError)
       stub.restore()

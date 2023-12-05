@@ -52,7 +52,7 @@ export const peerQuestions = async (count: number): Promise<NetworkCreatePeerOrg
   ], { onCancel })
 
   const ports: NetworkPeerPortType[] = []
-  for (let i = 0; i < peerCount; i++) {
+  for (let i = 0; i < peerCount; i += 1) {
     ports.push(await prompts([
       {
         type: 'number',

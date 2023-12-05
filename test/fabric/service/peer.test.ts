@@ -102,7 +102,7 @@ describe('Peer service:', function () {
         assert.strictEqual(fs.existsSync(`${peerOrgPath}/users/Admin@${peerOrg.domain}/tls/client.key`), true)
 
         // peers peerCount
-        for (let index = 0; index < peerOrg.peerCount; index++) {
+        for (let index = 0; index < peerOrg.peerCount; index += 1) {
           const hostname = `peer${index}`
           const hostPath = `${peerOrgPath}/peers/${hostname}.${peerOrg.domain}`
 
@@ -138,7 +138,7 @@ describe('Peer service:', function () {
       assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/tlsca`), true)
 
       orgPeerCreateJson.forEach((peerOrg) => {
-        for (let index = 0; index < peerOrg.peerCount; index++) {
+        for (let index = 0; index < peerOrg.peerCount; index += 1) {
           assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/tlsca/peer${index}.${peerOrg.domain}`), true)
         }
       })
@@ -194,7 +194,7 @@ describe('Peer service:', function () {
       assert.strictEqual(fs.existsSync(`${dockerEnvPath}`), true)
 
       orgPeerCreateJson.forEach((peerOrg) => {
-        for (let index = 0; index < peerOrg.peerCount; index++) {
+        for (let index = 0; index < peerOrg.peerCount; index += 1) {
           assert.strictEqual(fs.existsSync(`${dockerCompsoePath}/docker-compose-peer-peer${index}.${peerOrg.domain}.yaml`), true)
           assert.strictEqual(fs.existsSync(`${dockerEnvPath}/peer-peer${index}.${peerOrg.domain}.env`), true)
         }

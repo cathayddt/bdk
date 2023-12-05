@@ -15,7 +15,7 @@
 //   const cleanSpace = async function () {
 //     const containers = await docker.listContainers(dockerdOption)
 //     // stop and remove all containers
-//     for (let i = 0; i < containers.length; i++) {
+//     for (let i = 0; i < containers.length; i += 1) {
 //       const containerInfo = containers[i]
 //       const container = docker.getContainer(containerInfo.Id)
 //       await container.remove({ force: true, v: true })
@@ -47,7 +47,7 @@
 
 //   const isContainerAlive = function (port: number): boolean {
 //     const totalRetryTime = 3
-//     for (let retrytime = 0; retrytime < totalRetryTime; retrytime++) {
+//     for (let retrytime = 0; retrytime < totalRetryTime; retrytime+= 1) {
 //       try {
 //         const result = axios.get(`https://localhost:${port}/healthz`,
 //           {

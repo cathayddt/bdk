@@ -59,7 +59,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
       const peerOrgs: NetworkCreatePeerOrgType[] = []
       const peerOrgNames: string[] = []
-      for (let i = 0; i < peerOrg.count; i++) {
+      for (let i = 0; i < peerOrg.count; i += 1) {
         const cryptoConfigPeerOrg = await peerQuestions(i)
 
         peerOrgs.push(cryptoConfigPeerOrg)

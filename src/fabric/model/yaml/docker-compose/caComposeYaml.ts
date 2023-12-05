@@ -33,18 +33,18 @@ class CaDockerComposeYaml extends DockerComposeYaml {
       .concat(
         crypto.caCertFile && crypto.caKeyFile
           ? [
-              // Pregenerated CA Keypair
-              `FABRIC_CA_SERVER_CA_CERTFILE=${crypto.caCertFile}`,
-              `FABRIC_CA_SERVER_CA_KEYFILE=${crypto.caKeyFile}`,
+            // Pregenerated CA Keypair
+            `FABRIC_CA_SERVER_CA_CERTFILE=${crypto.caCertFile}`,
+            `FABRIC_CA_SERVER_CA_KEYFILE=${crypto.caKeyFile}`,
           ]
           : [],
       )
       .concat(
         crypto.tlsCertFile && crypto.tlsKeyFile
           ? [
-              // Pregenerated TLS Keypair
-              `FABRIC_CA_SERVER_TLS_CERTFILE=${crypto.tlsCertFile}`,
-              `FABRIC_CA_SERVER_TLS_KEYFILE=${crypto.tlsKeyFile}`,
+            // Pregenerated TLS Keypair
+            `FABRIC_CA_SERVER_TLS_CERTFILE=${crypto.tlsCertFile}`,
+            `FABRIC_CA_SERVER_TLS_KEYFILE=${crypto.tlsKeyFile}`,
           ]
           : [],
       )
@@ -69,12 +69,12 @@ class CaDockerComposeYaml extends DockerComposeYaml {
       .concat(
         upstreamEnabled && intermediate
           ? [
-              // ICA options
-              `FABRIC_CA_SERVER_INTERMEDIATE_PARENTSERVER_URL=${intermediate.parentserverUrl}`,
-              `FABRIC_CA_SERVER_INTERMEDIATE_PARENTSERVER_CANAME=${intermediate.parentserverCn}`,
-              `FABRIC_CA_SERVER_INTERMEDIATE_ENROLLMENT_HOSTS=${intermediate.enrollmentHost}`,
-              'FABRIC_CA_SERVER_INTERMEDIATE_ENROLLMENT_PROFILE=ca',
-              `FABRIC_CA_SERVER_INTERMEDIATE_TLS_CERTFILES=/fabric-ca/${intermediate.parentserverCn}/crypto/tls-cert.pem`,
+            // ICA options
+            `FABRIC_CA_SERVER_INTERMEDIATE_PARENTSERVER_URL=${intermediate.parentserverUrl}`,
+            `FABRIC_CA_SERVER_INTERMEDIATE_PARENTSERVER_CANAME=${intermediate.parentserverCn}`,
+            `FABRIC_CA_SERVER_INTERMEDIATE_ENROLLMENT_HOSTS=${intermediate.enrollmentHost}`,
+            'FABRIC_CA_SERVER_INTERMEDIATE_ENROLLMENT_PROFILE=ca',
+            `FABRIC_CA_SERVER_INTERMEDIATE_TLS_CERTFILES=/fabric-ca/${intermediate.parentserverCn}/crypto/tls-cert.pem`,
           ]
           : [],
       )
