@@ -119,7 +119,7 @@ export interface DecodeEnvelopeType {
   channelName: string
 }
 
-export enum EnvelopeTypeEnum{
+export enum EnvelopeTypeEnum {
   UPDATE_ANCHOR_PEER = 'UPDATE_ANCHOR_PEER',
   ADD_PEER_TO_APPLICATION_CHANNEL = 'ADD_PEER_TO_APPLICATION_CHANNEL',
   ADD_PEER_TO_SYSTEM_CHANNEL = 'ADD_PEER_TO_SYSTEM_CHANNEL',
@@ -127,7 +127,7 @@ export enum EnvelopeTypeEnum{
   ADD_ORDERER_CONSENTER = 'ADD_ORDERER_CONSENTER',
 }
 
-export enum EnvelopeVerifyEnum{
+export enum EnvelopeVerifyEnum {
   VERIFIED = 'VERIFIED',
   NOT_MATCH = 'NOT_MATCH',
   NO_FILE = 'NO_FILE'
@@ -138,6 +138,6 @@ export interface DecodeEnvelopeReturnType {
   type: EnvelopeTypeEnum
   org?: string
   verify?: EnvelopeVerifyEnum
-  anchorPeers? : string[]
+  anchorPeers?: string[]
   consensus?: string[]
 }

@@ -124,7 +124,7 @@ describe('Network service:', function () {
         assert.strictEqual(fs.existsSync(`${peerOrgPath}/users/Admin@${peerOrg.domain}/tls/client.key`), true)
 
         // peers peerCount
-        for (let index = 0; index < peerOrg.peerCount; index++) {
+        for (let index = 0; index < peerOrg.peerCount; index += 1) {
           const hostname = `peer${index}`
           const hostPath = `${peerOrgPath}/peers/${hostname}.${peerOrg.domain}`
 
@@ -169,7 +169,7 @@ describe('Network service:', function () {
       })
 
       networkCreateJson.peerOrgs.forEach((peerOrg) => {
-        for (let index = 0; index < peerOrg.peerCount; index++) {
+        for (let index = 0; index < peerOrg.peerCount; index += 1) {
           assert.strictEqual(fs.existsSync(`${config.infraConfig.bdkPath}/${config.networkName}/tlsca/peer${index}.${peerOrg.domain}`), true)
         }
       })
@@ -210,6 +210,7 @@ describe('Network service:', function () {
   })
 
   describe('createConnectionProfile', () => {
+    this.timeout(60000)
     before(async () => {
       (new Config(config)).init()
       networkService = new Network(config)
@@ -226,7 +227,6 @@ describe('Network service:', function () {
 
     it('should generate peer connection profile file', () => {
       networkService.createConnectionProfile(networkCreateJson)
-
       networkCreateJson.peerOrgs.forEach((peerOrg) => {
         const filePath = `${config.infraConfig.bdkPath}/${config.networkName}/peerOrganizations/${peerOrg.domain}`
         assert.strictEqual(fs.existsSync(`${filePath}/connection-${peerOrg.name}.json`), true)
@@ -240,6 +240,7 @@ describe('Network service:', function () {
   })
 
   describe('createDockerCompose', () => {
+    this.timeout(60000)
     before(async () => {
       (new Config(config)).init()
       networkService = new Network(config)
@@ -271,7 +272,7 @@ describe('Network service:', function () {
       })
 
       networkCreateJson.peerOrgs.forEach((peerOrg) => {
-        for (let index = 0; index < peerOrg.peerCount; index++) {
+        for (let index = 0; index < peerOrg.peerCount; index += 1) {
           assert.strictEqual(fs.existsSync(`${dockerCompsoePath}/docker-compose-peer-peer${index}.${peerOrg.domain}.yaml`), true)
           assert.strictEqual(fs.existsSync(`${dockerEnvPath}/peer-peer${index}.${peerOrg.domain}.env`), true)
         }

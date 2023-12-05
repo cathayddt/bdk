@@ -34,13 +34,13 @@ body:
       render: bash
       placeholder: |
         BDK:
-          Version: 2.0.4
+          Version: x.x.x
         Operating System:
           Platform: macOS
           Arch: arm64
           Version: Darwin Kernel Version 22.5.0
         Binaries:
-          Node: 16.13.2
+          Node: 18.18.2
           npm: 9.5.1
         Docker:
           client: 24.0.5

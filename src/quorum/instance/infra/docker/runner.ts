@@ -121,7 +121,7 @@ export class Runner implements InfraRunner<DockerResultType> {
   }
 
   // Docker Compose
-  private runSpawn (args: Array<string>):Promise<string> {
+  private runSpawn (args: Array<string>): Promise<string> {
     return new Promise((resolve) => {
       logger.debug(`run spawnSync: docker-compose ${args.join(' ')}`)
       const spawnReturn = spawn('docker-compose', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })

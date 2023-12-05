@@ -6,3 +6,13 @@ export interface ItemProps {
 export interface CommandProps {
   type: string
 }
+
+export interface ContainerListProps {
+  id: string
+  names: string[]
+  image: string
+  status: string
+  state: string
+  created: number
+  ports?: string[]
+}

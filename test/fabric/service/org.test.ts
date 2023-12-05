@@ -29,7 +29,7 @@
 
 //   const peerOrgNames: string[] = []
 //   for (const peerOrg of peerOrgs) {
-//     for (let i = 0; i < peerOrg.peerCount; i++) {
+//     for (let i = 0; i < peerOrg.peerCount; i += 1) {
 //       peerOrgNames.push(`peer${i}.${peerOrg.domain}`)
 //     }
 //   }

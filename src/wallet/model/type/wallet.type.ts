@@ -3,7 +3,7 @@ export enum WalletType {
 }
 /**
  * @requires ethereum - [string] ethereum
-*/
+ */
 export interface WalletCreateType {
   type: WalletType
 }

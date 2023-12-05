@@ -49,7 +49,7 @@ export const handler = async (argv: Arguments<OptType>) => {
       })()
 
       const orgJsons: OrgJsonType[] = []
-      for (let i = 0; i < orgCount; i++) {
+      for (let i = 0; i < orgCount; i += 1) {
         const orgJson = await prompts([
           {
             type: 'text',
