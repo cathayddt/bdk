@@ -76,6 +76,23 @@ export const handler = async (argv: Arguments<OptType>) => {
           },
         ], { onCancel })
 
+        const { isBootNode } = await prompts({
+          type: 'select',
+          name: 'isBootNode',
+          message: 'Using bootnode?',
+          choices: [
+            {
+              title: 'true',
+              value: true,
+            },
+            {
+              title: 'false',
+              value: false,
+            },
+          ],
+          initial: 1,
+        })
+
         const { walletOwner } = await prompts({
           type: 'select',
           name: 'walletOwner',
@@ -122,7 +139,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc }
+        return { chainId, validatorNumber, memberNumber, alloc, isBootNode }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         return defaultNetworkConfig(address, privateKey)

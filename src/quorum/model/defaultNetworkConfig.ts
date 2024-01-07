@@ -19,6 +19,7 @@ export function defaultNetworkConfig (address: string, privateKey: string) {
       account: address,
       amount: '1000000000000000000000000000',
     }],
+    isBootNode: false
   }
 
   return networkConfig

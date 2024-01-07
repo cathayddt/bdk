@@ -18,6 +18,7 @@ export interface NetworkCreateType {
   validatorNumber: number
   memberNumber: number
   alloc: AllocType[]
+  isBootNode: boolean
 }
 
 export interface NetworkGenerateType {

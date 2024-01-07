@@ -117,3 +117,5 @@ src/command/test.ts
 
 
 .scannerwork
+
+pnpm-lock.yaml
