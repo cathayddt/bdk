@@ -128,8 +128,6 @@ export const handler = async (argv: Arguments<OptType>) => {
           })
         }
 
-        console.log(bootNodeList)
-
         const { walletOwner } = await prompts({
           type: 'select',
           name: 'walletOwner',
