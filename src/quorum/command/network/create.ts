@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import prompts from 'prompts'
-import { Argv, Arguments } from 'yargs'
+import { Argv, Arguments, boolean, number } from 'yargs'
 import Network from '../../service/network'
 import { onCancel } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
@@ -9,6 +9,7 @@ import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import ora from 'ora'
 import Wallet from '../../../wallet/service/wallet'
 import { WalletType } from '../../../wallet/model/type/wallet.type'
+import { Item } from 'ink-select-input'
 
 export const command = 'create'
 
@@ -93,6 +94,42 @@ export const handler = async (argv: Arguments<OptType>) => {
           initial: 1,
         })
 
+        var nodelist = []
+        for(let i=0; i<validatorNumber; i++){
+          nodelist.push(
+            {
+              title: `validator${i}`,
+              value: `${i}`,
+            }
+          )
+        }
+        for(let i=0; i<memberNumber; i++){
+          nodelist.push(
+            {
+              title: `member${i}`,
+              value: `${i+validatorNumber}`,
+            }
+          )
+        }
+
+        var bootNodeList: boolean[] = Array(validatorNumber+memberNumber).fill(false);
+        if(isBootNode){
+          const isbootNodeList:any  = await prompts({
+            type: 'multiselect',
+            name: 'isbootNodeList',
+            message: 'Choose bootnode',
+            choices: nodelist,
+            initial: '',
+          })
+          Object.values(isbootNodeList).forEach((item:any)=>{
+            item.forEach((node:any)=>{
+              bootNodeList[node] = true
+            })
+          })
+        }
+
+        console.log(bootNodeList)
+
         const { walletOwner } = await prompts({
           type: 'select',
           name: 'walletOwner',
@@ -139,7 +176,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc, isBootNode }
+        return { chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         return defaultNetworkConfig(address, privateKey)

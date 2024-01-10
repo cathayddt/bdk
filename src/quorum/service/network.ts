@@ -72,7 +72,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.isBootNode, staticNodesJson[i])
+      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i])
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -90,7 +90,7 @@ export default class Network extends AbstractService {
         this.bdkFile.copyPublicKeyToMember(i)
         this.bdkFile.copyAddressToMember(i)
 
-        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i, networkCreateConfig.isBootNode, staticNodesJson[networkCreateConfig.validatorNumber+i])
+        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i, networkCreateConfig.bootNodeList[networkCreateConfig.validatorNumber+i], staticNodesJson[networkCreateConfig.validatorNumber+i])
       }
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
