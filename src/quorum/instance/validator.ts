@@ -13,12 +13,12 @@ export default class Validator extends AbstractInstance {
 
   public async up (): Promise<InfraRunnerResultType> {
     logger.debug('Validator instance up')
-      return await this.infra.upInBackground(this.dockerComposePath)
+    return await this.infra.upInBackground(this.dockerComposePath)
   }
 
   public async upOneService (service: string): Promise<InfraRunnerResultType> {
     logger.debug(`Validator instance ${service} up`)
-      return await this.infra.upServiceInBackground(this.dockerComposePath, service)
+    return await this.infra.upServiceInBackground(this.dockerComposePath, service)
   }
 
   public async down (): Promise<InfraRunnerResultType> {

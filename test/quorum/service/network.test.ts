@@ -30,6 +30,8 @@ describe.skip('Quorum.Network.Service', function () {
       account: address,
       amount: '1000000000000000000000000000',
     }],
+    isBootNode: false,
+    bootNodeList: [],
   }
 
   before(async () => {
@@ -85,6 +87,8 @@ describe.skip('Quorum.Network.Service', function () {
         memberNumber: 0,
         chainId: 1234,
         alloc: [],
+        isBootNode: false,
+        bootNodeList: [],
       }
       await network.create(onlyMemberConfig)
       const upContainers = await docker.listContainers(dockerdOption)

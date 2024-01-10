@@ -20,7 +20,7 @@ export function defaultNetworkConfig (address: string, privateKey: string) {
       amount: '1000000000000000000000000000',
     }],
     isBootNode: false,
-    bootNodeList: []
+    bootNodeList: [],
   }
 
   return networkConfig

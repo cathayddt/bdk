@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import prompts from 'prompts'
-import { Argv, Arguments, boolean, number } from 'yargs'
+import { Argv, Arguments } from 'yargs'
 import Network from '../../service/network'
 import { onCancel } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
@@ -9,7 +9,6 @@ import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import ora from 'ora'
 import Wallet from '../../../wallet/service/wallet'
 import { WalletType } from '../../../wallet/model/type/wallet.type'
-import { Item } from 'ink-select-input'
 
 export const command = 'create'
 
@@ -94,35 +93,35 @@ export const handler = async (argv: Arguments<OptType>) => {
           initial: 1,
         })
 
-        var nodelist = []
-        for(let i=0; i<validatorNumber; i++){
+        const nodelist = []
+        for (let i = 0; i < validatorNumber; i += 1) {
           nodelist.push(
             {
               title: `validator${i}`,
               value: `${i}`,
-            }
+            },
           )
         }
-        for(let i=0; i<memberNumber; i++){
+        for (let i = 0; i < memberNumber; i += 1) {
           nodelist.push(
             {
               title: `member${i}`,
-              value: `${i+validatorNumber}`,
-            }
+              value: `${i + validatorNumber}`,
+            },
           )
         }
 
-        var bootNodeList: boolean[] = Array(validatorNumber+memberNumber).fill(false);
-        if(isBootNode){
-          const isbootNodeList:any  = await prompts({
+        const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
+        if (isBootNode) {
+          const isbootNodeList: any = await prompts({
             type: 'multiselect',
             name: 'isbootNodeList',
             message: 'Choose bootnode',
             choices: nodelist,
             initial: '',
           })
-          Object.values(isbootNodeList).forEach((item:any)=>{
-            item.forEach((node:any)=>{
+          Object.values(isbootNodeList).forEach((item: any) => {
+            item.forEach((node: any) => {
               bootNodeList[node] = true
             })
           })
