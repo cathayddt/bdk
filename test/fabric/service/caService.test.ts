@@ -202,49 +202,37 @@ describe('Fabric.CA', function () {
       fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
     })
 
-    it('up & down', (done) => {
-      caService.up(rcaArgv).then(() => {
-        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
-          caService.down({ caName: rcaArgv.basic.caName })
-            .then(() => {
-              // TODO check container
-              done()
-            })
-            .catch((err) => {
-              assert.fail(`ca down error: ${err.message}`)
-            })
+    it('up & down', async () => {
+      await caService.up(rcaArgv)
+      await new Promise<void>((resolve, reject) => {
+        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', async () => {
+          await caService.down({ caName: rcaArgv.basic.caName })
+          resolve()
         })
-
         socket.on('error', (err) => {
-          assert.fail(`ca connect test error: ${err.message}`)
+          reject(new Error(`ca connect test error: ${err.message}`))
         })
-      }).catch((err) => {
-        assert.fail(`ca up error: ${err.message}`)
       })
     })
   })
 
   describe('Fabric.CA.enrollICA', function () {
-    before((done) => {
-      caService.up(rcaArgv).then(async () => {
-        await sleep(1000)
-        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', () => {
-          done()
+    before(async () => {
+      await caService.up(rcaArgv)
+      await new Promise<void>((resolve, reject) => {
+        const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', async () => {
+          await sleep(1000)
+          resolve()
         })
         socket.on('error', (err) => {
-          assert.fail(`rca connect test error: ${err.message}`)
+          reject(new Error(`rca connect test error: ${err.message}`))
         })
-      }).catch((err) => {
-        assert.fail(`rca up error: ${err.message}`)
       })
     })
 
-    after((done) => {
-      caService.down({ caName: rcaArgv.basic.caName })
-        .then(() => {
-          fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
-          done()
-        }).catch((err) => { assert.fail(`rca down error: ${err.message}`) })
+    after(async () => {
+      await caService.down({ caName: rcaArgv.basic.caName })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
     })
 
     it('enroll client', async () => {
@@ -272,32 +260,32 @@ describe('Fabric.CA', function () {
 
   describe('Fabric.CA.enrollOrg', function () {
     this.timeout(60000)
-    before((done) => {
-      caService.up(rcaArgv).then(() => {
+    before(async () => {
+      await caService.up(rcaArgv)
+      await new Promise<void>((resolve, reject) => {
         const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', async () => {
           await sleep(1000)
-          caService.enroll(enrollRcaClientArgv).then(() => {
-            caService.register(registerIcaArgv).then(() => {
-              caService.up(icaArgv).then(() => {
-                const socket = net.connect(icaArgv.basic.port, '127.0.0.1', () => {
-                  done()
-                })
-                socket.on('error', (err) => { assert.fail(`ica connect test error: ${err.message}`) })
-              }).catch((err) => { assert.fail(`ica up error: ${err.message}`) })
-            }).catch((err) => { assert.fail(`rca register ica error: ${err.message}`) })
-          }).catch((err) => { assert.fail(`rca enroll client error: ${err.message}`) })
+          await caService.enroll(enrollRcaClientArgv)
+          await caService.register(registerIcaArgv)
+          await caService.up(icaArgv)
+          const socket = net.connect(icaArgv.basic.port, '127.0.0.1', () => {
+            resolve()
+          })
+          socket.on('error', (err) => {
+            reject(new Error(`ica connect test error: ${err.message}`))
+          })
+          resolve()
         })
-        socket.on('error', (err) => { assert.fail(`rca connect test error: ${err.message}`) })
-      }).catch((err) => { assert.fail(`rca up error: ${err.message}`) })
+        socket.on('error', (err) => {
+          reject(new Error(`rca connect test error: ${err.message}`))
+        })
+      })
     })
 
-    after((done) => {
-      caService.down({ caName: rcaArgv.basic.caName }).then(() => {
-        caService.down({ caName: icaArgv.basic.caName }).then(() => {
-          fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
-          done()
-        }).catch((err) => { assert.fail(`ica down error: ${err.message}`) })
-      }).catch((err) => { assert.fail(`rca down error: ${err.message}`) })
+    after(async () => {
+      await caService.down({ caName: rcaArgv.basic.caName })
+      await caService.down({ caName: icaArgv.basic.caName })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
     })
 
     it('enroll && register orderer', async () => {
@@ -382,32 +370,30 @@ describe('Fabric.CA', function () {
 
   describe('Fabric.CA.reenroll', function () {
     this.timeout(60000)
-    before((done) => {
-      caService.up(rcaArgv).then(() => {
+    before(async () => {
+      await caService.up(rcaArgv)
+      await new Promise<void>((resolve, reject) => {
         const socket = net.connect(rcaArgv.basic.port, '127.0.0.1', async () => {
           await sleep(1000)
-          caService.enroll(enrollRcaClientArgv).then(() => {
-            caService.register(registerIcaArgv).then(() => {
-              caService.up(icaArgv).then(() => {
-                const socket = net.connect(icaArgv.basic.port, '127.0.0.1', () => {
-                  done()
-                })
-                socket.on('error', (err) => { assert.fail(`ica connect test error: ${err.message}`) })
-              }).catch((err) => { assert.fail(`ica up error: ${err.message}`) })
-            }).catch((err) => { assert.fail(`rca register ica error: ${err.message}`) })
-          }).catch((err) => { assert.fail(`rca enroll client error: ${err.message}`) })
+          await caService.enroll(enrollRcaClientArgv)
+          await caService.register(registerIcaArgv)
+          await caService.up(icaArgv)
+          const socket = net.connect(icaArgv.basic.port, '127.0.0.1', async () => {
+            await sleep(1000)
+            resolve()
+          })
+          socket.on('error', (err) => { reject(new Error(`ica connect test error: ${err.message}`)) })
         })
-        socket.on('error', (err) => { assert.fail(`rca connect test error: ${err.message}`) })
-      }).catch((err) => { assert.fail(`rca up error: ${err.message}`) })
-    })
+        socket.on('error', (err) => {
+          reject(new Error(`rca connect test error: ${err.message}`))
+        })
+      })
 
-    after((done) => {
-      caService.down({ caName: rcaArgv.basic.caName }).then(() => {
-        caService.down({ caName: icaArgv.basic.caName }).then(() => {
-          fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
-          done()
-        }).catch((err) => { assert.fail(`ica down error: ${err.message}`) })
-      }).catch((err) => { assert.fail(`rca down error: ${err.message}`) })
+      after(async () => {
+        await caService.down({ caName: rcaArgv.basic.caName })
+        await caService.down({ caName: icaArgv.basic.caName })
+        fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+      })
     })
 
     it('reenroll orderer ca', async () => {
