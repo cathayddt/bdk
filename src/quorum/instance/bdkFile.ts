@@ -1,9 +1,11 @@
 import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 import fs from 'fs-extra'
+import path from 'path'
 import { Config } from '../config'
 import { GenesisJsonType, NetworkInfoItem } from '../model/type/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
+import GenesisYaml from '../model/yaml/helm-chart/genesisYaml'
 import { PathError } from '../../util/error'
 
 export enum InstanceTypeEnum {
@@ -15,13 +17,16 @@ export enum InstanceTypeEnum {
 export default class BdkFile {
   private config: Config
   private bdkPath: string
+  private helmPath: string
   private backupPath: string
   private envPath: string
   private orgPath: string
+  private thisPath = path.resolve(__dirname)
 
   constructor (config: Config, networkName: string = config.networkName) {
     this.config = config
     this.bdkPath = `${config.infraConfig.bdkPath}/${networkName}`
+    this.helmPath = `${this.bdkPath}/helm`
     this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
@@ -265,6 +270,31 @@ export default class BdkFile {
 
   public createMemberDockerComposeYaml (memberDockerComposeYaml: MemberDockerComposeYaml) {
     fs.writeFileSync(this.getMemberDockerComposeYamlPath(), memberDockerComposeYaml.getYamlString())
+  }
+
+  // helm chart files
+  private checkHelmChartPath () {
+    if (!fs.existsSync(this.helmPath)) {
+      fs.copySync(`${this.thisPath}/infra/kubernetes/charts`, this.helmPath, { recursive: true })
+    }
+  }
+
+  public getGoQuorumGensisChartPath (): string {
+    this.checkHelmChartPath()
+    return `${this.helmPath}/goquorum-genesis`
+  }
+
+  public getGoQuorumNodeChartPath (): string {
+    this.checkHelmChartPath()
+    return `${this.helmPath}/goquorum-node`
+  }
+
+  public createGenesisChartValues (genesisYaml: GenesisYaml) {
+    fs.writeFileSync(`${this.getGoQuorumGensisChartPath()}/genesis-values.yaml`, genesisYaml.getYamlString())
+  }
+
+  public getGenesisChartPath () {
+    return `${this.getGoQuorumGensisChartPath()}/genesis-values.yaml`
   }
 
   public checkPathExist (path: string) {

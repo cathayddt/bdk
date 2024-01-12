@@ -1,5 +1,5 @@
 import { DockerRunCommandType } from '../../model/type/docker.type'
-
+import { K8SRunCommandType } from '../../model/type/kubernetes.type'
 /**
  * Infra return type when direct use docker
  */
@@ -28,6 +28,13 @@ export interface InfraRunner<T> {
   restart(dockerComposeFile: string, service: string[]): Promise<T>
 }
 
+// Kubernetes Methods
+export interface KubernetesInfraRunner<T> {
+  createDeploymentAndService(payload: K8SRunCommandType): Promise<T>
+  createTemplate(payload: K8SRunCommandType): Promise<T>
+  deleteDeploymentAndService(payload: K8SRunCommandType): Promise<T>
+}
+
 // Strategy
 export class InfraStrategy {
   public static createDockerRunner (infraRunner: InfraRunner<DockerResultType>) {
@@ -35,6 +42,10 @@ export class InfraStrategy {
   }
 
   public static createRunner (infraRunner: InfraRunner<InfraRunnerResultType>) {
+    return infraRunner
+  }
+
+  public static createKubernetesRunner (infraRunner: KubernetesInfraRunner<DockerResultType>) {
     return infraRunner
   }
 }
