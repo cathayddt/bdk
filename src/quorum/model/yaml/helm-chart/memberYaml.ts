@@ -3,7 +3,7 @@ import HelmChartYaml from './helmChartYaml'
 class MemberConfigYaml extends HelmChartYaml {
   public setQuorumFlags () {
     this.setService('quorumFlags', {
-      privacy: true,
+      privacy: false,
       removeKeysOnDelete: true,
       isBootnode: false, // Besu only, set this to true if this node is a bootnode
       usesBootnodes: false, // Besu only, set this to true if the network you are connecting to use a bootnode/s that are deployed in the cluster
@@ -52,15 +52,6 @@ class MemberConfigYaml extends HelmChartYaml {
         account: {
           password: 'password',
         },
-      },
-      tessera: {
-        resources: {
-          cpuLimit: 1,
-          cpuRequest: 0.5,
-          memLimit: '2G',
-          memRequest: '1G',
-        },
-        password: 'password',
       },
     })
   }

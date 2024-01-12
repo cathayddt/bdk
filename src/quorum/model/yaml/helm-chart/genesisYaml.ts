@@ -10,7 +10,7 @@ class GenesisConfigYaml extends HelmChartYaml {
     })
   }
 
-  public setGenesis () {
+  public setGenesis (nodeCount: number) {
     const genesisConfig = {
       genesis: {
         config: {
@@ -31,7 +31,7 @@ class GenesisConfigYaml extends HelmChartYaml {
       blockchain: {
         nodes: {
           generate: true,
-          count: 4,
+          count: nodeCount,
         },
         accountPassword: 'password',
       },

@@ -5,7 +5,7 @@ import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
 
-export const command = 'create'
+export const command = 'apply'
 
 export const desc = '產生 Quorum Cluster 所需的相關設定檔案並建立網路'
 

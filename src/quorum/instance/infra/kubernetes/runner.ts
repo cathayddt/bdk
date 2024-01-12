@@ -9,7 +9,7 @@ import { K8SRunCommandType } from '../../../model/type/kubernetes.type'
 export class Runner implements KubernetesInfraRunner<DockerResultType> {
   public createDeploymentAndService = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
     await console.log('createDeploymentAndService')
-    await this.checkAndCreateNamespace(payload.namespace)
+    // await this.checkAndCreateNamespace(payload.namespace)
     await this.runHelm(
       ['install',
         payload.name,
@@ -67,12 +67,23 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   }
 
   private async checkAndCreateNamespace (namespace: string): Promise<void> {
-    console.log('hello')
     const ns = await this.runKubectl(['get', 'namespaces', namespace])
     console.log(ns)
     if (ns.includes('NotFound')) {
       await this.runKubectl(['create', 'namespace', ns])
     }
+  }
+
+  private checkInstall (name: string): Promise<string> {
+    return new Promise((resolve) => {
+      const spawnReturn = spawn('helm', ['list', '-n', name])
+      spawnReturn.stdout.on('data', (data) => {
+        resolve(data.toString())
+      })
+      spawnReturn.on('error', (error) => {
+        throw new Error(`[x] command [helm]: ${error.message}`)
+      })
+    })
   }
 
   private runKubectl (args: Array<string>): Promise<string> {

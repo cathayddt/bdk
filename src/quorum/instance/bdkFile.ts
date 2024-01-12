@@ -5,7 +5,7 @@ import { Config } from '../config'
 import { GenesisJsonType, NetworkInfoItem } from '../model/type/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
-import GenesisYaml from '../model/yaml/helm-chart/genesisYaml'
+import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { PathError } from '../../util/error'
 
 export enum InstanceTypeEnum {
@@ -289,8 +289,29 @@ export default class BdkFile {
     return `${this.helmPath}/goquorum-node`
   }
 
-  public createGenesisChartValues (genesisYaml: GenesisYaml) {
+  public copyGoQuorumHelmChart () {
+    this.checkHelmChartPath()
+    fs.copySync(this.helmPath, './', { recursive: true })
+  }
+
+  public getValidatorChartPath (i: number): string {
+    return `${this.getGoQuorumNodeChartPath()}/validator${i}-values.yaml`
+  }
+
+  public getMemberChartPath (i: number): string {
+    return `${this.getGoQuorumNodeChartPath()}/member${i}-values.yaml`
+  }
+
+  public createGenesisChartValues (genesisYaml: GenesisConfigYaml) {
     fs.writeFileSync(`${this.getGoQuorumGensisChartPath()}/genesis-values.yaml`, genesisYaml.getYamlString())
+  }
+
+  public createValidatorChartValues (validatorYaml: ValidatorConfigYaml, i: number) {
+    fs.writeFileSync(`${this.getGoQuorumNodeChartPath()}/validator${i}-values.yaml`, validatorYaml.getYamlString())
+  }
+
+  public createMemberChartValues (memberYaml: MemberConfigYaml, i: number) {
+    fs.writeFileSync(`${this.getGoQuorumNodeChartPath()}/member${i}-values.yaml`, memberYaml.getYamlString())
   }
 
   public getGenesisChartPath () {
