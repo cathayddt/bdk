@@ -1,4 +1,3 @@
-import { string } from 'yargs'
 import BdkYaml from '../bdkYaml'
 
 interface ClusterInterface {

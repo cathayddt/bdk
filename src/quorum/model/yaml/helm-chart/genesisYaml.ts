@@ -10,11 +10,11 @@ class GenesisConfigYaml extends HelmChartYaml {
     })
   }
 
-  public setGenesis (nodeCount: number) {
+  public setGenesis (chainID: number, nodeCount: number, alloc: any[]) {
     const genesisConfig = {
       genesis: {
         config: {
-          chainId: 1337,
+          chainId: chainID,
           algorithm: {
             consensus: 'qbft',
             blockperiodseconds: 1,

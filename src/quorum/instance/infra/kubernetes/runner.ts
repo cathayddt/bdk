@@ -9,7 +9,7 @@ import { K8SRunCommandType } from '../../../model/type/kubernetes.type'
 export class Runner implements KubernetesInfraRunner<DockerResultType> {
   public createDeploymentAndService = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
     await console.log('createDeploymentAndService')
-    // await this.checkAndCreateNamespace(payload.namespace)
+    await this.checkAndCreateNamespace(payload.namespace)
     await this.runHelm(
       ['install',
         payload.name,
@@ -67,10 +67,14 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   }
 
   private async checkAndCreateNamespace (namespace: string): Promise<void> {
-    const ns = await this.runKubectl(['get', 'namespaces', namespace])
-    console.log(ns)
-    if (ns.includes('NotFound')) {
-      await this.runKubectl(['create', 'namespace', ns])
+    try {
+      console.log(`kubectl get namespaces ${namespace}`)
+      await this.runKubectl(['get', 'namespaces', namespace])
+    } catch (e: any) {
+      if (e.message.includes('NotFound')) {
+        console.log('create namespace')
+        await this.runKubectl(['create', 'namespace', namespace])
+      }
     }
   }
 
@@ -87,11 +91,20 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   }
 
   private runKubectl (args: Array<string>): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       logger.debug(`run spawnSync: kubectl ${args.join(' ')}`)
       const spawnReturn = spawn('kubectl', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
+      let output = ''
+      spawnReturn.stdout.on('data', (data) => {
+        output += data
+      })
+
+      spawnReturn.stderr.on('data', (data) => {
+        output += data
+      })
       spawnReturn.stdout.on('close', () => {
-        resolve(spawnReturn.stdout.read())
+        if (output.includes('Error')) reject(new Error(`[x] command [kubectl ${args.join(' ')}]: ${output}`))
+        resolve(`kubectl ${args.join(' ')} ${output} OK`)
       })
       spawnReturn.on('error', (error) => {
         throw new Error(`[x] command [kubectl]: ${error.message}`)
@@ -100,12 +113,21 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   }
 
   private runHelm (args: Array<string>): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       logger.debug(`run spawnSync: helm ${args.join(' ')}`)
       console.log(`run spawnSync: helm ${args.join(' ')}`)
       const spawnReturn = spawn('helm', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
+      let output = ''
+      spawnReturn.stdout.on('data', (data) => {
+        output += data
+      })
+
+      spawnReturn.stderr.on('data', (data) => {
+        output += data
+      })
       spawnReturn.stdout.on('close', () => {
-        resolve(`helm ${args.join(' ')} OK`)
+        console.log(`helm ${args.join(' ')} OK\n${output}`)
+        resolve(`helm ${args.join(' ')} OK\n${output}`)
       })
       spawnReturn.on('error', (error) => {
         throw new Error(`[x] command [helm]: ${error.message}`)

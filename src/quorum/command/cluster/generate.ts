@@ -3,16 +3,17 @@ import { ethers } from 'ethers'
 import config from '../../config'
 import Cluster from '../../service/cluster'
 import Wallet from '../../../wallet/service/wallet'
-import { onCancel } from '../../../util/error'
+import { ClusterGenerateType } from '../../model/type/kubernetes.type'
 import { NetworkCreateType } from '../../model/type/network.type'
 import { WalletType } from '../../../wallet/model/type/wallet.type'
 import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
+import { onCancel } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
 
-export const command = 'apply'
+export const command = 'generate'
 
-export const desc = '產生 Quorum Cluster 所需的相關設定檔案並建立網路'
+export const desc = '產生 Quorum Cluster 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -20,7 +21,7 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum cluster create --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk quorum cluster generate --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
@@ -28,6 +29,32 @@ export const handler = async (argv: Arguments<OptType>) => {
   const cluster = new Cluster(config)
   const wallet = new Wallet()
 
+  const clusterGenerate: ClusterGenerateType = await (async () => {
+    if (argv.interactive) {
+      return (await prompts([
+        {
+          type: 'select',
+          name: 'chartPackageModeEnabled',
+          message: 'What is the connect mode you want?',
+          choices: [
+            {
+              title: 'package mode (package without helm and k8s)',
+              value: false,
+            },
+            {
+              title: 'template mode (template with helm and k8s)',
+              value: true,
+            },
+          ],
+          initial: 0,
+        },
+      ], { onCancel })) as ClusterGenerateType
+    } else {
+      return {
+        chartPackageModeEnabled: false,
+      }
+    }
+  })()
   // network create
   const networkCreate: NetworkCreateType = await (async () => {
     if (argv.interactive) {
@@ -107,7 +134,8 @@ export const handler = async (argv: Arguments<OptType>) => {
       return defaultNetworkConfig(address, privateKey)
     }
   })()
+
   const spinner = ora('Quorum Network Import ...').start()
-  await cluster.apply(networkCreate)
+  await cluster.generate(clusterGenerate, networkCreate)
   spinner.succeed('Quorum Network Import Successfully!')
 }
