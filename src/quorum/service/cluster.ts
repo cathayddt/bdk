@@ -24,6 +24,7 @@ export default class Cluster extends AbstractService {
       values: this.bdkFile.getGenesisChartPath(),
     })
 
+    await k8s.wait('job.batch/goquorum-genesis-init', 'quorum')
     // create network
     const validatorYaml = new ValidatorConfigYaml()
     validatorYaml.setCluster()
@@ -44,7 +45,7 @@ export default class Cluster extends AbstractService {
     for (let i = 0; i < validatorNumber; i += 1) {
       await k8s.install({
         helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
-        name: `validator${i}`,
+        name: `validator-${i + 1}`,
         namespace: 'quorum',
         values: this.bdkFile.getValidatorChartPath(i),
       })
@@ -52,7 +53,7 @@ export default class Cluster extends AbstractService {
     for (let i = 0; i < memberNumber; i += 1) {
       await k8s.install({
         helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
-        name: `member${i}`,
+        name: `member-${i + 1}`,
         namespace: 'quorum',
         values: this.bdkFile.getMemberChartPath(i),
       })

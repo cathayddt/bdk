@@ -1,8 +1,6 @@
-import YAML from 'js-yaml'
 import { logger } from '../../../../util/logger'
 import { spawn } from 'child_process'
 import config from '../../../config'
-import fs from 'fs-extra'
 import { DockerResultType, KubernetesInfraRunner } from '../InfraRunner.interface'
 import { K8SRunCommandType } from '../../../model/type/kubernetes.type'
 
@@ -27,6 +25,12 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
         payload.helmChart,
         '--namespace', payload.namespace,
         '--values', payload.values])
+    return { stdout: '' }
+  }
+
+  public wait = async (job: string, namespace: string): Promise<DockerResultType> => {
+    await console.log('wait')
+    await this.runKubectl(['wait', '--for=condition=complete', job, '-n', namespace, '--timeout=600s'])
     return { stdout: '' }
   }
 
@@ -55,15 +59,6 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
     await console.log('clusterList')
     await this.runKubectl(['config', 'get-contexts'])
     return { stdout: '' }
-  }
-
-  private getYaml (path: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      fs.readFile(path, 'utf8', (err, data) => {
-        if (err) reject(err)
-        resolve(YAML.load(data))
-      })
-    })
   }
 
   private async checkAndCreateNamespace (namespace: string): Promise<void> {

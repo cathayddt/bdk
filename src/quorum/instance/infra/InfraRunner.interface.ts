@@ -32,6 +32,7 @@ export interface InfraRunner<T> {
 export interface KubernetesInfraRunner<T> {
   createDeploymentAndService(payload: K8SRunCommandType): Promise<T>
   createTemplate(payload: K8SRunCommandType): Promise<T>
+  wait(job: string, namespace: string): Promise<T>
   deleteDeploymentAndService(payload: K8SRunCommandType): Promise<T>
 }
 

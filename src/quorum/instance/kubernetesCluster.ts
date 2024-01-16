@@ -18,4 +18,11 @@ export default class KubernetesInstance extends AbstractInstance {
       return await this.kubernetesInfra.createTemplate(payload)
     }
   }
+
+  public async wait (job: string, namespace: string) {
+    logger.debug('Kubernetes instance wait')
+    if (this.kubernetesInfra !== undefined) {
+      return await this.kubernetesInfra.wait(job, namespace)
+    }
+  }
 }
