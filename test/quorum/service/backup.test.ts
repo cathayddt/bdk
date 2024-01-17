@@ -24,6 +24,8 @@ describe('Quorum.Backup', function () {
       validatorNumber: 1,
       memberNumber: 1,
       alloc: [],
+      isBootNode: false,
+      bootNodeList: [],
     }
     await network.create(networkCreate)
   })

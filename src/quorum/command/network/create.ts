@@ -76,6 +76,47 @@ export const handler = async (argv: Arguments<OptType>) => {
           },
         ], { onCancel })
 
+        const { isBootNode } = await prompts({
+          type: 'select',
+          name: 'isBootNode',
+          message: 'Using bootnode?',
+          choices: [
+            {
+              title: 'true',
+              value: true,
+            },
+            {
+              title: 'false',
+              value: false,
+            },
+          ],
+          initial: 1,
+        })
+
+        const createNode = (type: string, index: number, offset = 0) => ({
+          title: `${type}${index}`,
+          value: `${index + offset}`,
+        })
+
+        const nodelist = [
+          ...Array.from({ length: validatorNumber }, (_, i) => createNode('validator', i)),
+          ...Array.from({ length: memberNumber }, (_, i) => createNode('member', i, validatorNumber)),
+        ]
+
+        const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
+        if (isBootNode) {
+          const isbootNodeList: any = await prompts({
+            type: 'multiselect',
+            name: 'isbootNodeList',
+            message: 'Choose bootnode',
+            choices: nodelist,
+            initial: '',
+          })
+          Object.values(isbootNodeList).flat().forEach((node: any) => {
+            bootNodeList[node] = true
+          })
+        }
+
         const { walletOwner } = await prompts({
           type: 'select',
           name: 'walletOwner',
@@ -122,7 +163,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc }
+        return { chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         return defaultNetworkConfig(address, privateKey)

@@ -72,7 +72,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i)
+      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i])
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -90,7 +90,7 @@ export default class Network extends AbstractService {
         this.bdkFile.copyPublicKeyToMember(i)
         this.bdkFile.copyAddressToMember(i)
 
-        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i)
+        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i, networkCreateConfig.bootNodeList[networkCreateConfig.validatorNumber + i], staticNodesJson[networkCreateConfig.validatorNumber + i])
       }
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
@@ -125,7 +125,9 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPermissionedNodesJsonToValidator(nodeNum)
 
       const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
-      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum)
+
+      // TODO: add bootnode selection
+      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum, false, '')
       this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
       await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
@@ -156,7 +158,8 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPermissionedNodesJsonToMember(nodeNum)
 
       const memberDockerComposeYaml = new MemberDockerComposeYaml()
-      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum)
+      // TODO: add bootnode selection
+      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum, false, '')
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
       await (new MemberInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
@@ -285,7 +288,8 @@ export default class Network extends AbstractService {
     for (let i = 0; i < validatorNum + 1; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i)
+      // TODO: add bootnode selection
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i, false, '')
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -353,7 +357,8 @@ export default class Network extends AbstractService {
     for (let i = 0; i < memberCount + 1; i += 1) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
-      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i)
+      // TODO: add bootnode selection
+      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i, false, '')
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
