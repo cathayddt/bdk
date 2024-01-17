@@ -93,23 +93,15 @@ export const handler = async (argv: Arguments<OptType>) => {
           initial: 1,
         })
 
-        const nodelist = []
-        for (let i = 0; i < validatorNumber; i += 1) {
-          nodelist.push(
-            {
-              title: `validator${i}`,
-              value: `${i}`,
-            },
-          )
-        }
-        for (let i = 0; i < memberNumber; i += 1) {
-          nodelist.push(
-            {
-              title: `member${i}`,
-              value: `${i + validatorNumber}`,
-            },
-          )
-        }
+        const createNode = (type: string, index: number, offset = 0) => ({
+          title: `${type}${index}`,
+          value: `${index + offset}`,
+        })
+
+        const nodelist = [
+          ...Array.from({ length: validatorNumber }, (_, i) => createNode('validator', i)),
+          ...Array.from({ length: memberNumber }, (_, i) => createNode('member', i, validatorNumber)),
+        ]
 
         const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
         if (isBootNode) {
@@ -120,10 +112,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             choices: nodelist,
             initial: '',
           })
-          Object.values(isbootNodeList).forEach((item: any) => {
-            item.forEach((node: any) => {
-              bootNodeList[node] = true
-            })
+          Object.values(isbootNodeList).flat().forEach((node: any) => {
+            bootNodeList[node] = true
           })
         }
 

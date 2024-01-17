@@ -19,7 +19,7 @@ export interface NetworkCreateType {
   memberNumber: number
   alloc: AllocType[]
   isBootNode: boolean
-  bootNodeList: any[]
+  bootNodeList: boolean[]
 }
 
 export interface NetworkGenerateType {
