@@ -78,6 +78,7 @@ export default class Cluster extends AbstractService {
     networkCreateConfig: NetworkCreateType,
   ): Promise<void> {
     const { chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
+    this.bdkFile.checkHelmChartPath()
     // create genesis and account
     const genesisYaml = new GenesisConfigYaml()
     genesisYaml.setCluster()
