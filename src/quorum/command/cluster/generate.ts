@@ -29,113 +29,135 @@ export const handler = async (argv: Arguments<OptType>) => {
   const cluster = new Cluster(config)
   const wallet = new Wallet()
 
-  const clusterGenerate: ClusterGenerateType = await (async () => {
-    if (argv.interactive) {
-      return (await prompts([
-        {
+  const confirm: boolean = await (async () => {
+    const fileList = cluster.getHelmChartFiles()
+    if (fileList.length !== 0) {
+      const confirmDelete = (await prompts({
+        type: 'confirm',
+        name: 'value',
+        message: '⚠️ Detecting quorum nodes already exists. The following processes will remove all existing files. Continue?',
+        initial: false,
+      }, { onCancel })).value
+      if (confirmDelete) {
+        const spinner = ora('Quorum Network Create ...').start()
+        cluster.removeHelmChartFiles()
+        spinner.succeed('Remove all existing files!')
+      }
+      return confirmDelete
+    } else {
+      return true
+    }
+  })()
+
+  if (confirm) {
+    const clusterGenerate: ClusterGenerateType = await (async () => {
+      if (argv.interactive) {
+        return (await prompts([
+          {
+            type: 'select',
+            name: 'chartPackageModeEnabled',
+            message: 'What is the connect mode you want?',
+            choices: [
+              {
+                title: 'package mode (package without helm and k8s)',
+                value: false,
+              },
+              {
+                title: 'template mode (template with helm and k8s)',
+                value: true,
+              },
+            ],
+            initial: 0,
+          },
+        ], { onCancel })) as ClusterGenerateType
+      } else {
+        return {
+          chartPackageModeEnabled: false,
+        }
+      }
+    })()
+    // network create
+    const networkCreate: NetworkCreateType = await (async () => {
+      if (argv.interactive) {
+        const { chainId, validatorNumber, memberNumber } = await prompts([
+          {
+            type: 'number',
+            name: 'chainId',
+            message: 'What is your chain id?',
+            min: 0,
+            initial: 81712,
+          },
+          {
+            type: 'number',
+            name: 'validatorNumber',
+            message: 'How many validator do you want?',
+            min: 1,
+            initial: 4,
+          },
+          {
+            type: 'number',
+            name: 'memberNumber',
+            message: 'How many member do you want?',
+            min: 0,
+            initial: 0,
+          },
+        ], { onCancel })
+
+        const { walletOwner } = await prompts({
           type: 'select',
-          name: 'chartPackageModeEnabled',
-          message: 'What is the connect mode you want?',
+          name: 'walletOwner',
+          message: 'Do you already own a wallet?',
           choices: [
             {
-              title: 'package mode (package without helm and k8s)',
-              value: false,
-            },
-            {
-              title: 'template mode (template with helm and k8s)',
+              title: 'true',
               value: true,
             },
+            {
+              title: 'false',
+              value: false,
+            },
           ],
-          initial: 0,
-        },
-      ], { onCancel })) as ClusterGenerateType
-    } else {
-      return {
-        chartPackageModeEnabled: false,
-      }
-    }
-  })()
-  // network create
-  const networkCreate: NetworkCreateType = await (async () => {
-    if (argv.interactive) {
-      const { chainId, validatorNumber, memberNumber } = await prompts([
-        {
-          type: 'number',
-          name: 'chainId',
-          message: 'What is your chain id?',
-          min: 0,
-          initial: 81712,
-        },
-        {
-          type: 'number',
-          name: 'validatorNumber',
-          message: 'How many validator do you want?',
-          min: 1,
-          initial: 4,
-        },
-        {
-          type: 'number',
-          name: 'memberNumber',
-          message: 'How many member do you want?',
-          min: 0,
-          initial: 0,
-        },
-      ], { onCancel })
+          initial: 1,
+        })
 
-      const { walletOwner } = await prompts({
-        type: 'select',
-        name: 'walletOwner',
-        message: 'Do you already own a wallet?',
-        choices: [
-          {
-            title: 'true',
-            value: true,
-          },
-          {
-            title: 'false',
-            value: false,
-          },
-        ],
-        initial: 1,
-      })
+        let walletAddress: string
 
-      let walletAddress: string
+        if (walletOwner) {
+          const { address } = await prompts({
+            type: 'text',
+            name: 'address',
+            message: 'What is your wallet address?',
+            validate: walletAddress => ethers.utils.isAddress(walletAddress) ? true : 'Address not valid.',
+          }, { onCancel })
 
-      if (walletOwner) {
-        const { address } = await prompts({
-          type: 'text',
-          name: 'address',
-          message: 'What is your wallet address?',
-          validate: walletAddress => ethers.utils.isAddress(walletAddress) ? true : 'Address not valid.',
-        }, { onCancel })
+          walletAddress = address
+        } else {
+          const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
+          walletAddress = address
+          ora().stopAndPersist({
+            text: `Your ${WalletType.ETHEREUM} wallet address: 0x${walletAddress}`,
+            symbol: '🔑',
+          })
+          ora().stopAndPersist({
+            text: `Wallet private key: ${privateKey}`,
+            symbol: '🔑',
+          })
+        }
 
-        walletAddress = address
+        const alloc = [{
+          account: walletAddress,
+          amount: '1000000000000000000000000000',
+        }]
+
+        return { chainId, validatorNumber, memberNumber, alloc }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        walletAddress = address
-        ora().stopAndPersist({
-          text: `Your ${WalletType.ETHEREUM} wallet address: 0x${walletAddress}`,
-          symbol: '🔑',
-        })
-        ora().stopAndPersist({
-          text: `Wallet private key: ${privateKey}`,
-          symbol: '🔑',
-        })
+        return defaultNetworkConfig(address, privateKey)
       }
+    })()
 
-      const alloc = [{
-        account: walletAddress,
-        amount: '1000000000000000000000000000',
-      }]
-
-      return { chainId, validatorNumber, memberNumber, alloc }
-    } else {
-      const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-      return defaultNetworkConfig(address, privateKey)
-    }
-  })()
-
-  const spinner = ora('Quorum Network Import ...').start()
-  await cluster.generate(clusterGenerate, networkCreate)
-  spinner.succeed('Quorum Network Import Successfully!')
+    const spinner = ora('Quorum Network Import ...').start()
+    await cluster.generate(clusterGenerate, networkCreate)
+    spinner.succeed('Quorum Network Import Successfully!')
+  }
 }

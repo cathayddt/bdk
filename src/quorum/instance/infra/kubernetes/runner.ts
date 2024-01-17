@@ -6,36 +6,32 @@ import { K8SRunCommandType } from '../../../model/type/kubernetes.type'
 
 export class Runner implements KubernetesInfraRunner<DockerResultType> {
   public createDeploymentAndService = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
-    await console.log('createDeploymentAndService')
     await this.checkAndCreateNamespace(payload.namespace)
-    await this.runHelm(
+    const helmOutput = await this.runHelm(
       ['install',
         payload.name,
         payload.helmChart,
         '--namespace', payload.namespace,
         '--values', payload.values])
-    return { stdout: '' }
+    return { stdout: helmOutput }
   }
 
   public createTemplate = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
-    await console.log('createTemplate')
-    await this.runHelm(
+    const helmOutput = await this.runHelm(
       ['template',
         payload.name,
         payload.helmChart,
         '--namespace', payload.namespace,
         '--values', payload.values])
-    return { stdout: '' }
+    return { stdout: helmOutput }
   }
 
   public wait = async (job: string, namespace: string): Promise<DockerResultType> => {
-    await console.log('wait')
-    await this.runKubectl(['wait', '--for=condition=complete', job, '-n', namespace, '--timeout=600s'])
-    return { stdout: '' }
+    const k8sOutput = await this.runKubectl(['wait', '--for=condition=complete', job, '-n', namespace, '--timeout=600s'])
+    return { stdout: k8sOutput }
   }
 
   public deleteDeploymentAndService = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
-    await console.log('deleteDeploymentAndService')
     await this.runHelm(
       ['delete',
         payload.name,
@@ -44,7 +40,6 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   }
 
   public deleteAll = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
-    await console.log('deleteAll')
     await this.runKubectl(['delete', 'all', '--all', '-n', payload.namespace])
     return { stdout: '' }
   }
@@ -56,18 +51,15 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   }
 
   public clusterList = async (): Promise<DockerResultType> => {
-    await console.log('clusterList')
     await this.runKubectl(['config', 'get-contexts'])
     return { stdout: '' }
   }
 
   private async checkAndCreateNamespace (namespace: string): Promise<void> {
     try {
-      console.log(`kubectl get namespaces ${namespace}`)
       await this.runKubectl(['get', 'namespaces', namespace])
     } catch (e: any) {
       if (e.message.includes('NotFound')) {
-        console.log('create namespace')
         await this.runKubectl(['create', 'namespace', namespace])
       }
     }
@@ -110,7 +102,6 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
   private runHelm (args: Array<string>): Promise<string> {
     return new Promise((resolve, reject) => {
       logger.debug(`run spawnSync: helm ${args.join(' ')}`)
-      console.log(`run spawnSync: helm ${args.join(' ')}`)
       const spawnReturn = spawn('helm', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
       let output = ''
       spawnReturn.stdout.on('data', (data) => {
@@ -121,8 +112,8 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
         output += data
       })
       spawnReturn.stdout.on('close', () => {
-        console.log(`helm ${args.join(' ')} OK\n${output}`)
         resolve(`helm ${args.join(' ')} OK\n${output}`)
+        if (output.includes('Error')) reject(new Error(`[x] command [helm ${args.join(' ')}]: ${output}`))
       })
       spawnReturn.on('error', (error) => {
         throw new Error(`[x] command [helm]: ${error.message}`)

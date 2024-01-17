@@ -1,5 +1,3 @@
-import { Config } from '../config'
-import { InfraRunnerResultType, DockerResultType, InfraRunner, KubernetesInfraRunner } from './infra/InfraRunner.interface'
 import { AbstractInstance } from './Instance.abstract'
 import { logger } from '../../util'
 import { K8SRunCommandType } from '../model/type/kubernetes.type'

@@ -273,7 +273,7 @@ export default class BdkFile {
   }
 
   // helm chart files
-  private checkHelmChartPath () {
+  public checkHelmChartPath () {
     if (!fs.existsSync(this.helmPath)) {
       fs.copySync(`${this.thisPath}/infra/kubernetes/charts`, this.helmPath, { recursive: true })
     }
@@ -289,33 +289,60 @@ export default class BdkFile {
     return `${this.helmPath}/goquorum-node`
   }
 
+  public createChartValueFolder () {
+    fs.mkdirSync(`${this.helmPath}/values`, { recursive: true })
+  }
+
+  public createGoQuorumValues () {
+    this.checkHelmChartPath()
+    fs.writeFileSync(`${this.helmPath}/goquorum-values.yaml`, '')
+  }
+
   public copyGoQuorumHelmChart () {
     this.checkHelmChartPath()
     fs.copySync(this.helmPath, './', { recursive: true })
   }
 
+  public createChartTar (tag: string, date: string) {
+    return fs.createWriteStream(`./chart_${tag}_${date}.tar.gz`)
+  }
+
   public getValidatorChartPath (i: number): string {
-    return `${this.getGoQuorumNodeChartPath()}/validator${i}-values.yaml`
+    this.createChartValueFolder()
+    return `${this.helmPath}/values/validator${i}-values.yaml`
   }
 
   public getMemberChartPath (i: number): string {
-    return `${this.getGoQuorumNodeChartPath()}/member${i}-values.yaml`
+    this.createChartValueFolder()
+    return `${this.helmPath}/values/member${i}-values.yaml`
   }
 
   public createGenesisChartValues (genesisYaml: GenesisConfigYaml) {
-    fs.writeFileSync(`${this.getGoQuorumGensisChartPath()}/genesis-values.yaml`, genesisYaml.getYamlString())
+    this.createChartValueFolder()
+    fs.writeFileSync(`${this.helmPath}/values/genesis-values.yaml`, genesisYaml.getYamlString())
   }
 
   public createValidatorChartValues (validatorYaml: ValidatorConfigYaml, i: number) {
-    fs.writeFileSync(`${this.getGoQuorumNodeChartPath()}/validator${i}-values.yaml`, validatorYaml.getYamlString())
+    this.createChartValueFolder()
+    fs.writeFileSync(`${this.helmPath}/values/validator${i}-values.yaml`, validatorYaml.getYamlString())
   }
 
   public createMemberChartValues (memberYaml: MemberConfigYaml, i: number) {
-    fs.writeFileSync(`${this.getGoQuorumNodeChartPath()}/member${i}-values.yaml`, memberYaml.getYamlString())
+    fs.writeFileSync(`${this.helmPath}/values/member${i}-values.yaml`, memberYaml.getYamlString())
   }
 
   public getGenesisChartPath () {
-    return `${this.getGoQuorumGensisChartPath()}/genesis-values.yaml`
+    return `${this.helmPath}/values/genesis-values.yaml`
+  }
+
+  public removeHelmChart () {
+    fs.rmSync(`${this.helmPath}`, { recursive: true, force: true })
+  }
+
+  public getHelmChartValuesFiles () {
+    this.checkHelmChartPath()
+    fs.mkdirSync(`${this.helmPath}/values`, { recursive: true })
+    return fs.readdirSync(`${this.helmPath}/values`)
   }
 
   public checkPathExist (path: string) {
