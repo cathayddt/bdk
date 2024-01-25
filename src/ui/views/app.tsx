@@ -1,10 +1,11 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react'
-import { Box, Text, useApp, useInput, useStdout } from 'ink'
+import React, { useState, useEffect } from 'react'
+import { Box, Newline, Text, useApp, useInput, useStdout } from 'ink'
 import Logo from '../components/logo'
-import DockerLogs from '../components/dockerlogs'
-import Select from '../components/selectInput'
-
-const Terminal = lazy(() => import('../components/terminal'))
+import SelectInput from 'ink-select-input'
+import NodeStatus from '../components/status'
+import NodeInfo from '../components/nodeInfo'
+import PeerInfo from '../components/peerInfo'
+import nodeJson from '../services/nodeJson.json'
 
 export default function App () {
   const { exit } = useApp()
@@ -50,32 +51,32 @@ export default function App () {
     }
   }, [])
 
-  const [networkType, setNetworkType] = useState('bdk fabric')
+  const [nodeType, setNodeType] = useState<string>('http://172.24.190.121:21000')
+  const [nodeName, setNodeName] = useState<string>('Validator0')
+  const selectNode = (item: any) => {
+    setNodeType(item.value)
+    setNodeName(item.label)
+  }
 
   return (
-    <Box flexDirection='row' width={width} height={height}>
-      <Suspense fallback={<Text>Loading ....</Text>}>
-        <Box width="45%" borderStyle='single' flexDirection='column' borderColor={'white'}>
-          <Terminal type={networkType} />
-          <Box height="5%" marginTop={30} paddingTop={1} flexDirection='row' justifyContent='space-between'>
-            <Text color={'yellow'}>Press q to exit</Text>
+    <Box flexDirection='column' width={width} height={height}>
+      <Box height="35%" flexDirection='row'>
+        <Box width="70%" flexDirection='row'>
+          <Box width="30%" flexDirection='column' borderStyle='bold' borderColor='white' padding={2}>
+            <Text color={'blue'}>Select Node: </Text>
+            <Newline/>
+            <SelectInput items={nodeJson} onSelect={selectNode} />
+            <Newline/>
+            <Text color={'#00FF19'}>Current node: {nodeName}  {nodeType}</Text>
           </Box>
+          <NodeStatus apiUrl={nodeType} />
+          <NodeInfo apiUrl={nodeType} />
         </Box>
-      </Suspense>
-      <Box width="55%" flexDirection='column'>
-        <Box height="30%" flexDirection='row'>
-          <Select setNetworkType={setNetworkType} />
+        <Box width="30%" flexDirection='row'>
           <Logo />
         </Box>
-        <Box height="70%" borderStyle='bold' borderColor={'white'} flexDirection='column'>
-          <Box height="10%" borderColor={'white'} borderStyle='bold' justifyContent='center'>
-            <Text color={'white'}>Running Docker Container</Text>
-          </Box>
-          <Box height="90%">
-            <DockerLogs />
-          </Box>
-        </Box>
       </Box>
+      <PeerInfo apiUrl={nodeType} />
     </Box>
   )
 }

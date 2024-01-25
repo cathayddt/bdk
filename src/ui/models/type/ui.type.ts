@@ -16,3 +16,19 @@ export interface ContainerListProps {
   created: number
   ports?: string[]
 }
+
+export interface NodeDetails {
+  id: string
+  name: string
+  enode: string
+  ip: string
+}
+
+export interface NodeGetPeers {
+  network: {
+    localAddress: string
+    remoteAddress: string
+  }
+  id: string
+  enode: string
+}

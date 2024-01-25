@@ -46,6 +46,7 @@
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {
+    "axios": "^1.6.5",
     "deep-object-diff": "^1.1.0",
     "dockerode": "^3.3.5",
     "dotenv": "^16.3.1",

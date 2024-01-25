@@ -1,0 +1,26 @@
+[
+  {
+    "label": "Validator0",
+    "value": "http://172.24.190.121:21000"
+  },
+  {
+    "label": "Validator1",
+    "value": "http://172.24.190.121:21001"
+  },
+  {
+    "label": "Validator2",
+    "value": "http://172.24.190.121:21002"
+  },
+  {
+    "label": "Validator3",
+    "value": "http://172.24.190.121:21003"
+  },
+  {
+    "label": "Member0",
+    "value": "http://172.24.190.121:20000"
+  },
+  {
+    "label": "Member1",
+    "value": "http://172.24.190.121:20001"
+  }
+]
