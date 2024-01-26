@@ -5,7 +5,8 @@ import SelectInput from 'ink-select-input'
 import NodeStatus from '../components/status'
 import NodeInfo from '../components/nodeInfo'
 import PeerInfo from '../components/peerInfo'
-import nodeJson from '../services/nodeJson.json'
+import { NodeContextService } from '../services/nodeContext'
+import { NodeListType } from '../models/type/ui.type'
 
 export default function App () {
   const { exit } = useApp()
@@ -51,9 +52,12 @@ export default function App () {
     }
   }, [])
 
-  const [nodeType, setNodeType] = useState<string>('http://172.24.190.121:21000')
-  const [nodeName, setNodeName] = useState<string>('Validator0')
-  const selectNode = (item: any) => {
+  const nodeService = new NodeContextService('http://localhost:8545')
+  const NodeList = nodeService.getNodeList()
+
+  const [nodeType, setNodeType] = useState<string>(NodeList[0].value)
+  const [nodeName, setNodeName] = useState<string>(NodeList[0].label)
+  const selectNode = (item: NodeListType) => {
     setNodeType(item.value)
     setNodeName(item.label)
   }
@@ -65,7 +69,7 @@ export default function App () {
           <Box width="30%" flexDirection='column' borderStyle='bold' borderColor='white' padding={2}>
             <Text color={'blue'}>Select Node: </Text>
             <Newline/>
-            <SelectInput items={nodeJson} onSelect={selectNode} />
+            <SelectInput items={NodeList} onSelect={selectNode} />
             <Newline/>
             <Text color={'#00FF19'}>Current node: {nodeName}  {nodeType}</Text>
           </Box>

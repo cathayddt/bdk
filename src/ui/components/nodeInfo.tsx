@@ -1,24 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text, Newline } from 'ink'
 import { NodeDetails } from '../models/type/ui.type'
-import { NodeInformationService } from '../services/nodeInformation'
+import { NodeContextService } from '../services/nodeContext'
 
 export default function NodeInfo (props: any) {
   const apiUrl = props.apiUrl
-  const nodeInformationService = new NodeInformationService(apiUrl)
+  const nodeInformationService = new NodeContextService(apiUrl)
   const [nodeInfo, setNodeInfo] = useState<NodeDetails>()
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        await nodeInformationService.getNodeDetails({
-          jsonrpc: '2.0',
-          method: 'admin_nodeInfo',
-          params: [],
-          id: 1,
-        }).then(res => { setNodeInfo(res) })
-      } catch (error) {
-      }
+      const res = await nodeInformationService.getNodeDetails()
+      setNodeInfo(res)
     }
     fetchData()
       .then((response) => { return response })

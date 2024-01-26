@@ -1,47 +1,24 @@
 import React, { useState, useEffect, useLayoutEffect, memo } from 'react'
 import { Box, Text, Newline } from 'ink'
-import { NodeInformationService } from '../services/nodeInformation'
+import { NodeContextService } from '../services/nodeContext'
 import { debounce } from '../../util'
 
 const NodeStatus = memo(function NodeStatus (props: any) {
   const apiUrl = props.apiUrl
-  const nodeInformationService = new NodeInformationService(apiUrl)
+  const nodeInformationService = new NodeContextService(apiUrl)
   const [state, setState] = useState<string>('shutdown')
   const [stateColor, setStateColor] = useState<string>('#FF000F')
-  const [block, setBlock] = useState<string>('')
-  const [peer, setPeer] = useState<string>('')
-  const [retryCount, setRetryCount] = useState(0)
+  const [block, setBlock] = useState<number>(0)
+  const [peer, setPeer] = useState<number>(0)
 
   const fetchData = async () => {
-    try {
-      await nodeInformationService.getBlocks({
-        jsonrpc: '2.0',
-        method: 'eth_blockNumber',
-        params: [],
-        id: 1,
-      }).then(res => {
-        const blockcount: any = parseInt(res, 16)
-        setBlock(blockcount)
-      },
-      )
-    } catch (error) {
-      setRetryCount(retryCount + 1)
-    }
+    const res = await nodeInformationService.getBlocks()
+    setBlock(res)
   }
 
   const fetchPeerData = async () => {
-    try {
-      await nodeInformationService.getPeers({
-        jsonrpc: '2.0',
-        method: 'net_peerCount',
-        params: [],
-        id: 1,
-      }).then(res => {
-        const peerCounts: any = parseInt(res, 16)
-        setPeer(peerCounts)
-      })
-    } catch (error) {
-    }
+    const res = await nodeInformationService.getPeers()
+    setPeer(res)
   }
 
   const debouncedFetchData = debounce(fetchData, 2500)
@@ -54,11 +31,10 @@ const NodeStatus = memo(function NodeStatus (props: any) {
     }, 2500)
 
     return () => clearInterval(intervalId)
-  }, [retryCount, apiUrl])
+  }, [apiUrl])
 
   useEffect(() => {
-    const isNumeric = /^[0-9]+$/.test(block)
-    if (isNumeric && block !== '') {
+    if (block !== 0) {
       setState('running')
       setStateColor('#00FF19')
     } else {
