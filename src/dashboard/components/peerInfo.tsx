@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text } from 'ink'
 import { NodeContextService } from '../services/nodeContext'
-import { PeerInformation } from '../models/type/ui.type'
+import { PeerInformation } from '../models/type/dashboard.type'
 
 export default function PeerInfo (props: any) {
   const apiUrl: string = props.apiUrl

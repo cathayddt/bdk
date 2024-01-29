@@ -1,5 +1,5 @@
 import fs from 'fs-extra'
-import { NodeDetails, PeerInformation } from '../models/type/ui.type'
+import { NodeDetails, PeerInformation } from '../models/type/dashboard.type'
 import axios from 'axios'
 
 export class NodeContextService {

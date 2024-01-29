@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text, Newline } from 'ink'
-import { NodeDetails } from '../models/type/ui.type'
+import { NodeDetails } from '../models/type/dashboard.type'
 import { NodeContextService } from '../services/nodeContext'
 
 export default function NodeInfo (props: any) {

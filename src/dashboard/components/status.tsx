@@ -45,7 +45,7 @@ const NodeStatus = memo(function NodeStatus (props: any) {
 
   return (
     <Box width='20%' flexDirection='column' borderStyle='bold' borderColor='white' padding={2}>
-      <Text color={'blue'}>Node Status</Text>
+      <Text color={'#42c5f5'}>Node Status</Text>
       <Newline />
       <Text color={stateColor}>Status: {state}</Text>
       <Newline />
