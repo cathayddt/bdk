@@ -7,11 +7,11 @@ export class NodeContextService {
   private bdkPath: string
   constructor (apiUrl: string) {
     this.apiUrl = apiUrl
-    this.bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/quorum`
+    this.bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/quorum/bdk-quorum-network`
   }
 
   public getNodeList () {
-    const nodeList = fs.readFileSync(`${this.bdkPath}/nodelist.json`, 'utf-8')
+    const nodeList = fs.readFileSync(`${this.bdkPath}/network-info.json`, 'utf-8')
     return JSON.parse(nodeList)
   }
 
@@ -21,9 +21,8 @@ export class NodeContextService {
         this.apiUrl,
         this.makeJsonRpcParam('eth_blockNumber'),
       )
-      let blockcount = 0
-      blockcount = parseInt(response.data.result, 16)
-      return blockcount
+      const blockNumberHex = response.data.result
+      return parseInt(blockNumberHex, 16)
     } catch (error) {
       return 0
     }
@@ -35,9 +34,8 @@ export class NodeContextService {
         this.apiUrl,
         this.makeJsonRpcParam('net_peerCount'),
       )
-      let peercount = 0
-      peercount = parseInt(response.data.result, 16)
-      return peercount
+      const peerCountHex = response.data.result
+      return parseInt(peerCountHex, 16)
     } catch (error) {
       return 0
     }
