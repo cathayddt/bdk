@@ -1,18 +1,21 @@
-export interface ItemProps {
-  label: string
-  value: string
-}
-
-export interface CommandProps {
-  type: string
-}
-
-export interface ContainerListProps {
+export interface NodeDetails {
   id: string
-  names: string[]
-  image: string
-  status: string
-  state: string
-  created: number
-  ports?: string[]
+  name: string
+  enode: string
+  ip: string
+}
+
+export interface PeerInformation {
+  id: string
+  enode: string
+  name: string
+  network: {
+    localAddress: string
+    remoteAddress: string
+  }
+}
+
+export interface NodeListType {
+  value: string
+  label: string
 }
