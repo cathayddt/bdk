@@ -1,6 +1,7 @@
 import prompts from 'prompts'
 import { Argv, Arguments } from 'yargs'
 import Network from '../../service/network'
+import Backup from '../../service/backup'
 import { onCancel, ParamsError } from '../../../util/error'
 import { NetworkGenerateType } from '../../model/type/network.type'
 import config from '../../config'
@@ -22,6 +23,7 @@ export const builder = (yargs: Argv<OptType>) => {
 
 export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
+  const backup = new Backup(config)
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
     network.createBdkFolder()
@@ -34,9 +36,12 @@ export const handler = async (argv: Arguments<OptType>) => {
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora('Quorum Network Generate ...').start()
+        const spinner = ora('Quorum Network Create ...').start()
+        // backup before remove
+        await backup.exportAll()
+
         network.removeBdkFiles(fileList)
-        spinner.succeed('Remove all existing files!')
+        spinner.succeed('Backup and remove all existing files!')
       }
       return confirmDelete
     } else {

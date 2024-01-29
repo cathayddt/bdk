@@ -98,3 +98,8 @@ export interface AddMemberRemoteType {
   discoveryPort: string
   ipAddress: string
 }
+
+export interface NetworkInfoItem {
+  label: string
+  value: string
+}
