@@ -28,7 +28,7 @@ const argv = yargs
   .commandDir('quorum')
   .commandDir('wallet')
   .commandDir('hello')
-  .commandDir('ui')
+  .commandDir('dashboard')
   .strict()
   .demandCommand()
   .completion()
