@@ -3,6 +3,14 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v2.1.0](https://github.com/cathayddt/bdk/releases/tag/v2.1.0) - 2024-02-01
+
+### Features
+
+* Transform bdk ui to quorum dashboard [#99](https://github.com/cathayddt/bdk/issues/99)
+* Optimize create network process [#100](https://github.com/cathayddt/bdk/issues/100)
+* Bootnode mode [#97](https://github.com/cathayddt/bdk/issues/97)
+
 ## [v2.0.5](https://github.com/cathayddt/bdk/releases/tag/v2.0.5) - 2023-12-05
 
 ### Features
