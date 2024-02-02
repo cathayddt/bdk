@@ -388,12 +388,11 @@ describe('Fabric.CA', function () {
           reject(new Error(`rca connect test error: ${err.message}`))
         })
       })
-
-      after(async () => {
-        await caService.down({ caName: rcaArgv.basic.caName })
-        await caService.down({ caName: icaArgv.basic.caName })
-        fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
-      })
+    })
+    after(async () => {
+      await caService.down({ caName: rcaArgv.basic.caName })
+      await caService.down({ caName: icaArgv.basic.caName })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
     })
 
     it('reenroll orderer ca', async () => {
