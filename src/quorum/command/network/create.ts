@@ -2,6 +2,7 @@ import { ethers } from 'ethers'
 import prompts from 'prompts'
 import { Argv, Arguments } from 'yargs'
 import Network from '../../service/network'
+import Backup from '../../service/backup'
 import { onCancel } from '../../../util/error'
 import { NetworkCreateType } from '../../model/type/network.type'
 import config from '../../config'
@@ -26,11 +27,12 @@ export const builder = (yargs: Argv<OptType>) => {
 
 export const handler = async (argv: Arguments<OptType>) => {
   const network = new Network(config)
+  const backup = new Backup(config)
   const wallet = new Wallet()
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
     network.createBdkFolder()
-    const fileList = network.getBdkFiles()
+    const fileList = network.getNetworkFiles()
     if (fileList.length !== 0) {
       const confirmDelete = (await prompts({
         type: 'confirm',
@@ -40,8 +42,11 @@ export const handler = async (argv: Arguments<OptType>) => {
       }, { onCancel })).value
       if (confirmDelete) {
         const spinner = ora('Quorum Network Create ...').start()
+        // backup before remove
+        await backup.exportAll()
+
         network.removeBdkFiles(fileList)
-        spinner.succeed('Remove all existing files!')
+        spinner.succeed('Backup and remove all existing files!')
       }
       return confirmDelete
     } else {
@@ -75,6 +80,47 @@ export const handler = async (argv: Arguments<OptType>) => {
             initial: 0,
           },
         ], { onCancel })
+
+        const { isBootNode } = await prompts({
+          type: 'select',
+          name: 'isBootNode',
+          message: 'Using bootnode?',
+          choices: [
+            {
+              title: 'true',
+              value: true,
+            },
+            {
+              title: 'false',
+              value: false,
+            },
+          ],
+          initial: 1,
+        })
+
+        const createNode = (type: string, index: number, offset = 0) => ({
+          title: `${type}${index}`,
+          value: `${index + offset}`,
+        })
+
+        const nodelist = [
+          ...Array.from({ length: validatorNumber }, (_, i) => createNode('validator', i)),
+          ...Array.from({ length: memberNumber }, (_, i) => createNode('member', i, validatorNumber)),
+        ]
+
+        const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
+        if (isBootNode) {
+          const isbootNodeList: any = await prompts({
+            type: 'multiselect',
+            name: 'isbootNodeList',
+            message: 'Choose bootnode',
+            choices: nodelist,
+            initial: '',
+          })
+          Object.values(isbootNodeList).flat().forEach((node: any) => {
+            bootNodeList[node] = true
+          })
+        }
 
         const { walletOwner } = await prompts({
           type: 'select',
@@ -122,7 +168,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc }
+        return { chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         return defaultNetworkConfig(address, privateKey)

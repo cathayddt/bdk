@@ -32,27 +32,19 @@ describe('Orderer service:', function () {
       await minimumNetwork.deleteNetwork()
     })
 
-    it('should start and shutdown docker container', (done) => {
+    it('should start and shutdown docker container', async () => {
       const ordererHostname = `${minimumNetwork.getOrderer().hostname}.${minimumNetwork.getOrderer().orgDomain}`
       const port = minimumNetwork.getOrderer().port
 
-      ordererService.up({ ordererHostname }).then(() => {
-        const socket = net.connect(port, '127.0.0.1', () => {
-          ordererService.down({ ordererHostname })
-            .then(() => {
-              // TODO check container
-              done()
-            })
-            .catch((err) => {
-              assert.fail(`orderer down error: ${err.message}`)
-            })
+      await ordererService.up({ ordererHostname })
+      await new Promise<void>((resolve, reject) => {
+        const socket = net.connect(port, '127.0.0.1', async () => {
+          await ordererService.down({ ordererHostname })
+          resolve()
         })
-
         socket.on('error', (err) => {
-          assert.fail(`orderer connect test error: ${err.message}`)
+          reject(new Error(`orderer down error: ${err.message}`))
         })
-      }).catch((err) => {
-        assert.fail(`orderer up error: ${err.message}`)
       })
     })
   })

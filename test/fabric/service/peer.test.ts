@@ -34,27 +34,19 @@ describe('Peer service:', function () {
       await minimumNetwork.deleteNetwork()
     })
 
-    it('should start and shutdown docker container', (done) => {
+    it('should start and shutdown docker container', async () => {
       const peerHostname = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`
       const port = minimumNetwork.getPeer().port
 
-      peerService.up({ peerHostname }).then(() => {
-        const socket = net.connect(port, '127.0.0.1', () => {
-          peerService.down({ peerHostname })
-            .then(() => {
-              // TODO check container
-              done()
-            })
-            .catch((err) => {
-              assert.fail(`peer down error: ${err.message}`)
-            })
+      await peerService.up({ peerHostname })
+      await new Promise<void>((resolve, reject) => {
+        const socket = net.connect(port, '127.0.0.1', async () => {
+          await peerService.down({ peerHostname })
+          resolve()
         })
-
-        socket.on('error', (err) => {
-          assert.fail(`peer connect test error: ${err.message}`)
+        socket.on('error', (err: any) => {
+          reject(new Error(`orderer down error: ${err.message}`))
         })
-      }).catch((err) => {
-        assert.fail(`peer up error: ${err.message}`)
       })
     })
   })

@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import RLP from 'rlp'
-import { NetworkCreateType, NetworkGenerateType, JoinNodeType, AddValidatorRemoteType, AddMemberRemoteType } from '../model/type/network.type'
+import { NetworkCreateType, NetworkGenerateType, JoinNodeType, AddValidatorRemoteType, AddMemberRemoteType, NetworkInfoItem } from '../model/type/network.type'
 import GenesisJsonYaml from '../model/yaml/network/gensisJson'
 import { AbstractService } from './Service.abstract'
 import ValidatorInstance from '../instance/validator'
@@ -17,6 +17,7 @@ export default class Network extends AbstractService {
    */
   public async create (networkCreateConfig: NetworkCreateType) {
     const validatorAddressList: Buffer[] = []
+    const networkInfo: NetworkInfoItem[] = []
     for (let i = 0; i < networkCreateConfig.validatorNumber; i += 1) {
       const { address } = this.createKey(`artifacts/validator${i}`)
       validatorAddressList.push(Buffer.from(address, 'hex'))
@@ -44,7 +45,7 @@ export default class Network extends AbstractService {
     this.bdkFile.createGenesisJson(genesisJson)
 
     this.bdkFile.createDisallowedNodesJson([])
-    const staticNodesJson = []
+    const staticNodesJson: string[] = []
     const bdkPath = this.bdkFile.getBdkPath()
 
     for (let i = 0; i < networkCreateConfig.validatorNumber; i += 1) {
@@ -72,7 +73,8 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i)
+      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i])
+      this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -90,17 +92,20 @@ export default class Network extends AbstractService {
         this.bdkFile.copyPublicKeyToMember(i)
         this.bdkFile.copyAddressToMember(i)
 
-        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i)
+        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i, networkCreateConfig.bootNodeList[networkCreateConfig.validatorNumber + i], staticNodesJson[networkCreateConfig.validatorNumber + i])
+        this.createNetworkInfoJson(networkInfo, `http://member${i}:${8645 + i * 2}`)
       }
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
       await (new MemberInstance(this.config, this.infra).up())
     }
+    this.bdkFile.createNetworkInfoJson(networkInfo)
   }
 
   public async joinNode (joinNodeConfig: JoinNodeType) {
+    const networkInfo: NetworkInfoItem[] = this.bdkFile.getNetworkInfoJson()
     const nodeNum = Number(joinNodeConfig.node.replace(/(validator|member)+/g, ''))
-    const staticNodesJson = []
+    const staticNodesJson: string[] = []
     const bdkPath = this.bdkFile.getBdkPath()
     const enodeInfo = String(this.getNodeInfo(joinNodeConfig.node, 'enodeInfo'))
     const publicKey = String(this.getNodeInfo(joinNodeConfig.node, 'publicKey'))
@@ -125,30 +130,17 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPermissionedNodesJsonToValidator(nodeNum)
 
       const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
-      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum)
+
+      // TODO: add bootnode selection
+      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum, false, '')
+      this.createNetworkInfoJson(networkInfo, `http://validator${nodeNum}:${8545 + nodeNum * 2}`)
       this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
       await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
+      this.bdkFile.createNetworkInfoJson(networkInfo)
 
-      let tryTime = 0
-      while (await this.quorumCommand('istanbul.isValidator()', `${joinNodeConfig.node}`) !== 'true') {
-        if (tryTime !== 10) {
-          const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
-          const wallet = ethers.Wallet.createRandom().connect(provider)
-          const tx = {
-            to: '0x0000000000000000000000000000000000000000',
-            value: '0x0',
-            nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
-          }
-          const receipt = await wallet.sendTransaction(tx)
-          await receipt.wait()
+      await this.istanbulIsValidator(joinNodeConfig.node)
 
-          tryTime += 1
-          await sleep(500)
-        } else {
-          throw new TimeLimitError('[x] Time limit reached. Please check later.')
-        }
-      }
       return nodeNum
     } else {
       this.bdkFile.copyGenesisJsonToMember(nodeNum)
@@ -156,10 +148,13 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPermissionedNodesJsonToMember(nodeNum)
 
       const memberDockerComposeYaml = new MemberDockerComposeYaml()
-      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum)
+      // TODO: add bootnode selection
+      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum, false, '')
+      this.createNetworkInfoJson(networkInfo, `http://member${nodeNum}:${8645 + nodeNum * 2}`)
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
       await (new MemberInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
+      this.bdkFile.createNetworkInfoJson(networkInfo)
 
       let tryTime = 0
       while (parseInt(await this.quorumCommand('net.peerCount', joinNodeConfig.node)) < 1) {
@@ -227,7 +222,7 @@ export default class Network extends AbstractService {
   }
 
   public generate (networkGenerateConfig: NetworkGenerateType) {
-    const staticNodesJson = []
+    const staticNodesJson: string[] = []
 
     // Add node to static-nodes.json
     for (let i = 0; i < networkGenerateConfig.validatorNumber; i += 1) {
@@ -256,6 +251,7 @@ export default class Network extends AbstractService {
   }
 
   public async addValidatorLocal () {
+    const networkInfo: NetworkInfoItem[] = await this.bdkFile.getNetworkInfoJson()
     // count validator number
     const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
     const validatorNum = validatorCount
@@ -285,9 +281,12 @@ export default class Network extends AbstractService {
     for (let i = 0; i < validatorNum + 1; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i)
+      // TODO: add bootnode selection
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i, false, '')
+      this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
+    this.bdkFile.createNetworkInfoJson(networkInfo)
 
     // for loop to copy static-nodes.json to member
     const memberCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g)).length
@@ -297,30 +296,13 @@ export default class Network extends AbstractService {
     }
 
     await (new ValidatorInstance(this.config, this.infra).upOneService(`${newValidator}`))
+    await this.istanbulIsValidator(newValidator)
 
-    let tryTime = 0
-    while (await this.quorumCommand('istanbul.isValidator()', `${newValidator}`) !== 'true') {
-      if (tryTime !== 10) {
-        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
-        const wallet = ethers.Wallet.createRandom().connect(provider)
-        const tx = {
-          to: '0x0000000000000000000000000000000000000000',
-          value: '0x0',
-          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
-        }
-        const receipt = await wallet.sendTransaction(tx)
-        await receipt.wait()
-
-        tryTime += 1
-        await sleep(500)
-      } else {
-        throw new TimeLimitError('[x] Time limit reached. Please check later.')
-      }
-    }
     return validatorNum
   }
 
   public async addMemberLocal () {
+    const networkInfo: NetworkInfoItem[] = await this.bdkFile.getNetworkInfoJson()
     // count member number
     const memberCount = (await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g))).length
     const memberNum = memberCount
@@ -353,10 +335,12 @@ export default class Network extends AbstractService {
     for (let i = 0; i < memberCount + 1; i += 1) {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
-      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i)
+      // TODO: add bootnode selection
+      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i, false, '')
+      this.createNetworkInfoJson(networkInfo, `http://member${i}:${8645 + i * 2}`)
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
-
+    this.bdkFile.createNetworkInfoJson(networkInfo)
     await (new MemberInstance(this.config, this.infra).upOneService(`${newMember}`))
 
     let tryTime = 0
@@ -370,29 +354,6 @@ export default class Network extends AbstractService {
     }
 
     return memberNum
-  }
-
-  public async upService (service: string) {
-    if (service.match(/validator[\w-]+/g)) {
-      await (new ValidatorInstance(this.config, this.infra).upOneService(service))
-    } else if (service.match(/member[\w-]+/g)) {
-      await (new MemberInstance(this.config, this.infra).upOneService(service))
-    }
-  }
-
-  public async upAll () {
-    await (new ValidatorInstance(this.config, this.infra).up())
-    await (new MemberInstance(this.config, this.infra).up())
-  }
-
-  public async down () {
-    await (new ValidatorInstance(this.config, this.infra).down())
-    await (new MemberInstance(this.config, this.infra).down())
-  }
-
-  public async delete () {
-    await this.down()
-    this.removeBdkFiles(this.getNetworkFiles())
   }
 
   public async checkNode (node: string, method: string) {
@@ -464,6 +425,32 @@ export default class Network extends AbstractService {
     return result
   }
 
+  /**
+   * @description network service
+   */
+  public async upService (service: string) {
+    if (service.match(/validator[\w-]+/g)) {
+      await (new ValidatorInstance(this.config, this.infra).upOneService(service))
+    } else if (service.match(/member[\w-]+/g)) {
+      await (new MemberInstance(this.config, this.infra).upOneService(service))
+    }
+  }
+
+  public async upAll () {
+    await (new ValidatorInstance(this.config, this.infra).up())
+    await (new MemberInstance(this.config, this.infra).up())
+  }
+
+  public async down () {
+    await (new ValidatorInstance(this.config, this.infra).down())
+    await (new MemberInstance(this.config, this.infra).down())
+  }
+
+  public async delete () {
+    await this.down()
+    this.removeBdkFiles(this.getNetworkFiles())
+  }
+
   /** @ignore */
   private async quorumCommand (args: string, option: string) {
     const result = await this.infra.runCommand({
@@ -501,6 +488,42 @@ export default class Network extends AbstractService {
   }
 
   /** @ignore */
+  private createNetworkInfoJson (networkInfo: NetworkInfoItem[], endpoint: string) {
+    const match = endpoint.match(/((http[s]?):\/\/((validator|member)\d+)):(\d+)/)
+    if (!match) {
+      throw new Error('Invalid URL format')
+    }
+    const label = match[3]
+    const protocol = match[2]
+    const host = label.startsWith('validator') || label.startsWith('member') ? 'localhost' : label
+    const value = `${protocol}://${host}:${match[5]}`
+    networkInfo.push({ label, value })
+  }
+
+  /** @ignore */
+  private async istanbulIsValidator (joinNode: string, retryTime = 10) {
+    let tryTime = 0
+    while (await this.quorumCommand('istanbul.isValidator()', `${joinNode}`) !== 'true') {
+      if (tryTime !== retryTime) {
+        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        const wallet = ethers.Wallet.createRandom().connect(provider)
+        const tx = {
+          to: '0x0000000000000000000000000000000000000000',
+          value: '0x0',
+          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+        }
+        const receipt = await wallet.sendTransaction(tx)
+        await receipt.wait()
+
+        tryTime += 1
+        await sleep(500)
+      } else {
+        throw new TimeLimitError('[x] Time limit reached. Please check later.')
+      }
+    }
+  }
+
+  /** @ignore */
   public createBdkFolder () {
     return this.bdkFile.createBdkFolder()
   }
@@ -512,11 +535,9 @@ export default class Network extends AbstractService {
 
   /** @ignore */
   public getNetworkFiles () {
-    const array = []
-    array.push(this.bdkFile.getExportFiles().filter(file => file.match(/(validator|member)+/g)))
-    array.push(this.bdkFile.getExportFiles().filter(file => file.match(/(artifacts)/g)))
-    const networkFilesList = array.flat()
-
+    const networkFilesList = this.bdkFile.getExportFiles().filter(
+      file => file.match(/(validator|member|artifacts|network-info)+/g),
+    )
     return networkFilesList
   }
 

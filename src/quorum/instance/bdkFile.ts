@@ -1,7 +1,7 @@
 import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 import fs from 'fs-extra'
 import { Config } from '../config'
-import { GenesisJsonType } from '../model/type/network.type'
+import { GenesisJsonType, NetworkInfoItem } from '../model/type/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
 import { PathError } from '../../util/error'
@@ -48,6 +48,10 @@ export default class BdkFile {
   public createStaticNodesJson (staticNodesJson: Array<string>) {
     this.createArtifactsFolder()
     fs.writeFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, JSON.stringify(staticNodesJson, null, 2))
+  }
+
+  public createNetworkInfoJson (networkInfoJson: Array<NetworkInfoItem>) {
+    fs.writeFileSync(`${this.bdkPath}/network-info.json`, JSON.stringify(networkInfoJson, null, 2))
   }
 
   public createPrivateKey (dir: string, privateKey: string) {
@@ -215,6 +219,12 @@ export default class BdkFile {
     this.checkPathExist(this.bdkPath)
     const staticNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, 'utf8')
     return JSON.parse(staticNodesJson)
+  }
+
+  public getNetworkInfoJson () {
+    this.checkPathExist(this.bdkPath)
+    const networkInfoJson = fs.readFileSync(`${this.bdkPath}/network-info.json`, 'utf8')
+    return JSON.parse(networkInfoJson)
   }
 
   public getPermissionedNodesJson () {

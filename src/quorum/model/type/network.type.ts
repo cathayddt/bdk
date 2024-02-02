@@ -18,6 +18,8 @@ export interface NetworkCreateType {
   validatorNumber: number
   memberNumber: number
   alloc: AllocType[]
+  isBootNode: boolean
+  bootNodeList: boolean[]
 }
 
 export interface NetworkGenerateType {
@@ -95,4 +97,9 @@ export interface AddMemberRemoteType {
   memberPublicKey: string
   discoveryPort: string
   ipAddress: string
+}
+
+export interface NetworkInfoItem {
+  label: string
+  value: string
 }
