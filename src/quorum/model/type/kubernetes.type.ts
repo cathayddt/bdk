@@ -10,6 +10,7 @@ export interface K8SRunCommandType {
 
 export interface ClusterCreateType extends NetworkCreateType {
   provider: string
+  region?: string
 }
 
 /**

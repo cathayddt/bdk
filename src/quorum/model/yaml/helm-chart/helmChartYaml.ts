@@ -65,7 +65,7 @@ class HelmChartYaml extends BdkYaml<HelmChartYamlInterface> {
     }
   }
 
-  public setProvider (provider: string) {
+  public setProvider (provider: string, region: string = 'ap-southeast-2') {
     const clusterConfig = {
       provider: provider,
       cloudNativeServices: (provider !== 'local'),
@@ -75,7 +75,7 @@ class HelmChartYaml extends BdkYaml<HelmChartYamlInterface> {
     const providers: { [key: string]: any } = {
       aws: {
         serviceAccountName: 'quorum-sa',
-        region: 'ap-southeast-2',
+        region: region,
       },
       azure: {
         serviceAccountName: 'quorum-sa',

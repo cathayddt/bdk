@@ -99,6 +99,17 @@ export const handler = async (argv: Arguments<OptType>) => {
           initial: 0,
         }, { onCancel })
 
+        let region: string | undefined = ''
+        if (provider === 'aws') {
+          const { awsRegion } = await prompts({
+            type: 'text',
+            name: 'awsRegion',
+            message: 'What is your region?',
+            initial: 'ap-southeast-2',
+          }, { onCancel })
+          region = awsRegion
+        }
+
         const { chainId, validatorNumber, memberNumber } = await prompts([
           {
             type: 'number',
@@ -172,7 +183,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         const isBootNode = false
         const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
 
-        return { chainId, validatorNumber, memberNumber, alloc, provider, isBootNode, bootNodeList }
+        return { provider, region, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         const config = defaultNetworkConfig(address, privateKey)
