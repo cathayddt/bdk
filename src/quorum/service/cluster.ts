@@ -3,21 +3,20 @@ import { Ora } from 'ora'
 import { tarDateFormat } from '../../util'
 import { AbstractService } from './Service.abstract'
 import KubernetesInstance from '../instance/kubernetesCluster'
-import { NetworkCreateType } from '../model/type/network.type'
-import { ClusterGenerateType } from '../model/type/kubernetes.type'
+import { ClusterCreateType, ClusterGenerateType } from '../model/type/kubernetes.type'
 import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { DockerResultType } from '../instance/infra/InfraRunner.interface'
 export default class Cluster extends AbstractService {
   /**
    * @description Use helm create quorum template
    */
-  public async apply (networkCreateConfig: NetworkCreateType, spinner: Ora): Promise<void> {
-    const { chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
+  public async apply (networkCreateConfig: ClusterCreateType, spinner: Ora): Promise<void> {
+    const { provider, chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
     // create genesis and account
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
     this.bdkFile.checkHelmChartPath()
     const genesisYaml = new GenesisConfigYaml()
-    genesisYaml.setCluster()
+    genesisYaml.setProvider(provider)
     genesisYaml.setGenesis(chainId, validatorNumber, alloc)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
@@ -33,18 +32,16 @@ export default class Cluster extends AbstractService {
     spinner.succeed(`Helm install genesis chart ${genesisOutput.stdout}`)
     // create network
     const validatorYaml = new ValidatorConfigYaml()
-    validatorYaml.setCluster()
-    validatorYaml.setQuorumFlags()
-    validatorYaml.setNode()
+    validatorYaml.setProvider(provider)
+    validatorYaml.setQuorumConfigs()
 
     for (let i = 0; i < validatorNumber; i += 1) {
       this.bdkFile.createValidatorChartValues(validatorYaml, i)
     }
 
     const memberYaml = new MemberConfigYaml()
-    memberYaml.setCluster()
-    memberYaml.setQuorumFlags()
-    memberYaml.setNode()
+    memberYaml.setProvider(provider)
+    memberYaml.setQuorumConfigs()
     for (let i = 0; i < memberNumber; i += 1) {
       this.bdkFile.createMemberChartValues(memberYaml, i)
     }
@@ -75,30 +72,28 @@ export default class Cluster extends AbstractService {
    */
   public async generate (
     clusterGenerateConfig: ClusterGenerateType,
-    networkCreateConfig: NetworkCreateType,
+    networkCreateConfig: ClusterCreateType,
   ): Promise<void> {
-    const { chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
+    const { provider, chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
     this.bdkFile.checkHelmChartPath()
     // create genesis and account
     const genesisYaml = new GenesisConfigYaml()
-    genesisYaml.setCluster()
+    genesisYaml.setProvider(provider)
     genesisYaml.setGenesis(chainId, validatorNumber, alloc)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
 
     const validatorYaml = new ValidatorConfigYaml()
-    validatorYaml.setCluster()
-    validatorYaml.setQuorumFlags()
-    validatorYaml.setNode()
+    validatorYaml.setProvider(provider)
+    validatorYaml.setQuorumConfigs()
 
     for (let i = 0; i < validatorNumber; i += 1) {
       this.bdkFile.createValidatorChartValues(validatorYaml, i)
     }
 
     const memberYaml = new MemberConfigYaml()
-    memberYaml.setCluster()
-    memberYaml.setQuorumFlags()
-    memberYaml.setNode()
+    memberYaml.setProvider(provider)
+    memberYaml.setQuorumConfigs()
     for (let i = 0; i < memberNumber; i += 1) {
       this.bdkFile.createMemberChartValues(memberYaml, i)
     }

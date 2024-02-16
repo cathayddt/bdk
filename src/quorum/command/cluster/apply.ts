@@ -4,7 +4,7 @@ import config from '../../config'
 import Cluster from '../../service/cluster'
 import Wallet from '../../../wallet/service/wallet'
 import { onCancel } from '../../../util/error'
-import { NetworkCreateType } from '../../model/type/network.type'
+import { ClusterCreateType } from '../../model/type/kubernetes.type'
 import { WalletType } from '../../../wallet/model/type/wallet.type'
 import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import prompts from 'prompts'
@@ -49,9 +49,30 @@ export const handler = async (argv: Arguments<OptType>) => {
   })()
 
   if (confirm) {
-  // network create
-    const networkCreate: NetworkCreateType = await (async () => {
+    // network create
+    const networkCreate: ClusterCreateType = await (async () => {
       if (argv.interactive) {
+        const { provider } = await prompts({
+          type: 'select',
+          name: 'provider',
+          message: 'What is your cloud provider?',
+          choices: [
+            {
+              title: 'GCP/local',
+              value: 'local',
+            },
+            {
+              title: 'AWS',
+              value: 'aws',
+            },
+            {
+              title: 'Azure',
+              value: 'azure',
+            },
+          ],
+          initial: 0,
+        }, { onCancel })
+
         const { chainId, validatorNumber, memberNumber } = await prompts([
           {
             type: 'number',
@@ -122,10 +143,14 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc }
+        const isBootNode = false
+        const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
+
+        return { provider, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        return defaultNetworkConfig(address, privateKey)
+        const config = defaultNetworkConfig(address, privateKey)
+        return { ...config, provider: 'local' }
       }
     })()
     const spinner = ora('Quorum Network Import ...').start()

@@ -3,8 +3,7 @@ import { ethers } from 'ethers'
 import config from '../../config'
 import Cluster from '../../service/cluster'
 import Wallet from '../../../wallet/service/wallet'
-import { ClusterGenerateType } from '../../model/type/kubernetes.type'
-import { NetworkCreateType } from '../../model/type/network.type'
+import { ClusterCreateType, ClusterGenerateType } from '../../model/type/kubernetes.type'
 import { WalletType } from '../../../wallet/model/type/wallet.type'
 import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import { onCancel } from '../../../util/error'
@@ -77,8 +76,29 @@ export const handler = async (argv: Arguments<OptType>) => {
       }
     })()
     // network create
-    const networkCreate: NetworkCreateType = await (async () => {
+    const networkCreate: ClusterCreateType = await (async () => {
       if (argv.interactive) {
+        const { provider } = await prompts({
+          type: 'select',
+          name: 'provider',
+          message: 'What is your cloud provider?',
+          choices: [
+            {
+              title: 'GCP/local',
+              value: 'local',
+            },
+            {
+              title: 'AWS',
+              value: 'aws',
+            },
+            {
+              title: 'Azure',
+              value: 'azure',
+            },
+          ],
+          initial: 0,
+        }, { onCancel })
+
         const { chainId, validatorNumber, memberNumber } = await prompts([
           {
             type: 'number',
@@ -149,10 +169,14 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc }
+        const isBootNode = false
+        const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
+
+        return { chainId, validatorNumber, memberNumber, alloc, provider, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        return defaultNetworkConfig(address, privateKey)
+        const config = defaultNetworkConfig(address, privateKey)
+        return { ...config, provider: 'local' }
       }
     })()
 

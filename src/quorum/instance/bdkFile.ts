@@ -304,7 +304,7 @@ export default class BdkFile {
   }
 
   public createChartTar (tag: string, date: string) {
-    return fs.createWriteStream(`./chart_${tag}_${date}.tar.gz`)
+    return fs.createWriteStream(`./${tag}-${date}.tar.gz`)
   }
 
   public getValidatorChartPath (i: number): string {

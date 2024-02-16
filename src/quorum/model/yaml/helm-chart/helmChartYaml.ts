@@ -29,19 +29,19 @@ interface AzureInterface {
 interface NodeInterface {
   goquorum: {
     metrics: {
-      serviceMonitor: boolean
+      serviceMonitorEnabled: boolean
     }
     resources: {
       cpuLimit: number
-      cpuRequest: string
+      cpuRequest: number
       memLimit: string
       memRequest: string
     }
-    account: {
+    account?: {
       password: string
     }
   }
-  tessera: {
+  tessera?: {
     password: string
   }
 }
@@ -65,33 +65,43 @@ class HelmChartYaml extends BdkYaml<HelmChartYamlInterface> {
     }
   }
 
-  public setQuorumFlags (quorumFlags: quorumFlags) {
+  public setProvider (provider: string) {
+    const clusterConfig = {
+      provider: provider,
+      cloudNativeServices: (provider !== 'local'),
+    }
+    this.setCluster(clusterConfig)
+
+    const providers: { [key: string]: any } = {
+      aws: {
+        serviceAccountName: 'quorum-sa',
+        region: 'ap-southeast-2',
+      },
+      azure: {
+        serviceAccountName: 'quorum-sa',
+        identityClientId: 'azure-clientId',
+        keyvaultName: 'azure-keyvault',
+        tenantId: 'azure-tenantId',
+        subscriptionId: 'azure-subscriptionId',
+      },
+    }
+
+    this.setService(provider, providers[provider])
+  }
+
+  protected setQuorumFlags (quorumFlags: quorumFlags) {
     this.value.quorumFlags = quorumFlags
   }
 
-  public setCluster (cluster: ClusterInterface) {
+  protected setCluster (cluster: ClusterInterface) {
     this.value.cluster = cluster
   }
 
-  public setAws (aws: AwsInterface) {
-    this.value.aws = aws
-    if (this.value.cluster) {
-      this.value.cluster.provider = 'aws'
-    }
-  }
-
-  public setAzure (azure: AzureInterface) {
-    this.value.azure = azure
-    if (this.value.cluster) {
-      this.value.cluster.provider = 'azure'
-    }
-  }
-
-  public setNode (node: NodeInterface) {
+  protected setNode (node: NodeInterface) {
     this.value.node = node
   }
 
-  public setService (name: string, service: any) {
+  protected setService (name: string, service: any) {
     this.value[name] = service
   }
 }

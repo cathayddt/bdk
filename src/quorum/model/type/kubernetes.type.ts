@@ -1,3 +1,4 @@
+import { NetworkCreateType } from './network.type'
 export interface K8SRunCommandType {
   helmChart: string
   name: string
@@ -5,6 +6,10 @@ export interface K8SRunCommandType {
   values: string
   version?: string
   ignoreError?: boolean
+}
+
+export interface ClusterCreateType extends NetworkCreateType {
+  provider: string
 }
 
 /**
