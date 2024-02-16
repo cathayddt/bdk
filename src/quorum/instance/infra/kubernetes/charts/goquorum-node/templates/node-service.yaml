@@ -13,12 +13,18 @@ metadata:
     app.kubernetes.io/managed-by: helm    
   namespace: {{ .Release.Namespace }}
 spec:
+{{- if (.Values.bdk.migrate)}}
+  type: NodePort
+{{- else}}
   type: ClusterIP
+{{- end}}
   selector:
     app.kubernetes.io/part-of: {{ include "goquorum-node.fullname" . }}
     app.kubernetes.io/namespace: {{ .Release.Namespace }}
     app.kubernetes.io/release: {{ .Release.Name }}
+    app.kubernetes.io/component: goquorum
   ports:
+{{- if not (.Values.bdk.loadBalancer.enabled)}}
     - name: json-rpc
       port: {{ .Values.node.goquorum.rpc.port }}
       targetPort: json-rpc
@@ -31,14 +37,21 @@ spec:
       port: {{ .Values.node.goquorum.graphql.port }}
       targetPort: graphql
       protocol: TCP
+{{- end}}
     - name: rlpx
       port: {{ .Values.node.goquorum.p2p.port }}
       targetPort: rlpx
       protocol: TCP
+{{- if (.Values.bdk.migrate)}}
+      nodePort: {{ .Values.bdk.nodePort }}
+{{- end}}
     - name: discovery
       port: {{ .Values.node.goquorum.p2p.port }}
       targetPort: discovery
       protocol: UDP
+{{- if (.Values.bdk.migrate)}}
+      nodePort: {{ .Values.bdk.nodePort }}
+{{- end}}
     - name: metrics
       port: {{ .Values.node.goquorum.metrics.pprofport }}
       targetPort: metrics

@@ -17,6 +17,9 @@ metadata:
     {{- range $labelName, $labelValue := .Values.node.goquorum.customLabels }}
     {{ $labelName }}: {{ $labelValue }}
     {{- end }}
+    {{- if (.Values.bdk.loadBalancer.enabled) }}
+    app: bdk-network-loadbalancer
+    {{- end}}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
@@ -53,10 +56,13 @@ spec:
         app.kubernetes.io/namespace: {{ .Release.Namespace }}
         app.kubernetes.io/release: {{ .Release.Name }}
         app.kubernetes.io/managed-by: helm
+        {{- if (.Values.bdk.loadBalancer.enabled) }}
+        app: bdk-network-loadbalancer
+        {{- end}}   
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: {{ .Values.node.goquorum.metrics.pprofport | quote}}
-        prometheus.io/path: "/debug/metrics/prometheus"        
+        prometheus.io/path: "/debug/metrics/prometheus"     
     spec:
 {{- if and (eq .Values.cluster.provider "azure") (.Values.cluster.cloudNativeServices) }}
       serviceAccountName: {{ .Values.azure.serviceAccountName }}
@@ -266,7 +272,16 @@ spec:
             cp /config/static/static-nodes.json {{ .Values.node.goquorum.dataPath }}/geth/static-nodes.json
             mkdir -p {{ .Values.node.goquorum.dataPath }}/keystore/
             cp {{ .Values.node.goquorum.keysPath }}/accountKeystore {{ .Values.node.goquorum.dataPath }}/keystore/key;
-
+{{- if .Values.bdk.migrate }}
+            geth \
+            --datadir {{ .Values.node.goquorum.dataPath }} --networkid 81712 \
+            --nodiscover --verbosity 3 \
+            --syncmode full --nousb --mine --miner.threads 1 --miner.gasprice 0 \
+            --nat extip:$POD_IP \
+            --emitcheckpoints \
+            --metrics --pprof --pprof.addr {{ .Values.node.goquorum.metrics.pprofaddr | quote }} --pprof.port {{ .Values.node.goquorum.metrics.pprofport }} \
+            --port {{ .Values.node.goquorum.p2p.port }} \
+{{- else }}            
             geth \
             --datadir {{ .Values.node.goquorum.dataPath }} \
             --nodiscover --ipcdisable \
@@ -277,6 +292,7 @@ spec:
             --metrics --pprof --pprof.addr {{ .Values.node.goquorum.metrics.pprofaddr | quote }} --pprof.port {{ .Values.node.goquorum.metrics.pprofport }} \
             --networkid {{ .Values.node.goquorum.networkId }} \
             --port {{ .Values.node.goquorum.p2p.port }} \
+{{- end }}         
           {{- if .Values.node.goquorum.rpc.enabled }}
             --http --http.addr {{ .Values.node.goquorum.rpc.addr }} --http.port {{ .Values.node.goquorum.rpc.port }} --http.corsdomain {{ .Values.node.goquorum.rpc.corsDomain | quote }} --http.vhosts {{ .Values.node.goquorum.rpc.vHosts | quote }} --http.api {{ .Values.node.goquorum.rpc.api | quote }} \
           {{- end }}
