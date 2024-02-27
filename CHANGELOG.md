@@ -3,6 +3,12 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v2.1.1](https://github.com/cathayddt/bdk/releases/tag/v2.1.1) - 2024-02-27
+
+### Fixes
+
+* Network generate with networkInfo
+
 ## [v2.1.0](https://github.com/cathayddt/bdk/releases/tag/v2.1.0) - 2024-02-01
 
 ### Features

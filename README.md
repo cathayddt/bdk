@@ -10,7 +10,7 @@
 ########    ########    ###    ###
 </pre>
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE) [![codeql-analysis](https://github.com/cathayddt/bdk/actions/workflows/codeql.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/codeql.yml) [![test-report](https://github.com/cathayddt/bdk/actions/workflows/test-report.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/test-report.yml) [![unit-test](https://github.com/cathayddt/bdk/actions/workflows/unit-test.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/unit-test.yml)
+[![NPM](https://img.shields.io/npm/v/%40cathaybc%2Fbdk?logo=npm)](https://www.npmjs.com/package/@cathaybc/bdk) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE) [![codeql-analysis](https://github.com/cathayddt/bdk/actions/workflows/codeql.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/codeql.yml) [![test-report](https://github.com/cathayddt/bdk/actions/workflows/test-report.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/test-report.yml) [![unit-test](https://github.com/cathayddt/bdk/actions/workflows/unit-test.yml/badge.svg)](https://github.com/cathayddt/bdk/actions/workflows/unit-test.yml)
 </div>
 
 提供指令快速建立、管理、監控 blockchain，最大的特色是可以使用互動式的問答，讓使用者可以依續性的問答來完成指令所需要的指令，在每個 BDK 指令的後面，加入 `-i` 或是 `--interactive` 的參數，來使用互動式問答
@@ -34,9 +34,9 @@ bdk fabric network create -i
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v2.1.0][v2.1.0] | [v2.1.0][v2.1.0] |
+| [v2.1.1][v2.1.1] | [v2.1.1][v2.1.1] |
 
-[v2.1.0]: https://github.com/cathayddt/bdk/releases/tag/v2.1.0
+[v2.1.1]: https://github.com/cathayddt/bdk/releases/tag/v2.1.1
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
@@ -52,7 +52,7 @@ bdk fabric network create -i
 
 ### 環境 (Prerequisites)
 
-- [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v16, npm v8
+- [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v18, npm v9
 - [docker](https://docs.docker.com/engine/install)
 - [docker-compose](https://docs.docker.com/compose/install) >= 1.27
 - [docker-desktop(MacOS)](https://www.docker.com/products/docker-desktop/) Need Allow Docker Sockers in Advanced Options 
@@ -63,12 +63,7 @@ bdk fabric network create -i
 #### 直接安裝 (Direct Install)
 
 ```bash
-npm config set @cathayddt:registry=https://npm.pkg.github.com
-
-# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
-npm config set //npm.pkg.github.com/:_authToken=[SET-YOUR-TOKEN]
-
-npm install -g @cathayddt/bdk@latest
+npm install -g @cathaybc/bdk@latest
 
 # 初始化 (initialize)
 bdk fabric config init

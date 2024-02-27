@@ -223,7 +223,7 @@ export default class Network extends AbstractService {
 
   public generate (networkGenerateConfig: NetworkGenerateType) {
     const staticNodesJson: string[] = []
-
+    const networkInfo: NetworkInfoItem[] = []
     // Add node to static-nodes.json
     for (let i = 0; i < networkGenerateConfig.validatorNumber; i += 1) {
       const { publicKey } = this.createKey(`artifacts/validator${i}`)
@@ -242,12 +242,15 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPrivateKeyToValidator(i)
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
+      this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
     for (let i = 0; i < networkGenerateConfig.memberNumber; i += 1) {
       this.bdkFile.copyPrivateKeyToMember(i)
       this.bdkFile.copyPublicKeyToMember(i)
       this.bdkFile.copyAddressToMember(i)
+      this.createNetworkInfoJson(networkInfo, `http://member${i}:${8645 + i * 2}`)
     }
+    this.bdkFile.createNetworkInfoJson(networkInfo)
   }
 
   public async addValidatorLocal () {
