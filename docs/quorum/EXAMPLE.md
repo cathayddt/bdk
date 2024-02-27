@@ -24,7 +24,7 @@ bdk hello
 bdk quorum network create -i
 ```
 
-依序輸入 `chain id`（預設為 81712）、`validator` 以及 `member` 的數量，並填入自己的錢包，如無錢包則選擇 `false`，會提供一組公私鑰來作為使用 Quorum 網路的帳號，該組帳號將在創始區塊擁有代幣
+依序輸入 `chain id`（預設為 81712）、`validator` 以及 `member` 的數量，於 `Using bootnode?` 選項選 `false`，並填入自己的錢包，如無錢包則選擇 `false`，會提供一組公私鑰來作為使用 Quorum 網路的帳號，該組帳號將在創始區塊擁有代幣
 
 ## 建立 Blockscout Explorer
 

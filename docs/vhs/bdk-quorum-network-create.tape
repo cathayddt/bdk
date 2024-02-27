@@ -25,5 +25,8 @@ Enter
 Sleep 3s
 Enter 
 
+Sleep 3s
+Enter 
+
 # Admire the output for a bit.
 Sleep 10s
