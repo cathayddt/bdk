@@ -7,6 +7,7 @@
 - [建立 Blockscout Explorer](#建立-blockscout-explorer)
 - [加入 Remote 節點](#加入-remote-節點)
 - [備份還原 Node](#備份還原-node)
+- [建立 Cluster](#建立-cluster)
 
 ## 確認 BDK 安裝狀態
 
@@ -138,4 +139,49 @@ bdk quorum backup import -i
 ```bash
 # 還原後需透過以下指令，來啟動該備份的節點
 bdk quorum network up --all
+```
+
+## 建立 Cluster
+
+先確保電腦安裝以下套件 `kubectl`, `helm`, `docker`
+```bash
+kubectl version
+helm version
+docker version
+```
+該範例以 `minikube` 做為本機建立的範例
+
+### Step 1. 建立本地 Cluster
+
+```bash
+minikube start --memory 11384 --cpus 2
+# 確認目前的 cluster 為 minikube
+kubectl config current-context
+```
+
+### Step 2. 建立 K8S 網路
+```bash
+bdk quorum cluster apply -i
+```
+- `What is your cloud provider?` 選擇 `GCP/local`
+- `What is your chain id?` 選擇 81712
+- `How many validator do you want?` 選擇 4
+- `How many member do you want?` 選擇 0
+- `Do you already own a wallet?` false
+
+這樣你的本地端的 quorum 網路就建立好了，如需連線及可用 `http://localhost:8545` 做連線
+```bash
+kubectl port-forward -n quorum svc/goquorum-node-validator-1 8545
+```
+
+### Step 3. 刪除 K8S 網路
+```bash
+bdk quorum cluster delete
+```
+按 'y' 刪除
+
+## 產出 helm values 和資料於本地
+如需直接使用 helm repo 來做 helm release 可利用以下 script
+```bash
+bdk quorum cluster generate -i
 ```

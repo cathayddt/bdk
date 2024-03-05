@@ -15,8 +15,7 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum cluster delete --interactive', 'Cathay BDK 互動式問答')
-    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
+    .example('bdk quorum cluster delete', 'Cathay BDK 互動式問答')
 }
 
 export const handler = async () => {
