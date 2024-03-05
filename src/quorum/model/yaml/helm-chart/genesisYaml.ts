@@ -1,7 +1,7 @@
 import HelmChartYaml from './helmChartYaml'
 
 class GenesisConfigYaml extends HelmChartYaml {
-  public setGenesis (chainID: number, nodeCount: number, alloc: any[]) {
+  public setGenesis (chainID: number, nodeCount: number) {
     this.setQuorumFlags({
       privacy: false,
       removeKeysOnDelete: false,

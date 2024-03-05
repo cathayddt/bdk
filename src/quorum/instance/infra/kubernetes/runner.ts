@@ -2,7 +2,7 @@ import { logger } from '../../../../util/logger'
 import { spawn } from 'child_process'
 import config from '../../../config'
 import { DockerResultType, KubernetesInfraRunner } from '../InfraRunner.interface'
-import { K8SRunCommandType } from '../../../model/type/kubernetes.type'
+import { ClusterDeleteType, K8SRunCommandType } from '../../../model/type/kubernetes.type'
 
 export class Runner implements KubernetesInfraRunner<DockerResultType> {
   public createDeploymentAndService = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
@@ -26,14 +26,25 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
     return { stdout: helmOutput }
   }
 
-  public wait = async (job: string, namespace: string): Promise<DockerResultType> => {
-    const k8sOutput = await this.runKubectl(['wait', '--for=condition=complete', job, '-n', namespace, '--timeout=600s'])
+  public wait = async (job: string, namespace: string, timeoutSecond = 300): Promise<DockerResultType> => {
+    const k8sOutput = await this.runKubectl([
+      'wait',
+      '--for=condition=complete',
+      job,
+      '-n',
+      namespace,
+      `--timeout=${timeoutSecond.toString()}s`])
     return { stdout: k8sOutput }
   }
 
-  public deleteDeploymentAndService = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
+  public listAllRelease = async (namespace: string): Promise<DockerResultType> => {
+    const helmOutput = await this.runHelm(['list', '--short', '--namespace', namespace])
+    return { stdout: helmOutput }
+  }
+
+  public deleteDeploymentAndService = async (payload: ClusterDeleteType): Promise<DockerResultType> => {
     await this.runHelm(
-      ['delete',
+      ['uninstall',
         payload.name,
         '--namespace', payload.namespace])
     return { stdout: '' }

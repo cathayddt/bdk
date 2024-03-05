@@ -8,6 +8,10 @@ export interface K8SRunCommandType {
   ignoreError?: boolean
 }
 
+export interface ClusterDeleteType {
+  name: string
+  namespace: string
+}
 export interface ClusterCreateType extends NetworkCreateType {
   provider: string
   region?: string

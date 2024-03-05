@@ -1,6 +1,6 @@
 import { AbstractInstance } from './Instance.abstract'
 import { logger } from '../../util'
-import { K8SRunCommandType } from '../model/type/kubernetes.type'
+import { K8SRunCommandType, ClusterDeleteType } from '../model/type/kubernetes.type'
 
 export default class KubernetesInstance extends AbstractInstance {
   public async install (payload: K8SRunCommandType) {
@@ -14,6 +14,20 @@ export default class KubernetesInstance extends AbstractInstance {
     logger.debug('Kubernetes instance template')
     if (this.kubernetesInfra !== undefined) {
       return await this.kubernetesInfra.createTemplate(payload)
+    }
+  }
+
+  public async delete (payload: ClusterDeleteType) {
+    logger.debug('Kubernetes instance delete')
+    if (this.kubernetesInfra !== undefined) {
+      return await this.kubernetesInfra.deleteDeploymentAndService(payload)
+    }
+  }
+
+  public async listAllRelease (namespace: string) {
+    logger.debug('Kubernetes instance listAllRelease')
+    if (this.kubernetesInfra !== undefined) {
+      return await this.kubernetesInfra.listAllRelease(namespace)
     }
   }
 

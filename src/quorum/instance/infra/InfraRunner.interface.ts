@@ -1,5 +1,5 @@
 import { DockerRunCommandType } from '../../model/type/docker.type'
-import { K8SRunCommandType } from '../../model/type/kubernetes.type'
+import { K8SRunCommandType, ClusterDeleteType } from '../../model/type/kubernetes.type'
 /**
  * Infra return type when direct use docker
  */
@@ -33,7 +33,8 @@ export interface KubernetesInfraRunner<T> {
   createDeploymentAndService(payload: K8SRunCommandType): Promise<T>
   createTemplate(payload: K8SRunCommandType): Promise<T>
   wait(job: string, namespace: string): Promise<T>
-  deleteDeploymentAndService(payload: K8SRunCommandType): Promise<T>
+  deleteDeploymentAndService(payload: ClusterDeleteType): Promise<T>
+  listAllRelease(namespace: string): Promise<T>
 }
 
 // Strategy

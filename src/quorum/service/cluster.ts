@@ -11,13 +11,13 @@ export default class Cluster extends AbstractService {
    * @description Use helm create quorum template
    */
   public async apply (networkCreateConfig: ClusterCreateType, spinner: Ora): Promise<void> {
-    const { provider, region, chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
+    const { provider, region, chainId, validatorNumber, memberNumber } = networkCreateConfig
     // create genesis and account
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
     this.bdkFile.checkHelmChartPath()
     const genesisYaml = new GenesisConfigYaml()
     genesisYaml.setProvider(provider, region)
-    genesisYaml.setGenesis(chainId, validatorNumber, alloc)
+    genesisYaml.setGenesis(chainId, validatorNumber)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
     // custom namespace
@@ -74,12 +74,12 @@ export default class Cluster extends AbstractService {
     clusterGenerateConfig: ClusterGenerateType,
     networkCreateConfig: ClusterCreateType,
   ): Promise<void> {
-    const { provider, region, chainId, validatorNumber, memberNumber, alloc } = networkCreateConfig
+    const { provider, region, chainId, validatorNumber, memberNumber } = networkCreateConfig
     this.bdkFile.checkHelmChartPath()
     // create genesis and account
     const genesisYaml = new GenesisConfigYaml()
     genesisYaml.setProvider(provider, region)
-    genesisYaml.setGenesis(chainId, validatorNumber, alloc)
+    genesisYaml.setGenesis(chainId, validatorNumber)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
 
@@ -108,6 +108,23 @@ export default class Cluster extends AbstractService {
       })
     }
     this.exportChartTar()
+  }
+
+  /**
+   * @description Delete all quorum deployment and service
+   */
+  public async delete (): Promise<void> {
+    const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
+    const releases = await this.getAllHelmRelease()
+    releases.forEach(async (release: string) => {
+      await k8s.delete({ name: release, namespace: 'quorum' })
+    })
+  }
+
+  private async getAllHelmRelease () {
+    const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
+    const releases = await k8s.listAllRelease('quorum') as DockerResultType
+    return releases.stdout.split('\n').slice(1)
   }
 
   public getHelmChartFiles (): string[] {
