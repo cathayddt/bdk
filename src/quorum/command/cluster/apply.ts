@@ -20,7 +20,7 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum cluster create --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk quorum cluster apply --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
@@ -34,11 +34,11 @@ export const handler = async (argv: Arguments<OptType>) => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: '⚠️ Detecting quorum nodes already exists. The following processes will remove all existing files. Continue?',
+        message: '⚠️ Detecting quorum cluster already exists. The following processes will remove all existing files. Continue?',
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora('Quorum Network Create ...').start()
+        const spinner = ora('Quorum Cluster Delete ...').start()
         cluster.removeHelmChartFiles()
         spinner.succeed('Remove all existing files!')
       }
@@ -50,7 +50,7 @@ export const handler = async (argv: Arguments<OptType>) => {
 
   if (confirm) {
     // network create
-    const networkCreate: ClusterCreateType = await (async () => {
+    const clusterCreate: ClusterCreateType = await (async () => {
       if (argv.interactive) {
         const { provider } = await prompts({
           type: 'select',
@@ -164,8 +164,8 @@ export const handler = async (argv: Arguments<OptType>) => {
         return { ...config, provider: 'local' }
       }
     })()
-    const spinner = ora('Quorum Network Import ...').start()
-    await cluster.apply(networkCreate, spinner)
-    spinner.succeed('Quorum Network Import Successfully!')
+    const spinner = ora('Quorum Cluster Apply ...').start()
+    await cluster.apply(clusterCreate, spinner)
+    spinner.succeed('Quorum Cluster Apply Successfully!')
   }
 }

@@ -27,11 +27,11 @@ export const handler = async () => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: '⚠️ Detecting quorum nodes already exists. The following processes will remove all existing files. Continue?',
+        message: '⚠️ Detecting quorum cluster already exists. The following processes will remove all existing files. Continue?',
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora('Quorum Network Create ...').start()
+        const spinner = ora('Quorum Cluster Create ...').start()
         cluster.removeHelmChartFiles()
         spinner.succeed('Remove all existing files!')
       }
