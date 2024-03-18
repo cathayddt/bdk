@@ -23,7 +23,7 @@ export default class Cluster extends AbstractService {
     // custom namespace
     spinner.start('Helm install genesis chart')
     const genesisOutput = await k8s.install({
-      helmChart: this.bdkFile.getGoQuorumGensisChartPath(),
+      helmChart: this.bdkFile.getGoQuorumGenesisChartPath(),
       name: 'genesis',
       namespace: 'quorum',
       values: this.bdkFile.getGenesisChartPath(),
@@ -100,12 +100,32 @@ export default class Cluster extends AbstractService {
 
     if (clusterGenerateConfig.chartPackageModeEnabled) {
       const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
-      await k8s.template({
-        helmChart: this.bdkFile.getGoQuorumGensisChartPath(),
+      const genesisOutput = await k8s.template({
+        helmChart: this.bdkFile.getGoQuorumGenesisChartPath(),
         name: 'genesis',
         namespace: 'quorum',
         values: this.bdkFile.getGenesisChartPath(),
-      })
+      }) as DockerResultType
+      this.bdkFile.createYaml('genesis', genesisOutput.stdout)
+
+      for (let i = 0; i < validatorNumber; i += 1) {
+        const validatorOutput = await k8s.template({
+          helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
+          name: `validator-${i + 1}`,
+          namespace: 'quorum',
+          values: this.bdkFile.getValidatorChartPath(i),
+        }) as DockerResultType
+        this.bdkFile.createYaml(`validator-${i + 1}`, validatorOutput.stdout)
+      }
+      for (let i = 0; i < memberNumber; i += 1) {
+        const memberOutput = await k8s.template({
+          helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
+          name: `member-${i + 1}`,
+          namespace: 'quorum',
+          values: this.bdkFile.getMemberChartPath(i),
+        }) as DockerResultType
+        this.bdkFile.createYaml(`member-${i + 1}`, memberOutput.stdout)
+      }
     }
     this.exportChartTar()
   }
@@ -116,9 +136,9 @@ export default class Cluster extends AbstractService {
   public async delete (): Promise<void> {
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
     const releases = await this.getAllHelmRelease()
-    releases.forEach(async (release: string) => {
+    await Promise.all(releases.map(async (release: string) => {
       await k8s.delete({ name: release, namespace: 'quorum' })
-    })
+    }))
   }
 
   private async getAllHelmRelease () {

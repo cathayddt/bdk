@@ -279,7 +279,12 @@ export default class BdkFile {
     }
   }
 
-  public getGoQuorumGensisChartPath (): string {
+  public createYaml (name: string, yaml: string) {
+    fs.mkdirSync(`${this.helmPath}/kubernetes`, { recursive: true })
+    fs.writeFileSync(`${this.helmPath}/kubernetes/${name}.yaml`, yaml)
+  }
+
+  public getGoQuorumGenesisChartPath (): string {
     this.checkHelmChartPath()
     return `${this.helmPath}/goquorum-genesis`
   }
