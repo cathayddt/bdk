@@ -41,6 +41,14 @@ console.log(`[+] child process exited with code ${npmBuild.status}`)
 if (npmBuild.status !== 0) { console.error(`${npmBuild.output[1]}`); console.error('\x1b[31m%s\x1b[0m', npmBuild.stderr); exit(0) }
 
 /**
+ * copy helm chart file
+ */
+console.log('[*] exec spawnSync: copy helm chart file')
+const cp = spawnSync('cp', ['-r', 'src/quorum/instance/infra/kubernetes/charts', 'dist/quorum/instance/infra/kubernetes'])
+console.log(`[+] child process exited with code ${cp.status}`)
+if (cp.status !== 0) { console.error('\x1b[31m%s\x1b[0m', cp.stderr); exit(0) }
+
+/**
  * npm link/
  */
 console.log('[*] exec spawnSync: npm link')

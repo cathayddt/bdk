@@ -1,0 +1,10 @@
+---
+bdk:
+  loadBalancer:
+    enabled: true
+
+network:
+  port:
+    rpc: 8545
+    ws: 8546
+    graphql: 8547

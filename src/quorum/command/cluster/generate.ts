@@ -1,0 +1,198 @@
+import { Argv, Arguments } from 'yargs'
+import { ethers } from 'ethers'
+import config from '../../config'
+import Cluster from '../../service/cluster'
+import Wallet from '../../../wallet/service/wallet'
+import { ClusterCreateType, ClusterGenerateType } from '../../model/type/kubernetes.type'
+import { WalletType } from '../../../wallet/model/type/wallet.type'
+import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
+import { onCancel } from '../../../util/error'
+import prompts from 'prompts'
+import ora from 'ora'
+
+export const command = 'generate'
+
+export const desc = '產生 Quorum Cluster 所需的相關設定檔案'
+
+interface OptType {
+  interactive: boolean
+}
+
+export const builder = (yargs: Argv<OptType>) => {
+  return yargs
+    .example('bdk quorum cluster generate --interactive', 'Cathay BDK 互動式問答')
+    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
+}
+
+export const handler = async (argv: Arguments<OptType>) => {
+  const cluster = new Cluster(config)
+  const wallet = new Wallet()
+
+  const confirm: boolean = await (async () => {
+    const fileList = cluster.getHelmChartFiles()
+    if (fileList.length !== 0) {
+      const confirmDelete = (await prompts({
+        type: 'confirm',
+        name: 'value',
+        message: '⚠️ Detecting quorum cluster already exists. The following processes will remove all existing files. Continue?',
+        initial: false,
+      }, { onCancel })).value
+      if (confirmDelete) {
+        const spinner = ora('Quorum Cluster Delete ...').start()
+        cluster.removeHelmChartFiles()
+        spinner.succeed('Remove all existing files!')
+      }
+      return confirmDelete
+    } else {
+      return true
+    }
+  })()
+
+  if (confirm) {
+    const clusterGenerate: ClusterGenerateType = await (async () => {
+      if (argv.interactive) {
+        return (await prompts([
+          {
+            type: 'select',
+            name: 'chartPackageModeEnabled',
+            message: 'What is the connect mode you want?',
+            choices: [
+              {
+                title: 'package mode (package without helm and k8s)',
+                value: false,
+              },
+              {
+                title: 'template mode (template with helm and k8s)',
+                value: true,
+              },
+            ],
+            initial: 0,
+          },
+        ], { onCancel })) as ClusterGenerateType
+      } else {
+        return {
+          chartPackageModeEnabled: false,
+        }
+      }
+    })()
+    // network create
+    const networkCreate: ClusterCreateType = await (async () => {
+      if (argv.interactive) {
+        const { provider } = await prompts({
+          type: 'select',
+          name: 'provider',
+          message: 'What is your cloud provider?',
+          choices: [
+            {
+              title: 'GCP/local',
+              value: 'local',
+            },
+            {
+              title: 'AWS',
+              value: 'aws',
+            },
+            {
+              title: 'Azure',
+              value: 'azure',
+            },
+          ],
+          initial: 0,
+        }, { onCancel })
+
+        let region: string | undefined = ''
+        if (provider === 'aws') {
+          const { awsRegion } = await prompts({
+            type: 'text',
+            name: 'awsRegion',
+            message: 'What is your region?',
+            initial: 'ap-southeast-2',
+          }, { onCancel })
+          region = awsRegion
+        }
+
+        const { chainId, validatorNumber, memberNumber } = await prompts([
+          {
+            type: 'number',
+            name: 'chainId',
+            message: 'What is your chain id?',
+            min: 0,
+            initial: 81712,
+          },
+          {
+            type: 'number',
+            name: 'validatorNumber',
+            message: 'How many validator do you want?',
+            min: 1,
+            initial: 4,
+          },
+          {
+            type: 'number',
+            name: 'memberNumber',
+            message: 'How many member do you want?',
+            min: 0,
+            initial: 0,
+          },
+        ], { onCancel })
+
+        const { walletOwner } = await prompts({
+          type: 'select',
+          name: 'walletOwner',
+          message: 'Do you already own a wallet?',
+          choices: [
+            {
+              title: 'true',
+              value: true,
+            },
+            {
+              title: 'false',
+              value: false,
+            },
+          ],
+          initial: 1,
+        })
+
+        let walletAddress: string
+
+        if (walletOwner) {
+          const { address } = await prompts({
+            type: 'text',
+            name: 'address',
+            message: 'What is your wallet address?',
+            validate: walletAddress => ethers.utils.isAddress(walletAddress) ? true : 'Address not valid.',
+          }, { onCancel })
+
+          walletAddress = address
+        } else {
+          const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
+          walletAddress = address
+          ora().stopAndPersist({
+            text: `Your ${WalletType.ETHEREUM} wallet address: 0x${walletAddress}`,
+            symbol: '🔑',
+          })
+          ora().stopAndPersist({
+            text: `Wallet private key: ${privateKey}`,
+            symbol: '🔑',
+          })
+        }
+
+        const alloc = [{
+          account: walletAddress,
+          amount: '1000000000000000000000000000',
+        }]
+
+        const isBootNode = false
+        const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
+
+        return { provider, region, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
+      } else {
+        const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
+        const config = defaultNetworkConfig(address, privateKey)
+        return { ...config, provider: 'local' }
+      }
+    })()
+
+    const spinner = ora('Quorum Cluster Generate ...').start()
+    await cluster.generate(clusterGenerate, networkCreate)
+    spinner.succeed('Quorum Cluster Generate Successfully!')
+  }
+}

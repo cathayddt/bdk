@@ -1,9 +1,11 @@
 import ExplorerDockerComposeYaml from '../model/yaml/docker-compose/explorerDockerComposeYaml'
 import fs from 'fs-extra'
+import path from 'path'
 import { Config } from '../config'
 import { GenesisJsonType, NetworkInfoItem } from '../model/type/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
+import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { PathError } from '../../util/error'
 
 export enum InstanceTypeEnum {
@@ -15,13 +17,16 @@ export enum InstanceTypeEnum {
 export default class BdkFile {
   private config: Config
   private bdkPath: string
+  private helmPath: string
   private backupPath: string
   private envPath: string
   private orgPath: string
+  private thisPath = path.resolve(__dirname)
 
   constructor (config: Config, networkName: string = config.networkName) {
     this.config = config
     this.bdkPath = `${config.infraConfig.bdkPath}/${networkName}`
+    this.helmPath = `${this.bdkPath}/helm`
     this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
@@ -265,6 +270,84 @@ export default class BdkFile {
 
   public createMemberDockerComposeYaml (memberDockerComposeYaml: MemberDockerComposeYaml) {
     fs.writeFileSync(this.getMemberDockerComposeYamlPath(), memberDockerComposeYaml.getYamlString())
+  }
+
+  // helm chart files
+  public checkHelmChartPath () {
+    if (!fs.existsSync(this.helmPath)) {
+      fs.copySync(`${this.thisPath}/infra/kubernetes/charts`, this.helmPath, { recursive: true })
+    }
+  }
+
+  public createYaml (name: string, yaml: string) {
+    fs.mkdirSync(`${this.helmPath}/kubernetes`, { recursive: true })
+    fs.writeFileSync(`${this.helmPath}/kubernetes/${name}.yaml`, yaml)
+  }
+
+  public getGoQuorumGenesisChartPath (): string {
+    this.checkHelmChartPath()
+    return `${this.helmPath}/goquorum-genesis`
+  }
+
+  public getGoQuorumNodeChartPath (): string {
+    this.checkHelmChartPath()
+    return `${this.helmPath}/goquorum-node`
+  }
+
+  public createChartValueFolder () {
+    fs.mkdirSync(`${this.helmPath}/values`, { recursive: true })
+  }
+
+  public createGoQuorumValues () {
+    this.checkHelmChartPath()
+    fs.writeFileSync(`${this.helmPath}/goquorum-values.yaml`, '')
+  }
+
+  public copyGoQuorumHelmChart () {
+    this.checkHelmChartPath()
+    fs.copySync(this.helmPath, './', { recursive: true })
+  }
+
+  public createChartTar (tag: string, date: string) {
+    return fs.createWriteStream(`./${tag}-${date}.tar.gz`)
+  }
+
+  public getValidatorChartPath (i: number): string {
+    this.createChartValueFolder()
+    return `${this.helmPath}/values/validator${i}-values.yaml`
+  }
+
+  public getMemberChartPath (i: number): string {
+    this.createChartValueFolder()
+    return `${this.helmPath}/values/member${i}-values.yaml`
+  }
+
+  public createGenesisChartValues (genesisYaml: GenesisConfigYaml) {
+    this.createChartValueFolder()
+    fs.writeFileSync(`${this.helmPath}/values/genesis-values.yaml`, genesisYaml.getYamlString())
+  }
+
+  public createValidatorChartValues (validatorYaml: ValidatorConfigYaml, i: number) {
+    this.createChartValueFolder()
+    fs.writeFileSync(`${this.helmPath}/values/validator${i}-values.yaml`, validatorYaml.getYamlString())
+  }
+
+  public createMemberChartValues (memberYaml: MemberConfigYaml, i: number) {
+    fs.writeFileSync(`${this.helmPath}/values/member${i}-values.yaml`, memberYaml.getYamlString())
+  }
+
+  public getGenesisChartPath () {
+    return `${this.helmPath}/values/genesis-values.yaml`
+  }
+
+  public removeHelmChart () {
+    fs.rmSync(`${this.helmPath}`, { recursive: true, force: true })
+  }
+
+  public getHelmChartValuesFiles () {
+    this.checkHelmChartPath()
+    fs.mkdirSync(`${this.helmPath}/values`, { recursive: true })
+    return fs.readdirSync(`${this.helmPath}/values`)
   }
 
   public checkPathExist (path: string) {

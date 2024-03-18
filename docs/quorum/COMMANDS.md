@@ -142,3 +142,34 @@ Description: 匯入現有的 Quorum Network
 | --help                | boolean | Show help                      |          |         |
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+## Cluster
+
+### `bdk quorum cluster apply`
+
+Description: 產生 Quorum Cluster 所需的相關設定檔案並建立網路
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+
+### `bdk quorum cluster delete`
+
+Description: 刪除現有的 Quorum Cluster 網路
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+### `bdk quorum cluster generate`
+
+Description: 產生 Quorum Cluster 所需的相關設定檔案
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |

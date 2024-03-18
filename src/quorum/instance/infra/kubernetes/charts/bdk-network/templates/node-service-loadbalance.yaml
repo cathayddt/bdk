@@ -1,0 +1,31 @@
+{{- if (.Values.bdk.loadBalancer.enabled)}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-loadbalancer
+  labels:
+    app.kubernetes.io/component: service
+    app.kubernetes.io/namespace: {{ .Release.Namespace }}
+    app.kubernetes.io/release: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: helm
+    app: bdk-network-loadbalancer
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: LoadBalancer
+  selector:
+    app: bdk-network-loadbalancer
+  ports:
+    - name: json-rpc
+      port: {{ .Values.network.port.rpc }}
+      targetPort: json-rpc
+      protocol: TCP
+    - name: ws
+      port: {{ .Values.network.port.ws }}
+      targetPort: ws
+      protocol: TCP
+    - name: graphql
+      port: {{ .Values.network.port.graphql }}
+      targetPort: graphql
+      protocol: TCP
+{{- end }}
