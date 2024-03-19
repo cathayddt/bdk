@@ -34,9 +34,9 @@ bdk fabric network create -i
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v2.1.1][v2.1.1] | [v2.1.1][v2.1.1] |
+| [v3.0.0][v3.0.0] | [v3.0.0][v3.0.0] |
 
-[v2.1.1]: https://github.com/cathayddt/bdk/releases/tag/v2.1.1
+[v3.0.0]: https://github.com/cathayddt/bdk/releases/tag/v3.0.0
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
@@ -143,3 +143,5 @@ Use the following command to create a simple Hyperledger Fabric Network.
 ## LICENSE
 
 [Apache2.0](LICENSE)
+
+[src/quorum/instance/infra/kubernetes/charts](./src/quorum/instance/infra/kubernetes/charts) follow [quorum-kubernetes](https://github.com/Consensys/quorum-kubernetes/) repository

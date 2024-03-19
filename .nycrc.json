@@ -11,9 +11,10 @@
     "src/quorum/service/**.ts",
     "src/wallet/service/**.ts"
   ],
-  "exclude":[
+  "exclude": [
     "src/fabric/service/Service.abstract.ts",
-    "src/quorum/service/Service.abstract.ts"
+    "src/quorum/service/Service.abstract.ts",
+    "src/quorum/service/network.ts"
   ],
   "reporter": [
     "text-summary",

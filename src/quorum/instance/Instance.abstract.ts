@@ -1,6 +1,6 @@
 import { Config } from '../config'
 import BdkFile from './bdkFile'
-import { InfraRunner, InfraRunnerResultType } from './infra/InfraRunner.interface'
+import { InfraRunner, InfraRunnerResultType, KubernetesInfraRunner } from './infra/InfraRunner.interface'
 
 export abstract class AbstractInstance {
   /** @ignore */
@@ -13,12 +13,19 @@ export abstract class AbstractInstance {
   protected hostPath: string
   /** @ignore */
   protected dockerPath: string
+  /** @ignore */
+  protected kubernetesInfra: KubernetesInfraRunner<InfraRunnerResultType>|undefined
 
-  constructor (config: Config, infra: InfraRunner<InfraRunnerResultType>) {
+  constructor (
+    config: Config,
+    infra: InfraRunner<InfraRunnerResultType>,
+    kubernetesInfra?: KubernetesInfraRunner<InfraRunnerResultType>,
+  ) {
     this.config = config
     this.infra = infra
     this.bdkFile = new BdkFile(config)
     this.hostPath = config.infraConfig.dockerHostPath
     this.dockerPath = config.infraConfig.dockerPath
+    this.kubernetesInfra = kubernetesInfra
   }
 }

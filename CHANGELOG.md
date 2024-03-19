@@ -3,6 +3,12 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v3.0.0](https://github.com/cathayddt/bdk/releases/tag/v3.0.0) - 2024-03-19
+
+### Features
+
+* [#98](https://github.com/cathayddt/bdk/issues/98) helm chart install & template prototype
+
 ## [v2.1.1](https://github.com/cathayddt/bdk/releases/tag/v2.1.1) - 2024-02-27
 
 ### Fixes

@@ -1,8 +1,8 @@
 import { Config } from '../config'
 import BdkFile from '../instance/bdkFile'
-import { DockerResultType, InfraStrategy, InfraRunnerResultType, InfraRunner } from '../instance/infra/InfraRunner.interface'
+import { DockerResultType, InfraStrategy, InfraRunnerResultType, InfraRunner, KubernetesInfraRunner } from '../instance/infra/InfraRunner.interface'
 import { Runner as DockerRunner } from '../instance/infra/docker/runner'
-
+import { Runner as KubernetesRunner } from '../instance/infra/kubernetes/runner'
 export interface ParserType {
   [method: string]: (dockerResult: DockerResultType, options?: any) => any
 }
@@ -14,8 +14,14 @@ export abstract class AbstractService {
   protected bdkFile: BdkFile
   /** @ignore */
   protected infra: InfraRunner<InfraRunnerResultType>
+  /** @ignore */
+  protected kubernetesInfra: KubernetesInfraRunner<InfraRunnerResultType>
 
-  constructor (config: Config, infra?: InfraRunner<InfraRunnerResultType>) {
+  constructor (
+    config: Config,
+    infra?: InfraRunner<InfraRunnerResultType>,
+    kubernetesInfra?: KubernetesInfraRunner<DockerResultType>,
+  ) {
     this.config = config
     this.bdkFile = new BdkFile(config)
 
@@ -23,6 +29,12 @@ export abstract class AbstractService {
       this.infra = InfraStrategy.createDockerRunner(new DockerRunner())
     } else {
       this.infra = InfraStrategy.createRunner(infra)
+    }
+
+    if (kubernetesInfra === undefined) {
+      this.kubernetesInfra = InfraStrategy.createKubernetesRunner(new KubernetesRunner())
+    } else {
+      this.kubernetesInfra = InfraStrategy.createKubernetesRunner(kubernetesInfra)
     }
   }
 

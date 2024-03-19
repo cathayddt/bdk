@@ -1,0 +1,13 @@
+apiVersion: v1
+version: 0.1.0
+appVersion: latest
+name: bdk-network
+description: Quorum network settings with bdk setting in Kubernetes
+keywords:
+  - ethereum
+  - hyperledger
+  - enterprise
+  - blockchain
+home: https://consensys.net/quorum/
+sources:
+  - https://github.com/consensys/quorum
