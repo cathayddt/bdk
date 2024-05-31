@@ -9,12 +9,15 @@
   "include": [
     "src/fabric/service/**.ts",
     "src/quorum/service/**.ts",
+    "src/besu/service/**.ts",
     "src/wallet/service/**.ts"
   ],
   "exclude": [
     "src/fabric/service/Service.abstract.ts",
     "src/quorum/service/Service.abstract.ts",
-    "src/quorum/service/network.ts"
+    "src/quorum/service/network.ts",
+    "src/besu/service/Service.abstract.ts",
+    "src/besu/service/network.ts"
   ],
   "reporter": [
     "text-summary",
