@@ -8,13 +8,13 @@
   "statements": 0,
   "include": [
     "src/fabric/service/**.ts",
-    "src/quorum/service/**.ts",
+    "src/eth/service/**.ts",
     "src/wallet/service/**.ts"
   ],
   "exclude": [
     "src/fabric/service/Service.abstract.ts",
-    "src/quorum/service/Service.abstract.ts",
-    "src/quorum/service/network.ts"
+    "src/eth/service/Service.abstract.ts",
+    "src/eth/service/network.ts"
   ],
   "reporter": [
     "text-summary",
