@@ -6,7 +6,7 @@ import Dockerode from 'dockerode'
 import { logger } from '../../../../util/logger'
 import { DockerCreateOptionsType, DockerStartOptionsType, DockerRunCommandType } from '../../../model/type/docker.type'
 import config from '../../../config'
-import { DockerError, QuorumContainerError } from '../../../../util/error'
+import { DockerError, EthContainerError } from '../../../../util/error'
 import { DockerResultType, InfraRunner } from '../InfraRunner.interface'
 import { DockerComposeYamlInterface } from '../../../model/yaml/docker-compose/dockerComposeYaml'
 
@@ -69,11 +69,11 @@ export class Runner implements InfraRunner<DockerResultType> {
       logger.silly(`run command output: \n${stdout}`)
       logger.debug(`docker run\n  image: ${image}\n  commands: ${commands.join(' ')}`)
       if (dockerRunResult[0].StatusCode !== 0 && !ignoreError) {
-        throw new QuorumContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i) || stdout)}`, stdout)
+        throw new EthContainerError(`[x] [in-docker-container error] ${stdout.split('\r\n').filter(x => x.match(/error/i) || stdout)}`, stdout)
       }
       return { statusCode: dockerRunResult[0].StatusCode, stdout: stdout.toString() }
     } catch (e: any) {
-      if (e instanceof QuorumContainerError) { throw e }
+      if (e instanceof EthContainerError) { throw e }
       throw new DockerError(`[x] command [docker run]:${e.message}`)
     }
   }

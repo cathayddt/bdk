@@ -44,7 +44,7 @@ if (npmBuild.status !== 0) { console.error(`${npmBuild.output[1]}`); console.err
  * copy helm chart file
  */
 console.log('[*] exec spawnSync: copy helm chart file')
-const cp = spawnSync('cp', ['-r', 'src/quorum/instance/infra/kubernetes/charts', 'dist/quorum/instance/infra/kubernetes'])
+const cp = spawnSync('cp', ['-r', 'src/eth/instance/infra/kubernetes/charts', 'dist/eth/instance/infra/kubernetes'])
 console.log(`[+] child process exited with code ${cp.status}`)
 if (cp.status !== 0) { console.error('\x1b[31m%s\x1b[0m', cp.stderr); exit(0) }
 
