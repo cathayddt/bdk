@@ -3,7 +3,7 @@ import { WalletCreateType, WalletType } from '../model/type/wallet.type'
 
 export default class Wallet {
   /**
-   * @description 建立 quorum network
+   * @description 建立 eth network
    */
   public create (walletCreateConfig: WalletCreateType) {
     const { address, privateKey } = this.createWalletAddress(walletCreateConfig.type)

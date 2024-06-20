@@ -1,10 +1,10 @@
 /* global describe, it */
 import Dockerode from 'dockerode'
 import assert from 'assert'
-import Network from '../../../src/quorum/service/network'
-import Explorer from '../../../src/quorum/service/explorer'
-import config from '../../../src/quorum/config'
-import { ExplorerCreateType } from '../../../src/quorum/model/type/explorer.type'
+import Network from '../../../src/eth/service/network'
+import Explorer from '../../../src/eth/service/explorer'
+import config from '../../../src/eth/config'
+import { ExplorerCreateType } from '../../../src/eth/model/type/explorer.type'
 
 describe('Quorum.Explorer.Service', function () {
   this.timeout(600000)

@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import os from 'os'
 import { EnvironmentEnum, NodeTypeEnum } from './model/type/config.type'
 
-const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/quorum`
+const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/eth`
 dotenv.config({ path: `${bdkPath}/.env` })
 
 /**
@@ -62,7 +62,7 @@ const config: Config = {
     dockerHostPath: process.env.BDK_DOCKER_HOST_PATH || bdkPath,
     dockerPath: '/tmp',
   },
-  networkName: process.env.BDK_QUORUM_NETWORK_NAME || 'bdk-quorum-network',
+  networkName: process.env.BDK_ETH_NETWORK_NAME || 'bdk-quorum-network',
   nodeType: nodeType,
   hostname: process.env.BDK_HOSTNAME || '',
   UID: process.env.UID === undefined ? os.userInfo().uid : parseInt(process.env.UID, 10),

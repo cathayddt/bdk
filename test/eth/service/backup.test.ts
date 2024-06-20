@@ -4,11 +4,11 @@ import assert from 'assert'
 import tar from 'tar'
 import sinon from 'sinon'
 import { resolve } from 'path'
-import config from '../../../src/quorum/config'
-import Backup from '../../../src/quorum/service/backup'
-import Network from '../../../src/quorum/service/network'
+import config from '../../../src/eth/config'
+import Backup from '../../../src/eth/service/backup'
+import Network from '../../../src/eth/service/network'
 import { BackupError, sleep } from '../../../src/util'
-import { NetworkCreateType } from '../../../src/quorum/model/type/network.type'
+import { NetworkCreateType } from '../../../src/eth/model/type/network.type'
 
 // write a test for the backup class
 describe('Quorum.Backup', function () {
