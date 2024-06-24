@@ -14,8 +14,8 @@ import { NetworkCreateType } from '../../../src/eth/model/type/network.type'
 describe('Quorum.Backup', function () {
   this.timeout(100000)
 
-  const backup = new Backup(config)
-  const network = new Network(config)
+  const backup = new Backup(config, 'quorum')
+  const network = new Network(config, 'quorum')
   const bdkPath = 'test/bdk'
 
   before(async function () {

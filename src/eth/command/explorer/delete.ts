@@ -11,7 +11,7 @@ export const desc = '刪除現有的 Quorum Explorer.'
 export const builder = {}
 
 export const handler = async () => {
-  const explorer = new Explorer(config)
+  const explorer = new Explorer(config, 'quorum')
 
   let confirmDelete = true
 

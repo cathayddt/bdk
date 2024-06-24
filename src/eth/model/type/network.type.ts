@@ -14,6 +14,8 @@ export interface AllocType {
  * @requires alloc - [{@link AllocType} array] 原生代幣分配設定
  */
 export interface NetworkCreateType {
+  //TODO - networkType?: ? should be removed, after cluster is integrated
+  networkType?: string
   chainId: number
   validatorNumber: number
   memberNumber: number
@@ -58,20 +60,20 @@ export interface GenesisJsonType {
     qbft: {
       epochLength: number
       blockPeriodSeconds: number
-      emptyBlockPeriodSeconds: number
+      emptyBlockPeriodSeconds?: number
       requestTimeoutSeconds: number
-      policy: number
-      ceil2Nby3Block: number
+      policy?: number
+      ceil2Nby3Block?: number
     }
-    transitions: {
+    transitions?: {
       block?: number
       transactionSizeLimit?: number
       contractSizeLimit?: number
       blockPeriodSeconds?: number
       emptyBlockPeriodSeconds?: number
     }[]
-    txnSizeLimit: number
-    isQuorum: boolean
+    txnSizeLimit?: number
+    isQuorum?: boolean
   }
   alloc: {
     [key: string]: Alloc

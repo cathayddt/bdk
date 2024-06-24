@@ -19,11 +19,15 @@ export abstract class AbstractService {
 
   constructor (
     config: Config,
+    networkType: string,
     infra?: InfraRunner<InfraRunnerResultType>,
     kubernetesInfra?: KubernetesInfraRunner<DockerResultType>,
   ) {
-    this.config = config
-    this.bdkFile = new BdkFile(config)
+    this.config = {
+      ...config,
+      networkName: `bdk-${networkType}-network`,
+    }
+    this.bdkFile = new BdkFile(this.config)
 
     if (infra === undefined) {
       this.infra = InfraStrategy.createDockerRunner(new DockerRunner())

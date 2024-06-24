@@ -6,10 +6,11 @@ import { onCancel, ParamsError } from '../../../util/error'
 import { NetworkGenerateType } from '../../model/type/network.type'
 import config from '../../config'
 import ora from 'ora'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'generate'
 
-export const desc = '產生 Quorum Network 所需的相關設定檔案'
+export const desc = '產生 Eth Network 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -17,13 +18,22 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network generate --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network generate --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const network = new Network(config)
-  const backup = new Backup(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const network = new Network(config, networkType)
+  const backup = new Backup(config, networkType)
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
     network.createBdkFolder()
@@ -36,7 +46,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora('Quorum Network Create ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Create ...`).start()
         // backup before remove
         await backup.exportAll()
 
@@ -79,8 +89,8 @@ export const handler = async (argv: Arguments<OptType>) => {
       throw new ParamsError('Invalid params: You need to generate at least one node')
     }
 
-    const spinner = ora('Quorum Network Generate ...').start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Network Generate ...`).start()
     await network.generate(networkGenerate)
-    spinner.succeed('Quorum Network Generate Successfully!')
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Network Generate Successfully!`)
   }
 }
