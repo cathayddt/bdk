@@ -20,7 +20,7 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const network = new Network(config)
+  const network = new Network(config, 'quorum')
 
   if (argv.interactive) {
     const node: string = await (async () => {

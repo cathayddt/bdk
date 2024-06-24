@@ -19,7 +19,7 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async () => {
-  const cluster = new Cluster(config)
+  const cluster = new Cluster(config, 'quorum')
 
   const confirm: boolean = await (async () => {
     const fileList = cluster.getHelmChartFiles()

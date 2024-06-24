@@ -25,7 +25,7 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const cluster = new Cluster(config)
+  const cluster = new Cluster(config, 'quorum')
   const wallet = new Wallet()
 
   const confirm: boolean = await (async () => {
