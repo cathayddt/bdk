@@ -5,7 +5,7 @@ import { BackupError, tarDateFormat } from '../../util'
 
 export default class Backup extends AbstractService {
   /**
-   * @description 匯出 quorum network 備份資料
+   * @description 匯出 eth network 備份資料
    */
   public exportAll () {
     const bdkPath = this.bdkFile.getBdkPath()
@@ -24,7 +24,7 @@ export default class Backup extends AbstractService {
   }
 
   /**
-   * @description 匯出 quorum network 單一 node 備份資料
+   * @description 匯出 eth network 單一 node 備份資料
    */
   public export (nodeName: string) {
     const bdkPath = this.bdkFile.getBdkPath()
@@ -67,7 +67,7 @@ export default class Backup extends AbstractService {
   }
 
   /**
-   * @description 匯入 quorum network 備份資料
+   * @description 匯入 eth network 備份資料
    */
   public import (tarFileName: string) {
     const bdkPath = this.bdkFile.getBdkPath()

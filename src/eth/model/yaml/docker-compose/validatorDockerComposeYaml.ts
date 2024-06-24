@@ -1,10 +1,27 @@
 import DockerComposeYaml from './dockerComposeYaml'
+import { getNetworkConfig } from '../../../config/networkConfigLoader'
+import { NetworkType } from '../../../config/network.type'
+import { NodeTypeEnum } from '../../type/config.type'
 
 class ValidatorDockerComposeYaml extends DockerComposeYaml {
-  public addValidator (bdkPath: string, validatorNum: number, rpcPort: number, chainId: number, peerPort: number, bootnode: boolean, nodeEncode: string) {
-    this.addNetwork('quorum', {})
+  public addValidator (
+    bdkPath: string,
+    validatorNum: number,
+    rpcPort: number,
+    chainId: number,
+    peerPort: number,
+    bootnode: boolean,
+    nodeEncode: string,
+    networkType: NetworkType,
+  ) {
+    const config = getNetworkConfig(networkType, NodeTypeEnum.VALIDATOR)
+    if (!config) {
+      throw new Error(`Unsupported network type: ${networkType}`)
+    }
+
+    this.addNetwork(networkType, {})
     this.addService(`validator${validatorNum}`, {
-      image: 'quorumengineering/quorum:23.4.0',
+      image: config.image,
       // eslint-disable-next-line no-template-curly-in-string
       user: '${UID}:${GID}',
       container_name: `validator${validatorNum}`,
@@ -16,12 +33,9 @@ class ValidatorDockerComposeYaml extends DockerComposeYaml {
         `${peerPort}:${peerPort}/tcp`,
         `${peerPort}:${peerPort}/udp`,
       ],
-      networks: ['quorum'],
+      networks: config.networks,
       volumes: [`${bdkPath}/validator${validatorNum}/data/:/data`],
-      entrypoint: [
-        '/bin/sh', '-c',
-        `geth init --datadir /data /data/genesis.json; geth --datadir /data --networkid ${chainId} --verbosity 3 --syncmode full --nousb --mine --miner.threads 1 --miner.gasprice 0 --emitcheckpoints --http --http.addr 0.0.0.0 --http.port 8545 --http.corsdomain "*" ${(bootnode) ? '--bootnodes '.concat(nodeEncode) : '--nodiscover'} --http.vhosts "*" --ws --ws.addr 0.0.0.0 --ws.port 8546 --ws.origins "*" --http.api admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft --ws.api admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft --port ${peerPort} `,
-      ],
+      entrypoint: config.entrypoint(chainId, peerPort, bootnode, nodeEncode),
     })
   }
 }

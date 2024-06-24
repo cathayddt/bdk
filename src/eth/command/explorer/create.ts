@@ -22,8 +22,8 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const explorer = new Explorer(config)
-  const backup = new Backup(config)
+  const explorer = new Explorer(config, 'quorum')
+  const backup = new Backup(config, 'quorum')
 
   const getBackupItems = backup.getExportItems()
   const explorerCreate: ExplorerCreateType = await (async () => {

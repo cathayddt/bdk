@@ -10,10 +10,10 @@ import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import ora from 'ora'
 import Wallet from '../../../wallet/service/wallet'
 import { WalletType } from '../../../wallet/model/type/wallet.type'
-
+import { getNetworkTypeChoices } from '../../config/network.type'
 export const command = 'create'
 
-export const desc = '產生 Quorum Network 所需的相關設定檔案並建立網路'
+export const desc = '產生 Eth Network 所需的相關設定檔案並建立網路'
 
 interface OptType {
   interactive: boolean
@@ -21,13 +21,23 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network create --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network create --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const network = new Network(config)
-  const backup = new Backup(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+
+  const network = new Network(config, networkType)
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const backup = new Backup(config, networkType)
   const wallet = new Wallet()
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
@@ -37,11 +47,11 @@ export const handler = async (argv: Arguments<OptType>) => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: '⚠️ Detecting quorum nodes already exists. The following processes will remove all existing files. Continue?',
+        message: `⚠️ Detecting ${networkType} nodes already exists. The following processes will remove all existing files. Continue?`,
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora('Quorum Network Create ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Create ...`).start()
         // backup before remove
         await backup.exportAll()
 
@@ -168,14 +178,15 @@ export const handler = async (argv: Arguments<OptType>) => {
           amount: '1000000000000000000000000000',
         }]
 
-        return { chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
+        return { networkType, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
         return defaultNetworkConfig(address, privateKey)
       }
-    })()
-    const spinner = ora('Quorum Network Create ...').start()
+    }
+    )()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Network Create ...`).start()
     await network.create(networkCreate)
-    spinner.succeed('Quorum Network Create Successfully!')
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Network Create Successfully!`)
   }
 }

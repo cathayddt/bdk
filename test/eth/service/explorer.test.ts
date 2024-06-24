@@ -11,8 +11,8 @@ describe('Quorum.Explorer.Service', function () {
 
   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
   const dockerdOption = { all: true }
-  const network = new Network(config)
-  const explorer = new Explorer(config)
+  const network = new Network(config, 'quorum')
+  const explorer = new Explorer(config, 'quorum')
   const explorerCreateOptions: ExplorerCreateType = {
     httpModeEnabled: false,
     nodeName: 'validator0',

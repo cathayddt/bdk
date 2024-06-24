@@ -4,10 +4,11 @@ import Backup from '../../service/backup'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'import'
 
-export const desc = '匯入現有的 Quorum Network'
+export const desc = '匯入現有的 Eth Network'
 
 interface OptType {
   interactive: boolean
@@ -15,12 +16,21 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum backup import --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth backup import --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const backup = new Backup(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const backup = new Backup(config, networkType)
 
   const archive: string = await (async () => {
     const archiveList = backup.getBackupItems()
@@ -35,7 +45,7 @@ export const handler = async (argv: Arguments<OptType>) => {
       throw new ParamsError('Invalid params: Required parameter missing')
     }
   })()
-  const spinner = ora('Quorum Network Import ...').start()
+  const spinner = ora(`${networkTypeWithBigFirstLetter} Network Import ...`).start()
   await backup.import(archive)
-  spinner.succeed('Quorum Network Import Successfully!')
+  spinner.succeed(`${networkTypeWithBigFirstLetter} Network Import Successfully!`)
 }

@@ -1,10 +1,26 @@
 import DockerComposeYaml from './dockerComposeYaml'
-
+import { getNetworkConfig } from '../../../config/networkConfigLoader'
+import { NetworkType } from '../../../config/network.type'
+import { NodeTypeEnum } from '../../type/config.type'
 class MemberDockerComposeYaml extends DockerComposeYaml {
-  public addMember (bdkPath: string, memberNum: number, rpcPort: number, chainId: number, peerPort: number, bootnode: boolean, nodeEncode: string) {
-    this.addNetwork('quorum', {})
+  public addMember (
+    bdkPath: string,
+    memberNum: number,
+    rpcPort: number,
+    chainId: number,
+    peerPort: number,
+    bootnode: boolean,
+    nodeEncode: string,
+    networkType: NetworkType,
+  ) {
+    const config = getNetworkConfig(networkType, NodeTypeEnum.MEMBER)
+    if (!config) {
+      throw new Error(`Unsupported network type: ${networkType}`)
+    }
+
+    this.addNetwork(networkType, {})
     this.addService(`member${memberNum}`, {
-      image: 'quorumengineering/quorum:23.4.0',
+      image: config.image,
       // eslint-disable-next-line no-template-curly-in-string
       user: '${UID}:${GID}',
       container_name: `member${memberNum}`,
@@ -16,12 +32,9 @@ class MemberDockerComposeYaml extends DockerComposeYaml {
         `${peerPort}:${peerPort}/tcp`,
         `${peerPort}:${peerPort}/udp`,
       ],
-      networks: ['quorum'],
+      networks: config.networks,
       volumes: [`${bdkPath}/member${memberNum}/data/:/data`],
-      entrypoint: [
-        '/bin/sh', '-c',
-        `geth init --datadir /data /data/genesis.json; geth --datadir /data --networkid ${chainId} ${(bootnode) ? '--bootnodes '.concat(nodeEncode) : '--nodiscover'} --verbosity 3 --syncmode full --nousb  --http --http.addr 0.0.0.0 --http.port 8545 --http.corsdomain "*" --http.vhosts "*" --ws --ws.addr 0.0.0.0 --ws.port 8546 --ws.origins "*" --http.api admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft --ws.api admin,trace,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum,istanbul,qbft --port ${peerPort}`,
-      ],
+      entrypoint: config.entrypoint(chainId, peerPort, bootnode, nodeEncode),
     })
   }
 }

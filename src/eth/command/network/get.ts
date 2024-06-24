@@ -4,6 +4,7 @@ import prompts from 'prompts'
 import Network from '../../service/network'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import ora from 'ora'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'get'
 
@@ -20,7 +21,16 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const network = new Network(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const network = new Network(config, networkType)
 
   if (argv.interactive) {
     const getOption = [
@@ -53,10 +63,10 @@ export const handler = async (argv: Arguments<OptType>) => {
         },
       ], { onCancel })
 
-      const spinner = ora('Quorum Network Get ...').start()
+      const spinner = ora(`${networkTypeWithBigFirstLetter} Network Get ...`).start()
       const result = await network.getNetworkInfo(networkInfo)
-      spinner.succeed(`Quorum Network Get Result: ${result}`)
-      spinner.succeed('Quorum Network Get Successfully!')
+      spinner.succeed(`${networkTypeWithBigFirstLetter} Network Get Result: ${result}`)
+      spinner.succeed(`${networkTypeWithBigFirstLetter} Network Get Successfully!`)
     } else if (get === 'node') {
       const node: string = await (async () => {
         const nodeList = network.getUpExportItems()
@@ -88,10 +98,10 @@ export const handler = async (argv: Arguments<OptType>) => {
           choices: nodeOption,
         },
       ], { onCancel })
-      const spinner = ora('Quorum Network Get ...').start()
+      const spinner = ora(`${networkTypeWithBigFirstLetter} Network Get ...`).start()
       const result = network.getNodeInfo(node, nodeInfo)
-      spinner.succeed(`Quorum Network Get Result: ${result}`)
-      spinner.succeed('Quorum Network Get Successfully!')
+      spinner.succeed(`${networkTypeWithBigFirstLetter} Network Get Result: ${result}`)
+      spinner.succeed(`${networkTypeWithBigFirstLetter} Network Get Successfully!`)
     }
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')

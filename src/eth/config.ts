@@ -41,7 +41,7 @@ const environment = (() => {
 })()
 
 const nodeType = (() => {
-  switch (process.env.BDK_QUORUM_NODE_TYPE) {
+  switch (process.env.BDK_ETH_NODE_TYPE) {
     case 'validator':
       return NodeTypeEnum.VALIDATOR
     default:
@@ -62,7 +62,7 @@ const config: Config = {
     dockerHostPath: process.env.BDK_DOCKER_HOST_PATH || bdkPath,
     dockerPath: '/tmp',
   },
-  networkName: process.env.BDK_ETH_NETWORK_NAME || 'bdk-quorum-network',
+  networkName: '',
   nodeType: nodeType,
   hostname: process.env.BDK_HOSTNAME || '',
   UID: process.env.UID === undefined ? os.userInfo().uid : parseInt(process.env.UID, 10),

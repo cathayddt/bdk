@@ -19,7 +19,7 @@ describe.skip('Quorum.Network.Service', function () {
   const bdkPath = 'test/bdk'
   const filePath = resolve(`${bdkPath}/bdk-quorum-network`)
 
-  const network = new Network(config)
+  const network = new Network(config, 'quorum')
   const wallet = new Wallet()
   const { address } = wallet.createWalletAddress(WalletType.ETHEREUM)
   const networkCreateConfig = {

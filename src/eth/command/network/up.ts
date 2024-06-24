@@ -4,6 +4,7 @@ import Network from '../../service/network'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'up'
 
@@ -22,12 +23,21 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const network = new Network(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const network = new Network(config, networkType)
 
   if (argv.all) {
-    const spinner = ora('Quorum Network Up All ...').start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Network Up All ...`).start()
     await network.upAll()
-    spinner.succeed('Quorum Network Up All Successfully!')
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Network Up All Successfully!`)
   } else if (argv.interactive) {
     const node: string = await (async () => {
       const nodeList = network.getUpExportItems()
@@ -44,9 +54,9 @@ export const handler = async (argv: Arguments<OptType>) => {
       }
     })()
 
-    const spinner = ora(`Quorum Network Up ${node} ...`).start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Network Up ${node} ...`).start()
     await network.upService(node)
-    spinner.succeed(`Quorum Network Up ${node} Successfully!`)
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Network Up ${node} Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }

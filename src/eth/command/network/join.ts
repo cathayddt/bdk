@@ -5,6 +5,7 @@ import Network from '../../service/network'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import ora from 'ora'
 import { JoinNodeType } from '../../model/type/network.type'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'join'
 
@@ -21,7 +22,16 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments) => {
-  const network = new Network(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const network = new Network(config, networkType)
 
   if (argv.interactive) {
     const node: string = await (async () => {
@@ -67,9 +77,9 @@ export const handler = async (argv: Arguments) => {
       staticNodesJson: JSON.parse(staticNodesJson),
     }
 
-    const spinner = ora('Quorum Network Join ...').start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Network Join ...`).start()
     await network.joinNode(joinNodeConfig)
-    spinner.succeed(`Quorum Network Join ${node} Successfully!`)
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Network Join ${node} Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }

@@ -6,6 +6,7 @@ import { onCancel, ParamsError } from '../../../util/error'
 import ora from 'ora'
 import { AddValidatorRemoteType, AddMemberRemoteType } from '../../model/type/network.type'
 import { ethers } from 'ethers'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'add'
 
@@ -22,7 +23,16 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments) => {
-  const network = new Network(config)
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const network = new Network(config, networkType)
 
   if (argv.interactive) {
     const connectOptionList = [
@@ -53,13 +63,13 @@ export const handler = async (argv: Arguments) => {
 
     if (connectOption === 'local') {
       if (nodeOption === 'validator') {
-        const spinner = ora('Quorum Network Add ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
         const validatorNum = await network.addValidatorLocal()
-        spinner.succeed(`Quorum Network Add Validator${validatorNum} Successfully!`)
+        spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Validator${validatorNum} Successfully!`)
       } else {
-        const spinner = ora('Quorum Network Add ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
         const memberNum = await network.addMemberLocal()
-        spinner.succeed(`Quorum Network Add Member${memberNum} Successfully!`)
+        spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Member${memberNum} Successfully!`)
       }
     } else if (connectOption === 'remote') {
       if (nodeOption === 'validator') {
@@ -87,9 +97,9 @@ export const handler = async (argv: Arguments) => {
           ipAddress: ipAddress,
         }
 
-        const spinner = ora('Quorum Network Add ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
         await network.addValidatorRemote(addValidatorRemoteConfig)
-        spinner.succeed(`Quorum Network Add Validator ${validatorAddress} Successfully!`)
+        spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Validator ${validatorAddress} Successfully!`)
       } else {
         const { enodeInfo, ipAddress } = await prompts([
           {
@@ -115,9 +125,9 @@ export const handler = async (argv: Arguments) => {
           ipAddress: ipAddress,
         }
 
-        const spinner = ora('Quorum Network Add ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
         await network.addMemberRemote(addMemberRemoteConfig)
-        spinner.succeed(`Quorum Network Add Member ${memberAddress} Successfully!`)
+        spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Member ${memberAddress} Successfully!`)
       }
       // TODO: addMemberRemote
     }
