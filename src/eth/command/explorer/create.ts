@@ -6,10 +6,11 @@ import prompts from 'prompts'
 import ora from 'ora'
 import { ExplorerCreateType } from '../../model/type/explorer.type'
 import Backup from '../../service/backup'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'create'
 
-export const desc = '產生 Quorum Explorer 所需的相關設定檔案'
+export const desc = '產生 ETH Explorer 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -22,8 +23,18 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const explorer = new Explorer(config, 'quorum')
-  const backup = new Backup(config, 'quorum')
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+  console.log(`Selected network type: ${networkType}`)
+
+  const explorer = new Explorer(config, networkType)
+  const backup = new Backup(config, networkType)
 
   const getBackupItems = backup.getExportItems()
   const explorerCreate: ExplorerCreateType = await (async () => {
@@ -48,14 +59,14 @@ export const handler = async (argv: Arguments<OptType>) => {
         {
           type: 'select',
           name: 'nodeName',
-          message: 'What is the host node of quorum explorer?',
+          message: 'What is the host node of ${networkType} explorer?',
           choices: getBackupItems,
           initial: 0,
         },
         {
           type: 'number',
           name: 'port',
-          message: 'What is the port of quorum explorer?',
+          message: 'What is the port of ${networkType} explorer?',
           min: 0,
           max: 65535,
           initial: 26000,
@@ -70,7 +81,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
-  const spinner = ora('Quorum Explorer Create ...').start()
+  const spinner = ora(`${networkType.charAt(0).toUpperCase() + networkType.slice(1)} Explorer Create ...`).start()
   await explorer.create(explorerCreate)
-  spinner.succeed(`Quorum Explorer Create Successfully! Host at: http://localhost:${explorerCreate.port}`)
+  spinner.succeed(`${networkType.charAt(0).toUpperCase() + networkType.slice(1)} Explorer Create Successfully! Host at: http://localhost:${explorerCreate.port}`)
 }
