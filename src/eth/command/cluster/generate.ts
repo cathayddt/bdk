@@ -9,10 +9,11 @@ import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import { onCancel } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'generate'
 
-export const desc = '產生 Quorum Cluster 所需的相關設定檔案'
+export const desc = '產生 Cluster 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -20,13 +21,23 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum cluster generate --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth cluster generate --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const cluster = new Cluster(config, 'quorum')
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices(),
+    },
+  ])
+
+  const cluster = new Cluster(config, networkType)
   const wallet = new Wallet()
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
 
   const confirm: boolean = await (async () => {
     const fileList = cluster.getHelmChartFiles()
@@ -34,11 +45,11 @@ export const handler = async (argv: Arguments<OptType>) => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: '⚠️ Detecting quorum cluster already exists. The following processes will remove all existing files. Continue?',
+        message: `⚠️ Detecting ${networkTypeWithBigFirstLetter} cluster already exists. The following processes will remove all existing files. Continue?`,
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora('Quorum Cluster Delete ...').start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Cluster Delete ...`).start()
         cluster.removeHelmChartFiles()
         spinner.succeed('Remove all existing files!')
       }
@@ -183,16 +194,16 @@ export const handler = async (argv: Arguments<OptType>) => {
         const isBootNode = false
         const bootNodeList: boolean[] = Array(validatorNumber + memberNumber).fill(false)
 
-        return { provider, region, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
+        return { provider, region, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList, networkType }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        const config = defaultNetworkConfig(address, privateKey)
-        return { ...config, provider: 'local' }
+        const defaultConfig = defaultNetworkConfig(address, privateKey)
+        return { ...defaultConfig, provider: 'local', networkType }
       }
     })()
 
-    const spinner = ora('Quorum Cluster Generate ...').start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Cluster Generate ...`).start()
     await cluster.generate(clusterGenerate, networkCreate)
-    spinner.succeed('Quorum Cluster Generate Successfully!')
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Cluster Generate Successfully!`)
   }
 }
