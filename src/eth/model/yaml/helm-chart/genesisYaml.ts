@@ -1,7 +1,7 @@
 import HelmChartYaml from './helmChartYaml'
 
 class GenesisConfigYaml extends HelmChartYaml {
-  public setGenesis (chainID: number, nodeCount: number) {
+  public setGenesis(chainID: number, nodeCount: number, networkType: 'besu' | 'quorum') {
     this.setQuorumFlags({
       privacy: false,
       removeKeysOnDelete: false,
@@ -9,21 +9,43 @@ class GenesisConfigYaml extends HelmChartYaml {
       usesBootnodes: false,
     })
 
-    const genesisConfig = {
+    const baseGenesisConfig: {
+      genesis: {
+        config: {
+          chainId: number;
+          algorithm: {
+            consensus: string;
+            blockperiodseconds: number;
+            epochlength: number;
+            requesttimeoutseconds: number;
+            emptyBlockPeriod?: number;
+          };
+          difficulty: string;
+          coinbase: string;
+          gasLimit?: string;
+        };
+        nonce?: string;
+      };
+      blockchain: {
+        nodes: {
+          generate: boolean;
+          count: number;
+        };
+        accountPassword: string;
+      };
+    } = {
       genesis: {
         config: {
           chainId: chainID,
           algorithm: {
             consensus: 'qbft',
             blockperiodseconds: 1,
-            emptyBlockPeriod: 3600,
             epochlength: 30000,
             requesttimeoutseconds: 60,
           },
           gasLimit: '0xE0000000',
           difficulty: '0x1',
           coinbase: '0x0000000000000000000000000000000000000000',
-          includeQuickStartAccounts: false,
         },
       },
       blockchain: {
@@ -34,7 +56,13 @@ class GenesisConfigYaml extends HelmChartYaml {
         accountPassword: 'password',
       },
     }
-    this.setService('rawGenesisConfig', genesisConfig)
+
+    if (networkType === 'quorum') {
+      baseGenesisConfig.genesis.config.algorithm.emptyBlockPeriod = 3600
+      baseGenesisConfig.genesis.nonce = '0x0'
+    }
+
+    this.setService('rawGenesisConfig', baseGenesisConfig)
   }
 }
 
