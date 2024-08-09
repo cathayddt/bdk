@@ -23,7 +23,7 @@ export abstract class AbstractInstance {
   ) {
     this.config = config
     this.infra = infra
-    this.bdkFile = new BdkFile(config)
+    this.bdkFile = new BdkFile(config, config.networkName, config.networkType)
     this.hostPath = config.infraConfig.dockerHostPath
     this.dockerPath = config.infraConfig.dockerPath
     this.kubernetesInfra = kubernetesInfra

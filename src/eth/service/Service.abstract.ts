@@ -27,7 +27,7 @@ export abstract class AbstractService {
       ...config,
       networkName: `bdk-${networkType}-network`,
     }
-    this.bdkFile = new BdkFile(this.config)
+    this.bdkFile = new BdkFile(config, config.networkName, config.networkType)
 
     if (infra === undefined) {
       this.infra = InfraStrategy.createDockerRunner(new DockerRunner())

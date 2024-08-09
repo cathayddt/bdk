@@ -4,34 +4,39 @@ import { tarDateFormat } from '../../util'
 import { AbstractService } from './Service.abstract'
 import KubernetesInstance from '../instance/kubernetesCluster'
 import { ClusterCreateType, ClusterGenerateType } from '../model/type/kubernetes.type'
-import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { DockerResultType } from '../instance/infra/InfraRunner.interface'
+import { getClusterConfig } from '../config/networkConfigLoader'
+import { NetworkType } from '../config/network.type'
+
 export default class Cluster extends AbstractService {
   /**
    * @description Use helm create quorum template
    */
   public async apply (networkCreateConfig: ClusterCreateType, spinner: Ora): Promise<void> {
-    const { provider, region, chainId, validatorNumber, memberNumber } = networkCreateConfig
+    const { provider, region, chainId, validatorNumber, memberNumber, networkType } = networkCreateConfig
+    const clusterConfig = getClusterConfig(networkType)
     // create genesis and account
-    const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
     this.bdkFile.checkHelmChartPath()
-    const genesisYaml = new GenesisConfigYaml()
+    const genesisYaml = new clusterConfig.genesisConfig()
     genesisYaml.setProvider(provider, region)
-    genesisYaml.setGenesis(chainId, validatorNumber)
+    genesisYaml.setGenesis(chainId, validatorNumber,networkType)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
     // custom namespace
     spinner.start('Helm install genesis chart')
+    const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
     const genesisOutput = await k8s.install({
-      helmChart: this.bdkFile.getGoQuorumGenesisChartPath(),
+      helmChart: this.bdkFile.getGenesisChartPath(),
       name: 'genesis',
-      namespace: 'quorum',
-      values: this.bdkFile.getGenesisChartPath(),
+      namespace: clusterConfig.namespace,
+      values: this.bdkFile.getGenesisChartValuesPath(),
     }) as DockerResultType
-    await k8s.wait('job.batch/goquorum-genesis-init', 'quorum')
+    const namespaceForJob = clusterConfig.namespace === 'quorum' ? 'goquorum' : clusterConfig.namespace;
+    await k8s.wait(`job.batch/${namespaceForJob}-genesis-init`, clusterConfig.namespace)
+
     spinner.succeed(`Helm install genesis chart ${genesisOutput.stdout}`)
     // create network
-    const validatorYaml = new ValidatorConfigYaml()
+    const validatorYaml = new clusterConfig.validatorConfig()
     validatorYaml.setProvider(provider, region)
     validatorYaml.setQuorumConfigs()
 
@@ -39,7 +44,7 @@ export default class Cluster extends AbstractService {
       this.bdkFile.createValidatorChartValues(validatorYaml, i)
     }
 
-    const memberYaml = new MemberConfigYaml()
+    const memberYaml = new clusterConfig.memberConfig()
     memberYaml.setProvider(provider, region)
     memberYaml.setQuorumConfigs()
     for (let i = 0; i < memberNumber; i += 1) {
@@ -48,9 +53,9 @@ export default class Cluster extends AbstractService {
     for (let i = 0; i < validatorNumber; i += 1) {
       spinner.start(`Helm install validator chart ${i + 1}`)
       const validatorOutput = await k8s.install({
-        helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
+        helmChart: this.bdkFile.getNodeChartPath(),
         name: `validator-${i + 1}`,
-        namespace: 'quorum',
+        namespace: clusterConfig.namespace,
         values: this.bdkFile.getValidatorChartPath(i),
       }) as DockerResultType
       spinner.succeed(`Helm install validator chart ${i + 1} ${validatorOutput.stdout}`)
@@ -58,9 +63,9 @@ export default class Cluster extends AbstractService {
     for (let i = 0; i < memberNumber; i += 1) {
       spinner.start(`Helm install member chart ${i + 1}`)
       const memberOutput = await k8s.install({
-        helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
+        helmChart: this.bdkFile.getNodeChartPath(),
         name: `member-${i + 1}`,
-        namespace: 'quorum',
+        namespace: clusterConfig.namespace,
         values: this.bdkFile.getMemberChartPath(i),
       }) as DockerResultType
       spinner.succeed(`Helm install member chart ${i + 1} ${memberOutput.stdout}`)
@@ -74,16 +79,17 @@ export default class Cluster extends AbstractService {
     clusterGenerateConfig: ClusterGenerateType,
     networkCreateConfig: ClusterCreateType,
   ): Promise<void> {
-    const { provider, region, chainId, validatorNumber, memberNumber } = networkCreateConfig
+    const { provider, region, chainId, validatorNumber, memberNumber, networkType } = networkCreateConfig
+    const clusterConfig = getClusterConfig(networkType)
     this.bdkFile.checkHelmChartPath()
     // create genesis and account
-    const genesisYaml = new GenesisConfigYaml()
+    const genesisYaml = new clusterConfig.genesisConfig()
     genesisYaml.setProvider(provider, region)
-    genesisYaml.setGenesis(chainId, validatorNumber)
+    genesisYaml.setGenesis(chainId, validatorNumber, networkType)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
 
-    const validatorYaml = new ValidatorConfigYaml()
+    const validatorYaml = new clusterConfig.validatorConfig()
     validatorYaml.setProvider(provider, region)
     validatorYaml.setQuorumConfigs()
 
@@ -91,7 +97,7 @@ export default class Cluster extends AbstractService {
       this.bdkFile.createValidatorChartValues(validatorYaml, i)
     }
 
-    const memberYaml = new MemberConfigYaml()
+    const memberYaml = new clusterConfig.memberConfig()
     memberYaml.setProvider(provider, region)
     memberYaml.setQuorumConfigs()
     for (let i = 0; i < memberNumber; i += 1) {
@@ -101,27 +107,27 @@ export default class Cluster extends AbstractService {
     if (clusterGenerateConfig.chartPackageModeEnabled) {
       const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
       const genesisOutput = await k8s.template({
-        helmChart: this.bdkFile.getGoQuorumGenesisChartPath(),
+        helmChart: this.bdkFile.getGenesisChartPath(),
         name: 'genesis',
-        namespace: 'quorum',
+        namespace: clusterConfig.namespace,
         values: this.bdkFile.getGenesisChartPath(),
       }) as DockerResultType
       this.bdkFile.createYaml('genesis', genesisOutput.stdout)
 
       for (let i = 0; i < validatorNumber; i += 1) {
         const validatorOutput = await k8s.template({
-          helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
+          helmChart: this.bdkFile.getNodeChartPath(),
           name: `validator-${i + 1}`,
-          namespace: 'quorum',
+          namespace: clusterConfig.namespace,
           values: this.bdkFile.getValidatorChartPath(i),
         }) as DockerResultType
         this.bdkFile.createYaml(`validator-${i + 1}`, validatorOutput.stdout)
       }
       for (let i = 0; i < memberNumber; i += 1) {
         const memberOutput = await k8s.template({
-          helmChart: this.bdkFile.getGoQuorumNodeChartPath(),
+          helmChart: this.bdkFile.getNodeChartPath(),
           name: `member-${i + 1}`,
-          namespace: 'quorum',
+          namespace: clusterConfig.namespace,
           values: this.bdkFile.getMemberChartPath(i),
         }) as DockerResultType
         this.bdkFile.createYaml(`member-${i + 1}`, memberOutput.stdout)
@@ -133,17 +139,18 @@ export default class Cluster extends AbstractService {
   /**
    * @description Delete all quorum deployment and service
    */
-  public async delete (): Promise<void> {
+  public async delete (networkType: NetworkType ): Promise<void> {
+    const clusterConfig = getClusterConfig(networkType)
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
-    const releases = await this.getAllHelmRelease()
+    const releases = await this.getAllHelmRelease(clusterConfig.namespace)
     await Promise.all(releases.map(async (release: string) => {
-      await k8s.delete({ name: release, namespace: 'quorum' })
+      await k8s.delete({ name: release, namespace: clusterConfig.namespace })
     }))
   }
 
-  private async getAllHelmRelease () {
+  private async getAllHelmRelease (namespace: string) {
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
-    const releases = await k8s.listAllRelease('quorum') as DockerResultType
+    const releases = await k8s.listAllRelease(namespace) as DockerResultType
     return releases.stdout.split('\n').slice(1)
   }
 

@@ -3,6 +3,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { Config } from '../config'
 import { GenesisJsonType, NetworkInfoItem } from '../model/type/network.type'
+import { NetworkType } from '../config/network.type'
 import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDockerComposeYaml'
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
 import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
@@ -22,14 +23,20 @@ export default class BdkFile {
   private envPath: string
   private orgPath: string
   private thisPath = path.resolve(__dirname)
+  private networkType: NetworkType
 
-  constructor (config: Config, networkName: string = config.networkName) {
+  constructor (config: Config, networkName: string = config.networkName, networkType: NetworkType) {
     this.config = config
     this.bdkPath = `${config.infraConfig.bdkPath}/${networkName}`
     this.helmPath = `${this.bdkPath}/helm`
     this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
+    this.networkType = networkType
+  }
+
+  private getNetworkFolder(): string {
+    return this.networkType === NetworkType.QUORUM ? 'goQuorum' : 'besu'
   }
 
   public createBdkFolder () {
@@ -37,22 +44,22 @@ export default class BdkFile {
   }
 
   public createArtifactsFolder () {
-    fs.mkdirSync(`${this.bdkPath}/artifacts/goQuorum`, { recursive: true })
+    fs.mkdirSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}`, { recursive: true })
   }
 
   public createGenesisJson (genesisJson: GenesisJsonType) {
     this.createArtifactsFolder()
-    fs.writeFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, JSON.stringify(genesisJson, null, 2))
+    fs.writeFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/genesis.json`, JSON.stringify(genesisJson, null, 2))
   }
 
   public createDisallowedNodesJson (disallowedNodesJson: Array<string>) {
     this.createArtifactsFolder()
-    fs.writeFileSync(`${this.bdkPath}/artifacts/goQuorum/disallowed-nodes.json`, JSON.stringify(disallowedNodesJson, null, 2))
+    fs.writeFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/disallowed-nodes.json`, JSON.stringify(disallowedNodesJson, null, 2))
   }
 
   public createStaticNodesJson (staticNodesJson: Array<string>) {
     this.createArtifactsFolder()
-    fs.writeFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, JSON.stringify(staticNodesJson, null, 2))
+      fs.writeFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/static-nodes.json`, JSON.stringify(staticNodesJson, null, 2))
   }
 
   public createNetworkInfoJson (networkInfoJson: Array<NetworkInfoItem>) {
@@ -112,7 +119,7 @@ export default class BdkFile {
   }
 
   public getMemberEnodeInfo (i: number) {
-    this.checkPathExist(`${this.bdkPath}/artifacts/goQuorum`)
+    this.checkPathExist(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}`)
     const staticNodesJson: Array<string> = this.getStaticNodesJson()
     const enodeInfo = staticNodesJson.find(file => file.includes(`member${i}`))
     return enodeInfo
@@ -120,7 +127,7 @@ export default class BdkFile {
 
   public copyStaticNodesJsonToPermissionedNodesJson () {
     this.createArtifactsFolder()
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, `${this.bdkPath}/artifacts/goQuorum/permissioned-nodes.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/static-nodes.json`, `${this.bdkPath}/artifacts/${this.getNetworkFolder()}/permissioned-nodes.json`)
   }
 
   public createValidatorFolder (i: number) {
@@ -129,17 +136,17 @@ export default class BdkFile {
 
   public copyGenesisJsonToValidator (i: number) {
     this.createValidatorFolder(i)
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, `${this.bdkPath}/validator${i}/data/genesis.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/genesis.json`, `${this.bdkPath}/validator${i}/data/genesis.json`)
   }
 
   public copyStaticNodesJsonToValidator (i: number) {
     this.createValidatorFolder(i)
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, `${this.bdkPath}/validator${i}/data/static-nodes.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/static-nodes.json`, `${this.bdkPath}/validator${i}/data/static-nodes.json`)
   }
 
   public copyPermissionedNodesJsonToValidator (i: number) {
     this.createValidatorFolder(i)
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/permissioned-nodes.json`, `${this.bdkPath}/validator${i}/data/permissioned-nodes.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/permissioned-nodes.json`, `${this.bdkPath}/validator${i}/data/permissioned-nodes.json`)
   }
 
   public copyPrivateKeyToValidator (i: number) {
@@ -167,17 +174,17 @@ export default class BdkFile {
 
   public copyGenesisJsonToMember (i: number) {
     this.createMemberFolder(i)
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, `${this.bdkPath}/member${i}/data/genesis.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/genesis.json`, `${this.bdkPath}/member${i}/data/genesis.json`)
   }
 
   public copyStaticNodesJsonToMember (i: number) {
     this.createMemberFolder(i)
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, `${this.bdkPath}/member${i}/data/static-nodes.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/static-nodes.json`, `${this.bdkPath}/member${i}/data/static-nodes.json`)
   }
 
   public copyPermissionedNodesJsonToMember (i: number) {
     this.createMemberFolder(i)
-    fs.copyFileSync(`${this.bdkPath}/artifacts/goQuorum/permissioned-nodes.json`, `${this.bdkPath}/member${i}/data/permissioned-nodes.json`)
+    fs.copyFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/permissioned-nodes.json`, `${this.bdkPath}/member${i}/data/permissioned-nodes.json`)
   }
 
   public copyPrivateKeyToMember (i: number) {
@@ -216,13 +223,13 @@ export default class BdkFile {
 
   public getGenesisJson () {
     this.checkPathExist(this.bdkPath)
-    const genesisJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/genesis.json`, 'utf8')
+    const genesisJson = fs.readFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/genesis.json`, 'utf8')
     return JSON.parse(genesisJson)
   }
 
   public getStaticNodesJson () {
     this.checkPathExist(this.bdkPath)
-    const staticNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/static-nodes.json`, 'utf8')
+    const staticNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/static-nodes.json`, 'utf8')
     return JSON.parse(staticNodesJson)
   }
 
@@ -234,7 +241,7 @@ export default class BdkFile {
 
   public getPermissionedNodesJson () {
     this.checkPathExist(this.bdkPath)
-    const permissionedNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/goQuorum/permissioned-nodes.json`, 'utf8')
+    const permissionedNodesJson = fs.readFileSync(`${this.bdkPath}/artifacts/${this.getNetworkFolder()}/permissioned-nodes.json`, 'utf8')
     return JSON.parse(permissionedNodesJson)
   }
 
@@ -284,23 +291,25 @@ export default class BdkFile {
     fs.writeFileSync(`${this.helmPath}/kubernetes/${name}.yaml`, yaml)
   }
 
-  public getGoQuorumGenesisChartPath (): string {
+  public getGenesisChartPath (): string {
     this.checkHelmChartPath()
-    return `${this.helmPath}/goquorum-genesis`
+    return `${this.helmPath}/${this.getNetworkFolder().toLowerCase()}-genesis`
   }
 
-  public getGoQuorumNodeChartPath (): string {
+  public getNodeChartPath (): string {
     this.checkHelmChartPath()
-    return `${this.helmPath}/goquorum-node`
+    return `${this.helmPath}/${this.getNetworkFolder().toLowerCase()}-node`
   }
-
+  public createNetworkValues () {
+    this.checkHelmChartPath()
+    fs.writeFileSync(`${this.helmPath}/${this.getNetworkFolder().toLowerCase()}-values.yaml`, '')
+  }
   public createChartValueFolder () {
     fs.mkdirSync(`${this.helmPath}/values`, { recursive: true })
   }
 
-  public createGoQuorumValues () {
-    this.checkHelmChartPath()
-    fs.writeFileSync(`${this.helmPath}/goquorum-values.yaml`, '')
+  public getGenesisChartValuesPath () {
+    return `${this.helmPath}/values/genesis-values.yaml`
   }
 
   public copyGoQuorumHelmChart () {
@@ -336,9 +345,6 @@ export default class BdkFile {
     fs.writeFileSync(`${this.helmPath}/values/member${i}-values.yaml`, memberYaml.getYamlString())
   }
 
-  public getGenesisChartPath () {
-    return `${this.helmPath}/values/genesis-values.yaml`
-  }
 
   public removeHelmChart () {
     fs.rmSync(`${this.helmPath}`, { recursive: true, force: true })
