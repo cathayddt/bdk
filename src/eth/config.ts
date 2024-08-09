@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import os from 'os'
 import { EnvironmentEnum, NodeTypeEnum } from './model/type/config.type'
+import { NetworkType } from './config/network.type'
 
 const bdkPath = process.env.BDK_PATH || `${process.env.HOME}/.bdk/eth`
 dotenv.config({ path: `${bdkPath}/.env` })
@@ -24,6 +25,7 @@ export interface Config {
   infraConfig: InfraConfig
   networkName: string
   nodeType: NodeTypeEnum
+  networkType: NetworkType
   hostname: string
   UID: number
   GID: number
@@ -49,6 +51,17 @@ const nodeType = (() => {
   }
 })()
 
+const getNetworkType = (): NetworkType => {
+  switch (process.env.BDK_ETH_NETWORK_TYPE?.toLowerCase()) {
+    case 'besu':
+      return NetworkType.BESU
+    case 'quorum':
+      return NetworkType.QUORUM
+    default:
+      return NetworkType.QUORUM // Default to Quorum if not specified
+  }
+}
+
 const isDevMode = environment === EnvironmentEnum.development
 const isTestMode = environment === EnvironmentEnum.testing
 
@@ -64,9 +77,15 @@ const config: Config = {
   },
   networkName: '',
   nodeType: nodeType,
+  networkType: NetworkType.QUORUM,
   hostname: process.env.BDK_HOSTNAME || '',
   UID: process.env.UID === undefined ? os.userInfo().uid : parseInt(process.env.UID, 10),
   GID: process.env.GID === undefined ? os.userInfo().gid : parseInt(process.env.GID, 10),
 }
 
 export default config
+
+export function setNetwork(networkType: NetworkType) {
+  config.networkType = networkType;
+  config.networkName = `bdk-${networkType.toLowerCase()}-network`;
+}
