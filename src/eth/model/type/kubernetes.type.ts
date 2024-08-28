@@ -1,4 +1,6 @@
 import { NetworkCreateType } from './network.type'
+import { NetworkType } from '../../config/network.type'
+
 export interface K8SRunCommandType {
   helmChart: string
   name: string
@@ -13,6 +15,7 @@ export interface ClusterDeleteType {
   namespace: string
 }
 export interface ClusterCreateType extends NetworkCreateType {
+  networkType: NetworkType
   provider: string
   region?: string
 }

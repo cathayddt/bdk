@@ -13,6 +13,13 @@ interface quorumFlags {
   usesBootnodes: boolean
 }
 
+interface besuFlags {
+  privacy: boolean
+  removeKeysOnDelete: boolean
+  isBootnode: boolean
+  usesBootnodes: boolean
+}
+
 interface AwsInterface {
   serviceAccountName: string
   region: string
@@ -26,7 +33,7 @@ interface AzureInterface {
   subscriptionId: string
 }
 
-interface NodeInterface {
+interface QuorumNodeInterface {
   goquorum: {
     metrics: {
       serviceMonitorEnabled: boolean
@@ -45,12 +52,32 @@ interface NodeInterface {
     password: string
   }
 }
+interface BesuNodeInterface {
+  besu: {
+    metrics: {
+      serviceMonitorEnabled: boolean
+    }
+    resources: {
+      cpuLimit: number
+      cpuRequest: number
+    memLimit: string
+    memRequest: string
+  }
+  account?: {
+    password: string
+    }
+  }
+  tessera?: {
+    password: string
+  }
+}
 export interface HelmChartYamlInterface {
   quorumFlags: quorumFlags
   cluster?: ClusterInterface
   aws?: AwsInterface
   azure?: AzureInterface
-  node?: NodeInterface
+  quorumNode?: QuorumNodeInterface
+  besuNode?: BesuNodeInterface
   [key: string]: any
 }
 
@@ -92,13 +119,22 @@ class HelmChartYaml extends BdkYaml<HelmChartYamlInterface> {
   protected setQuorumFlags (quorumFlags: quorumFlags) {
     this.value.quorumFlags = quorumFlags
   }
+  protected setBesuFlags (besuFlags: besuFlags) {
+    this.value.besuFlags = besuFlags
+  }
+  
+
 
   protected setCluster (cluster: ClusterInterface) {
     this.value.cluster = cluster
   }
 
-  protected setNode (node: NodeInterface) {
-    this.value.node = node
+  protected setQuorumNode (node: QuorumNodeInterface) {
+    this.value.quorumNode = node
+  }
+
+  protected setBesuNode (besu: BesuNodeInterface) {
+    this.value.besuNode = besu
   }
 
   protected setService (name: string, service: any) {
