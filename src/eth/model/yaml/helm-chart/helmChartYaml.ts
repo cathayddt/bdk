@@ -60,11 +60,11 @@ interface BesuNodeInterface {
     resources: {
       cpuLimit: number
       cpuRequest: number
-    memLimit: string
-    memRequest: string
-  }
-  account?: {
-    password: string
+      memLimit: string
+      memRequest: string
+    }
+    account?: {
+      password: string
     }
   }
   tessera?: {
@@ -119,11 +119,10 @@ class HelmChartYaml extends BdkYaml<HelmChartYamlInterface> {
   protected setQuorumFlags (quorumFlags: quorumFlags) {
     this.value.quorumFlags = quorumFlags
   }
+
   protected setBesuFlags (besuFlags: besuFlags) {
     this.value.besuFlags = besuFlags
   }
-  
-
 
   protected setCluster (cluster: ClusterInterface) {
     this.value.cluster = cluster

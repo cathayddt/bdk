@@ -74,7 +74,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPrivateKeyToValidator(i)
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
-      
+
       validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i], networkType)
       this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }

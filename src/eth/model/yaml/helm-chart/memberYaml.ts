@@ -2,7 +2,7 @@ import HelmChartYaml from './helmChartYaml'
 import { NetworkType } from '../../../config/network.type'
 
 class MemberConfigYaml extends HelmChartYaml {
-  public setMember(networkType: NetworkType, metrics = false) {
+  public setMember (networkType: NetworkType, metrics = false) {
     if (networkType === 'quorum') {
       this.setQuorumConfigs(metrics)
     } else if (networkType === 'besu') {
@@ -39,7 +39,7 @@ class MemberConfigYaml extends HelmChartYaml {
     })
   }
 
-  private setBesuConfigs(metrics = false) {
+  private setBesuConfigs (metrics = false) {
     this.setBesuFlags({
       privacy: false,
       removeKeysOnDelete: false,

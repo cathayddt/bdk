@@ -8,7 +8,7 @@ import quorumGenesisConfig from './quorum/quorumGenesisConfig'
 import besuGenesisConfig from './besu/besuGenesisConfig'
 import { NodeTypeEnum } from '../model/type/config.type'
 
-const networkConfigs: { [key in NetworkType]: { member: NetworkConfigType; validator: NetworkConfigType; genesisJson: GenesisJsonType, ethereumJsonRpcVariant: String } } = {
+const networkConfigs: { [key in NetworkType]: { member: NetworkConfigType; validator: NetworkConfigType; genesisJson: GenesisJsonType; ethereumJsonRpcVariant: string } } = {
   [NetworkType.BESU]: {
     member: besuMemberConfig,
     validator: besuValidatorConfig,
@@ -38,7 +38,7 @@ export const getGenesisJson = (networkType: NetworkType): GenesisJsonType => {
   }
   return genesisJson
 }
-export const getEthereumJsonRpcVariant = (networkType: NetworkType): String => {
+export const getEthereumJsonRpcVariant = (networkType: NetworkType): string => {
   const ethereumJsonRpcVariant = networkConfigs[networkType].ethereumJsonRpcVariant
   if (!ethereumJsonRpcVariant) {
     throw new Error(`Unsupported network type: ${networkType}`)

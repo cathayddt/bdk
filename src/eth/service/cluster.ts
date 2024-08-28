@@ -6,8 +6,6 @@ import KubernetesInstance from '../instance/kubernetesCluster'
 import { ClusterCreateType, ClusterGenerateType } from '../model/type/kubernetes.type'
 import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { DockerResultType } from '../instance/infra/InfraRunner.interface'
-import { NetworkType } from '../config/network.type'
-import fs from 'fs'
 
 export default class Cluster extends AbstractService {
   /**
@@ -33,7 +31,7 @@ export default class Cluster extends AbstractService {
       namespace: networkType,
       values: this.bdkFile.getGenesisChartPath(),
     }) as DockerResultType
-    const namespaceForJob = networkType === 'quorum' ? 'goquorum' : networkType;
+    const namespaceForJob = networkType === 'quorum' ? 'goquorum' : networkType
     await k8s.wait(`job.batch/${namespaceForJob}-genesis-init`, networkType)
     spinner.succeed(`Helm install genesis chart ${genesisOutput.stdout}`)
     // create network
@@ -53,9 +51,7 @@ export default class Cluster extends AbstractService {
     }
     for (let i = 0; i < validatorNumber; i += 1) {
       spinner.start(`Helm install validator chart ${i + 1}`)
-      const valuesPath = this.bdkFile.getValidatorChartPath(i);
-      console.log(`Validator ${i + 1} values file content:`);
-      console.log(await fs.promises.readFile(valuesPath, 'utf8'));
+      const valuesPath = this.bdkFile.getValidatorChartPath(i)
       const validatorOutput = await k8s.install({
         helmChart: networkType === 'quorum' ? this.bdkFile.getGoQuorumNodeChartPath() : this.bdkFile.getBesuNodeChartPath(),
         name: `validator-${i + 1}`,
@@ -151,7 +147,7 @@ export default class Cluster extends AbstractService {
       } catch (error) {
         console.log(`Failed to delete release ${release} from quorum namespace:`)
       }
-      
+
       try {
         await k8s.delete({ name: release, namespace: 'besu' })
       } catch (error) {

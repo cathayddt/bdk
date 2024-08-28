@@ -2,7 +2,7 @@ import HelmChartYaml from './helmChartYaml'
 import { NetworkType } from '../../../config/network.type'
 
 class GenesisConfigYaml extends HelmChartYaml {
-  public setGenesis(networkType: NetworkType, chainID: number, nodeCount: number) {
+  public setGenesis (networkType: NetworkType, chainID: number, nodeCount: number) {
     if (networkType === 'quorum') {
       this.setQuorumGenesis(chainID, nodeCount)
     } else if (networkType === 'besu') {
@@ -12,7 +12,7 @@ class GenesisConfigYaml extends HelmChartYaml {
     }
   }
 
-  private setQuorumGenesis(chainID: number, nodeCount: number) {
+  private setQuorumGenesis (chainID: number, nodeCount: number) {
     this.setQuorumFlags({
       privacy: false,
       removeKeysOnDelete: false,
@@ -48,7 +48,7 @@ class GenesisConfigYaml extends HelmChartYaml {
     this.setService('rawGenesisConfig', genesisConfig)
   }
 
-  private setBesuGenesis(chainID: number, nodeCount: number) {
+  private setBesuGenesis (chainID: number, nodeCount: number) {
     const genesisConfig = {
       genesis: {
         config: {

@@ -288,6 +288,7 @@ export default class BdkFile {
     this.checkHelmChartPath()
     return `${this.helmPath}/goquorum-genesis`
   }
+
   public getBesuGenesisChartPath (): string {
     this.checkHelmChartPath()
     return `${this.helmPath}/besu-genesis`

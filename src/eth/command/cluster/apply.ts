@@ -9,9 +9,7 @@ import { WalletType } from '../../../wallet/model/type/wallet.type'
 import { defaultNetworkConfig } from '../../model/defaultNetworkConfig'
 import prompts from 'prompts'
 import ora from 'ora'
-import { getNetworkTypeChoices } from '../../config/network.type'
-import { NetworkType } from '../../config/network.type'
-
+import { getNetworkTypeChoices, NetworkType } from '../../config/network.type'
 export const command = 'apply'
 
 export const desc = '產生 Network Cluster 所需的相關設定檔案並建立網路'
@@ -44,13 +42,13 @@ export const handler = async (argv: Arguments<OptType>) => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: `⚠️ Detecting ${networkType} cluster already exists. The following processes will remove all existing files. Continue?`,
+        message: '⚠️ Detecting cluster already exists. The following processes will remove all existing files. Continue?',
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
         const spinner = ora(`${networkType} Cluster Delete ...`).start()
         cluster.removeHelmChartFiles()
-        spinner.succeed(`Remove all existing files!`)
+        spinner.succeed('Remove all existing files!')
       }
       return confirmDelete
     } else {

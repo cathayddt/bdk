@@ -2,7 +2,7 @@ import HelmChartYaml from './helmChartYaml'
 import { NetworkType } from '../../../config/network.type'
 
 class ValidatorConfigYaml extends HelmChartYaml {
-  public setValidator(networkType: NetworkType, metrics = false) {
+  public setValidator (networkType: NetworkType, metrics = false) {
     if (networkType === 'quorum') {
       this.setQuorumConfigs(metrics)
     } else if (networkType === 'besu') {
@@ -12,7 +12,7 @@ class ValidatorConfigYaml extends HelmChartYaml {
     }
   }
 
-  private setQuorumConfigs(metrics = false) {
+  private setQuorumConfigs (metrics = false) {
     this.setQuorumFlags({
       privacy: false,
       removeKeysOnDelete: false,
@@ -35,7 +35,7 @@ class ValidatorConfigYaml extends HelmChartYaml {
     })
   }
 
-  private setBesuConfigs(metrics = false) {
+  private setBesuConfigs (metrics = false) {
     this.setBesuFlags({
       privacy: false,
       removeKeysOnDelete: false,
