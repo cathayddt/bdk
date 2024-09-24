@@ -50,6 +50,16 @@ export class Runner implements KubernetesInfraRunner<DockerResultType> {
     return { stdout: '' }
   }
 
+  public forceDeleteNamespace = async (namespace: string): Promise<DockerResultType> => {
+    await this.runKubectl(['delete', 'namespace', namespace, '--force'])
+    return { stdout: '' }
+  }
+
+  public deleteNamespace = async (namespace: string): Promise<DockerResultType> => {
+    await this.runKubectl(['delete', 'namespace', namespace])
+    return { stdout: '' }
+  }
+
   public deleteAll = async (payload: K8SRunCommandType): Promise<DockerResultType> => {
     await this.runKubectl(['delete', 'all', '--all', '-n', payload.namespace])
     return { stdout: '' }

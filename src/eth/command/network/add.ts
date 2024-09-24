@@ -10,7 +10,7 @@ import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'add'
 
-export const desc = '新增 Quorum Node'
+export const desc = '新增 Eth Network Node'
 
 interface OptType {
   interactive: boolean
@@ -18,7 +18,7 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network add --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network add --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
@@ -64,11 +64,11 @@ export const handler = async (argv: Arguments) => {
     if (connectOption === 'local') {
       if (nodeOption === 'validator') {
         const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
-        const validatorNum = await network.addValidatorLocal()
+        const validatorNum = await network.addValidatorLocal(networkType)
         spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Validator${validatorNum} Successfully!`)
       } else {
         const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
-        const memberNum = await network.addMemberLocal()
+        const memberNum = await network.addMemberLocal(networkType)
         spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Member${memberNum} Successfully!`)
       }
     } else if (connectOption === 'remote') {

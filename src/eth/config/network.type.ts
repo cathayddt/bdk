@@ -10,7 +10,7 @@ export interface NetworkConfigType {
     chainId: number,
     peerPort: number,
     bootnode: boolean,
-    nodeEncode: string
+    nodeEncode: string,
   ) => string[]
 }
 

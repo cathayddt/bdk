@@ -4,10 +4,11 @@ import prompts from 'prompts'
 import Network from '../../service/network'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import ora from 'ora'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'check'
 
-export const desc = '確認 Quorum Node 資訊'
+export const desc = '確認 Eth Network Node 資訊'
 
 interface OptType {
   interactive: boolean
@@ -15,12 +16,23 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network check --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network check --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const network = new Network(config, 'quorum')
+  const { networkType } = await prompts([
+    {
+      type: 'select',
+      name: 'networkType',
+      message: 'What is your network?',
+      choices: getNetworkTypeChoices().map(choice => ({
+        title: choice.title,
+        value: choice.title,
+      })),
+    },
+  ])
+  const network = new Network(config, networkType)
 
   if (argv.interactive) {
     const node: string = await (async () => {
@@ -53,10 +65,10 @@ export const handler = async (argv: Arguments<OptType>) => {
       },
     ], { onCancel })
 
-    const spinner = ora('Quorum Network Check ...').start()
+    const spinner = ora(`${networkType} Network Check ...`).start()
     const result = await network.checkNode(node, method)
-    spinner.succeed(`Quorum Network Check Result: ${result}`)
-    spinner.succeed('Quorum Network Check Successfully!')
+    spinner.succeed(`${networkType} Network Check Result: ${result}`)
+    spinner.succeed(`${networkType} Network Check Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
   }

@@ -35,6 +35,8 @@ export interface KubernetesInfraRunner<T> {
   wait(job: string, namespace: string): Promise<T>
   deleteDeploymentAndService(payload: ClusterDeleteType): Promise<T>
   listAllRelease(namespace: string): Promise<T>
+  forceDeleteNamespace(namespace: string): Promise<T>
+  deleteNamespace(namespace: string): Promise<T>
 }
 
 // Strategy

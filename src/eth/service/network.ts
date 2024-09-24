@@ -36,7 +36,7 @@ export default class Network extends AbstractService {
       alloc[`0x${x.account.replace(/^0x/, '').toLowerCase()}`] = { balance: x.amount }
     })
 
-    const networkType = (networkCreateConfig.networkType || 'quorum') as NetworkType
+    const networkType = networkCreateConfig.networkType || NetworkType.QUORUM
     const genesisJsonYaml = new GenesisJsonYaml(networkType)
     genesisJsonYaml.addExtraData(extraData)
     genesisJsonYaml.addChainId(networkCreateConfig.chainId)
@@ -75,7 +75,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
 
-      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i], networkType)
+      validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i], networkType || NetworkType.QUORUM)
       this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
@@ -94,7 +94,7 @@ export default class Network extends AbstractService {
         this.bdkFile.copyPublicKeyToMember(i)
         this.bdkFile.copyAddressToMember(i)
 
-        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i, networkCreateConfig.bootNodeList[networkCreateConfig.validatorNumber + i], staticNodesJson[networkCreateConfig.validatorNumber + i], networkType)
+        memberDockerComposeYaml.addMember(bdkPath, i, 8645 + i * 2, networkCreateConfig.chainId, 30403 + i, networkCreateConfig.bootNodeList[networkCreateConfig.validatorNumber + i], staticNodesJson[networkCreateConfig.validatorNumber + i], networkType || NetworkType.QUORUM)
         this.createNetworkInfoJson(networkInfo, `http://member${i}:${8645 + i * 2}`)
       }
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
@@ -111,7 +111,7 @@ export default class Network extends AbstractService {
     const bdkPath = this.bdkFile.getBdkPath()
     const enodeInfo = String(this.getNodeInfo(joinNodeConfig.node, 'enodeInfo'))
     const publicKey = String(this.getNodeInfo(joinNodeConfig.node, 'publicKey'))
-
+    const networkType = joinNodeConfig.networkType
     for (let i = 0; i < joinNodeConfig.staticNodesJson.length; i += 1) {
       if (joinNodeConfig.staticNodesJson[i].includes(publicKey)) {
         staticNodesJson.push(enodeInfo)
@@ -134,7 +134,7 @@ export default class Network extends AbstractService {
       const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
 
       // TODO: add bootnode selection
-      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum, false, '', NetworkType.QUORUM)
+      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum, false, '', networkType || NetworkType.QUORUM)
       this.createNetworkInfoJson(networkInfo, `http://validator${nodeNum}:${8545 + nodeNum * 2}`)
       this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -151,7 +151,7 @@ export default class Network extends AbstractService {
 
       const memberDockerComposeYaml = new MemberDockerComposeYaml()
       // TODO: add bootnode selection
-      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum, false, '', NetworkType.QUORUM)
+      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum, false, '', networkType || NetworkType.QUORUM)
       this.createNetworkInfoJson(networkInfo, `http://member${nodeNum}:${8645 + nodeNum * 2}`)
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 
@@ -255,7 +255,7 @@ export default class Network extends AbstractService {
     this.bdkFile.createNetworkInfoJson(networkInfo)
   }
 
-  public async addValidatorLocal () {
+  public async addValidatorLocal (networkType: NetworkType) {
     const networkInfo: NetworkInfoItem[] = await this.bdkFile.getNetworkInfoJson()
     // count validator number
     const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
@@ -287,7 +287,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
       // TODO: add bootnode selection
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i, false, '', NetworkType.QUORUM)
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i, false, '', networkType || NetworkType.QUORUM)
       this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
@@ -306,7 +306,7 @@ export default class Network extends AbstractService {
     return validatorNum
   }
 
-  public async addMemberLocal () {
+  public async addMemberLocal (networkType: NetworkType) {
     const networkInfo: NetworkInfoItem[] = await this.bdkFile.getNetworkInfoJson()
     // count member number
     const memberCount = (await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g))).length
@@ -341,7 +341,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
       // TODO: add bootnode selection
-      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i, false, '', NetworkType.QUORUM)
+      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i, false, '', networkType || NetworkType.QUORUM)
       this.createNetworkInfoJson(networkInfo, `http://member${i}:${8645 + i * 2}`)
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)

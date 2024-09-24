@@ -42,7 +42,7 @@ export const handler = async (argv: Arguments<OptType>) => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: '⚠️ Detecting quorum nodes already exists. The following processes will remove all existing files. Continue?',
+        message: `⚠️ Detecting ${networkTypeWithBigFirstLetter} nodes already exists. The following processes will remove all existing files. Continue?`,
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {

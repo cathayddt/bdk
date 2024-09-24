@@ -23,6 +23,7 @@ export const handler = async (argv: Arguments) => {
       choices: getNetworkTypeChoices(),
     },
   ])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
   const network = new Network(config, networkType)
 
   let confirmDelete = true
@@ -30,15 +31,15 @@ export const handler = async (argv: Arguments) => {
   const response = await prompts({
     type: 'confirm',
     name: 'value',
-    message: `Confirm to down ${networkType} Network?`,
+    message: `Confirm to down ${networkTypeWithBigFirstLetter} Network?`,
     initial: false,
   }, { onCancel })
 
   confirmDelete = response.value
 
   if (confirmDelete) {
-    const spinner = ora(`${networkType} Network Down ...`).start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Network Down ...`).start()
     await network.down()
-    spinner.succeed(`${networkType} Network Down Successfully!`)
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Network Down Successfully!`)
   }
 }

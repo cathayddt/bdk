@@ -13,7 +13,7 @@ import { getNetworkTypeChoices, NetworkType } from '../../config/network.type'
 
 export const command = 'generate'
 
-export const desc = '產生 Network Cluster 所需的相關設定檔案'
+export const desc = '產生 Eth Network Cluster 所需的相關設定檔案'
 
 interface OptType {
   interactive: boolean
@@ -21,7 +21,7 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk network cluster generate --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network cluster generate --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
@@ -34,6 +34,8 @@ export const handler = async (argv: Arguments<OptType>) => {
       choices: getNetworkTypeChoices(),
     },
   ]) as { networkType: NetworkType }
+
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
   const cluster = new Cluster(config, networkType)
   const wallet = new Wallet()
 
@@ -43,11 +45,11 @@ export const handler = async (argv: Arguments<OptType>) => {
       const confirmDelete = (await prompts({
         type: 'confirm',
         name: 'value',
-        message: '⚠️ Detecting cluster already exists. The following processes will remove all existing files. Continue?',
+        message: `⚠️ Detecting ${networkTypeWithBigFirstLetter} cluster already exists. The following processes will remove all existing files. Continue?`,
         initial: false,
       }, { onCancel })).value
       if (confirmDelete) {
-        const spinner = ora(`${networkType} Cluster Delete ...`).start()
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Cluster Delete ...`).start()
         cluster.removeHelmChartFiles()
         spinner.succeed('Remove all existing files!')
       }
@@ -195,13 +197,13 @@ export const handler = async (argv: Arguments<OptType>) => {
         return { provider, region, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList, networkType }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        const config = defaultNetworkConfig(address, privateKey)
+        const config = defaultNetworkConfig(address, privateKey, networkType)
         return { ...config, provider: 'local', networkType }
       }
     })()
 
-    const spinner = ora(`${networkType} Cluster Generate ...`).start()
+    const spinner = ora(`${networkTypeWithBigFirstLetter} Cluster Generate ...`).start()
     await cluster.generate(clusterGenerate, networkCreate)
-    spinner.succeed(`${networkType} Cluster Generate Successfully!`)
+    spinner.succeed(`${networkTypeWithBigFirstLetter} Cluster Generate Successfully!`)
   }
 }

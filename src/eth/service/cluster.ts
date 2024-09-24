@@ -6,7 +6,7 @@ import KubernetesInstance from '../instance/kubernetesCluster'
 import { ClusterCreateType, ClusterGenerateType } from '../model/type/kubernetes.type'
 import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { DockerResultType } from '../instance/infra/InfraRunner.interface'
-
+import { NetworkType } from '../config/network.type'
 export default class Cluster extends AbstractService {
   /**
    * @description Use helm create quorum template
@@ -23,7 +23,6 @@ export default class Cluster extends AbstractService {
     genesisYaml.setProvider(provider, region)
     genesisYaml.setGenesis(networkType, chainId, validatorNumber)
     this.bdkFile.createGenesisChartValues(genesisYaml)
-    // custom namespace
     spinner.start('Helm install genesis chart')
     const genesisOutput = await k8s.install({
       helmChart: networkType === 'quorum' ? this.bdkFile.getGoQuorumGenesisChartPath() : this.bdkFile.getBesuGenesisChartPath(),
@@ -138,27 +137,26 @@ export default class Cluster extends AbstractService {
   /**
    * @description Delete all quorum deployment and service
    */
-  public async delete (): Promise<void> {
+  public async delete (networkType: NetworkType): Promise<void> {
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
-    const releases = await this.getAllHelmRelease()
-    await Promise.all(releases.map(async (release: string) => {
-      try {
-        await k8s.delete({ name: release, namespace: 'quorum' })
-      } catch (error) {
-        console.log(`Failed to delete release ${release} from quorum namespace:`)
-      }
 
+    try {
+      await k8s.deleteNamespace(networkType)
+      console.log(`Successfully deleted namespace ${networkType}`)
+    } catch (error) {
+      console.error(`Failed to delete namespace ${networkType}:`, error)
       try {
-        await k8s.delete({ name: release, namespace: 'besu' })
-      } catch (error) {
-        console.log(`Failed to delete release ${release} from besu namespace: `)
+        await k8s.forceDeleteNamespace(networkType)
+        console.log(`Successfully force deleted namespace ${networkType}`)
+      } catch (forceError) {
+        console.error(`Failed to force delete namespace ${networkType}:`, forceError)
       }
-    }))
+    }
   }
 
-  private async getAllHelmRelease () {
+  private async getAllHelmRelease (networkType: NetworkType) {
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
-    const releases = await k8s.listAllRelease('quorum') as DockerResultType
+    const releases = await k8s.listAllRelease(networkType) as DockerResultType
     return releases.stdout.split('\n').slice(1)
   }
 

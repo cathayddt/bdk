@@ -1,3 +1,5 @@
+import { NetworkType } from '../../config/network.type'
+
 /**
  * @requires account - [string] wallet 地址
  * @requires amount - [string] 分配原生代幣數量
@@ -14,8 +16,7 @@ export interface AllocType {
  * @requires alloc - [{@link AllocType} array] 原生代幣分配設定
  */
 export interface NetworkCreateType {
-  // TODO - networkType?: ? should be removed, after cluster is integrated
-  networkType?: string
+  networkType: NetworkType
   chainId: number
   validatorNumber: number
   memberNumber: number
@@ -81,6 +82,7 @@ export interface GenesisJsonType {
 }
 
 export interface JoinNodeType {
+  networkType: any
   node: string
   ipAddress: string
   genesisJson: GenesisJsonType

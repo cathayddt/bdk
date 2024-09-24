@@ -181,7 +181,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         return { networkType, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        return defaultNetworkConfig(address, privateKey)
+        return defaultNetworkConfig(address, privateKey, networkType)
       }
     }
     )()

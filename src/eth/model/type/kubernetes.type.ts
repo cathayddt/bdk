@@ -14,6 +14,7 @@ export interface ClusterDeleteType {
   name: string
   namespace: string
 }
+
 export interface ClusterCreateType extends NetworkCreateType {
   networkType: NetworkType
   provider: string

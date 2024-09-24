@@ -6,6 +6,7 @@ import prompts from 'prompts'
 import ora from 'ora'
 import { ExplorerCreateType } from '../../model/type/explorer.type'
 import Backup from '../../service/backup'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'create'
 
@@ -22,9 +23,15 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-  const explorer = new Explorer(config, 'quorum')
-  const backup = new Backup(config, 'quorum')
-
+  const { networkType } = await prompts([{
+    type: 'select',
+    name: 'networkType',
+    message: 'What is yours network?',
+    choices: getNetworkTypeChoices(),
+  }])
+  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+  const explorer = new Explorer(config, networkType)
+  const backup = new Backup(config, networkType)
   const getBackupItems = backup.getExportItems()
   const explorerCreate: ExplorerCreateType = await (async () => {
     if (argv.interactive) {
@@ -70,7 +77,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     }
   })()
 
-  const spinner = ora('Quorum Explorer Create ...').start()
+  const spinner = ora(`${networkTypeWithBigFirstLetter} Explorer Create ...`).start()
   await explorer.create(explorerCreate)
-  spinner.succeed(`Quorum Explorer Create Successfully! Host at: http://localhost:${explorerCreate.port}`)
+  spinner.succeed(`${networkTypeWithBigFirstLetter} Explorer Create Successfully! Host at: http://localhost:${explorerCreate.port}`)
 }

@@ -20,7 +20,18 @@ export default class KubernetesInstance extends AbstractInstance {
   public async delete (payload: ClusterDeleteType) {
     logger.debug('Kubernetes instance delete')
     if (this.kubernetesInfra !== undefined) {
-      return await this.kubernetesInfra.deleteDeploymentAndService(payload)
+      try {
+        await this.kubernetesInfra.deleteNamespace(payload.namespace)
+        logger.info(`Successfully deleted namespace ${payload.namespace}`)
+      } catch (error) {
+        logger.error(`Failed to delete namespace ${payload.namespace}:`, error)
+        try {
+          await this.kubernetesInfra.forceDeleteNamespace(payload.namespace)
+          logger.info(`Successfully force deleted namespace ${payload.namespace}`)
+        } catch (forceError) {
+          logger.error(`Failed to force delete namespace ${payload.namespace}:`, forceError)
+        }
+      }
     }
   }
 
@@ -35,6 +46,20 @@ export default class KubernetesInstance extends AbstractInstance {
     logger.debug('Kubernetes instance wait')
     if (this.kubernetesInfra !== undefined) {
       return await this.kubernetesInfra.wait(job, namespace)
+    }
+  }
+
+  public async deleteNamespace (namespace: string): Promise<void> {
+    logger.debug(`Deleting namespace ${namespace}`)
+    if (this.kubernetesInfra !== undefined) {
+      await this.kubernetesInfra.deleteNamespace(namespace)
+    }
+  }
+
+  public async forceDeleteNamespace (namespace: string): Promise<void> {
+    logger.debug(`Force deleting namespace ${namespace}`)
+    if (this.kubernetesInfra !== undefined) {
+      await this.kubernetesInfra.forceDeleteNamespace(namespace)
     }
   }
 }
