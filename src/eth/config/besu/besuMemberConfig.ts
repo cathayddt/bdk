@@ -5,7 +5,9 @@ const besuConfig: NetworkConfigType = {
   networks: [NetworkType.BESU],
   entrypoint: (chainId, peerPort, bootnode, nodeEncode) => [
     '/bin/sh', '-c',
-        `besu --data-path=/data \
+    `besu --data-path=/data \
+        --node-private-key-file=/data/nodekey \
+        --sync-min-peers=2 \
         --genesis-file=/data/genesis.json \
         --network-id=${chainId} \
         ${(bootnode) ? '--bootnodes '.concat(nodeEncode) : ''}\
