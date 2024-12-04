@@ -1,7 +1,7 @@
 import { NetworkConfigType, NetworkType } from '../network.type'
 
 const besuConfig: NetworkConfigType = {
-  image: 'hyperledger/besu:latest',
+  image: 'hyperledger/besu:24.10.0',
   networks: [NetworkType.BESU],
   entrypoint: (chainId, peerPort, bootnode, nodeEncode) => [
     '/bin/sh', '-c',

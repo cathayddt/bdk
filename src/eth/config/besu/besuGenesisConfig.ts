@@ -23,7 +23,7 @@ const besuGenesisConfig: GenesisJsonType = {
     petersburgBlock: 0,
     istanbulBlock: 0,
     qbft: {
-      blockPeriodSeconds: 2,
+      blockPeriodSeconds: 5,
       epochLength: 30000,
       requestTimeoutSeconds: 60,
     },

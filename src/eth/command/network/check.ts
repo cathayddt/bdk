@@ -66,7 +66,7 @@ export const handler = async (argv: Arguments<OptType>) => {
           },
         },
         { title: 'peerCount', value: { method: 'net_peerCount', params: '[""]' } },
-        { title: 'chainId', value: { method: 'eth_chainId', params: '[""]' } },
+        { title: 'chainId', value: { method: 'net_version', params: '[""]' } },
       ]
 
     const { method } = await prompts([
