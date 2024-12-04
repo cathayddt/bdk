@@ -8,7 +8,7 @@ import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'up'
 
-export const desc = '啟動現有的 Quorum Network'
+export const desc = '啟動現有的 Eth Network'
 
 interface OptType {
   interactive: boolean
@@ -16,8 +16,8 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network up --interactive', 'Cathay BDK 互動式問答')
-    .example('bdk quorum network up --all', '啟動 BDK 資料夾下現有的 Quorum Network')
+    .example('bdk eth network up --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network up --all', '啟動 BDK 資料夾下現有的 Eth Network')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
     .option('all', { type: 'boolean', description: '是否啟動所有節點', alias: 'a' })
 }
