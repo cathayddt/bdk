@@ -74,7 +74,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyPrivateKeyToValidator(i)
       this.bdkFile.copyPublicKeyToValidator(i)
       this.bdkFile.copyAddressToValidator(i)
-      
+
       validatorDockerComposeYaml.addValidator(bdkPath, i, 8545 + i * 2, networkCreateConfig.chainId, 30303 + i, networkCreateConfig.bootNodeList[i], staticNodesJson[i], networkType)
       this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
@@ -361,8 +361,8 @@ export default class Network extends AbstractService {
     return memberNum
   }
 
-  public async checkNode (node: string, method: string) {
-    const result = await this.quorumCommand(method, node)
+  public async checkNode (network: NetworkType, node: string, method: string, params?: string) {
+    const result = network === NetworkType.QUORUM ? await this.quorumCommand(method, node) : await this.besuCommand(method, node, params as string)
 
     return result
   }
@@ -473,6 +473,30 @@ export default class Network extends AbstractService {
       ignoreError: true,
     }) as DockerResultType
     // strip ANSI color
+    const out = result.stdout.replace(/\s+/g, '').replace(/.\[[0-9;]*m/g, '')
+    return out
+  }
+
+  private async besuCommand (args: string, option: string, params: string) {
+    console.log(args, option, params)
+    const result = await this.infra.runCommand({
+      autoRemove: true,
+      user: false,
+      network: 'bdk-besu-network_besu',
+      image: 'alpine',
+      tag: 'latest',
+      commands: [
+        'sh',
+        '-c',
+        `
+  apk add -q --no-cache curl &&
+  curl -X POST -H "Content-Type: application/json" \
+    --data '{"jsonrpc":"2.0","method":"${args}","params":${params},"id":1}' \
+    http://${option}:8545
+  `,
+      ],
+      ignoreError: true,
+    }) as DockerResultType
     const out = result.stdout.replace(/\s+/g, '').replace(/.\[[0-9;]*m/g, '')
     return out
   }
