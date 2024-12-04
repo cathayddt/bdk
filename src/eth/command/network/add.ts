@@ -10,7 +10,7 @@ import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'add'
 
-export const desc = '新增 Quorum Node'
+export const desc = '新增 Quorum/Besu Node'
 
 interface OptType {
   interactive: boolean
@@ -18,7 +18,7 @@ interface OptType {
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk quorum network add --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth network add --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
