@@ -67,8 +67,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'number',
             name: 'validatorNumber',
             message: 'How many validator do you want?',
-            min: 0,
-            initial: 0,
+            min: 1,
+            initial: 4,
           },
           {
             type: 'number',
