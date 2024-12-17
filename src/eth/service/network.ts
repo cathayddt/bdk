@@ -171,12 +171,12 @@ export default class Network extends AbstractService {
     }
   }
 
-  public async addValidatorRemote (addValidatorRemoteConfig: AddValidatorRemoteType) {
+  public async addValidatorRemote (addValidatorRemoteConfig: AddValidatorRemoteType, networkType: NetworkType) {
     const validatorCount = await this.bdkFile.getExportFiles().filter(file => file.match(/(validator)[0-9]+/g)).length
 
     // propose
     for (let i = 0; i < validatorCount; i += 1) {
-      await this.quorumCommand(`istanbul.propose("${addValidatorRemoteConfig.validatorAddress}", true)`, `validator${i}`)
+      networkType === NetworkType.QUORUM ? await this.quorumCommand(`istanbul.propose("${addValidatorRemoteConfig.validatorAddress}", true)`, `validator${i}`) : await this.besuCommand('qbft_proposeValidatorVote', `validator${i}`, `["${addValidatorRemoteConfig.validatorAddress}", true]`)
     }
 
     const staticNodesJson = this.bdkFile.getStaticNodesJson()
@@ -255,22 +255,22 @@ export default class Network extends AbstractService {
     this.bdkFile.createNetworkInfoJson(networkInfo)
   }
 
-  public async addValidatorLocal () {
+  public async addValidatorLocal (networkType: NetworkType) {
     const networkInfo: NetworkInfoItem[] = await this.bdkFile.getNetworkInfoJson()
     // count validator number
-    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
+    const validatorCount = this.bdkFile.getExportFiles().filter(file => file.match(/(validator)[0-9]+/g)).length
     const validatorNum = validatorCount
     const newValidator = `validator${validatorNum}`
     const { publicKey, address } = this.createKey(`artifacts/${newValidator}`)
     const validatorNode = `enode://${publicKey}@${newValidator}:${30303 + validatorNum}`
-    const chainId = parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0'))
+    const chainId = networkType === NetworkType.QUORUM ? parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0')) : Number(JSON.parse(await this.besuCommand('net_version', 'validator0', '[""]')))
 
     this.bdkFile.copyPrivateKeyToValidator(validatorNum)
     this.bdkFile.copyPublicKeyToValidator(validatorNum)
     this.bdkFile.copyAddressToValidator(validatorNum)
 
     for (let i = 0; i < validatorNum; i += 1) {
-      await this.quorumCommand(`istanbul.propose("0x${address}", true)`, `validator${i}`)
+      networkType === NetworkType.QUORUM ? await this.quorumCommand(`istanbul.propose("0x${address}", true)`, `validator${i}`) : await this.besuCommand('qbft_proposeValidatorVote', `validator${i}`, `["0x${address}", true]`)
     }
 
     this.bdkFile.copyGenesisJsonToValidator(validatorNum)
@@ -287,7 +287,7 @@ export default class Network extends AbstractService {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
       // TODO: add bootnode selection
-      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i, false, '', NetworkType.QUORUM)
+      validatorDockerComposeYaml.addValidator(this.bdkFile.getBdkPath(), i, 8545 + i * 2, chainId, 30303 + i, false, '', networkType)
       this.createNetworkInfoJson(networkInfo, `http://validator${i}:${8545 + i * 2}`)
     }
     this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
@@ -301,12 +301,12 @@ export default class Network extends AbstractService {
     }
 
     await (new ValidatorInstance(this.config, this.infra).upOneService(`${newValidator}`))
-    await this.istanbulIsValidator(newValidator)
+    networkType === NetworkType.QUORUM ? await this.istanbulIsValidator(newValidator) : await this.besuIsValidator(address)
 
     return validatorNum
   }
 
-  public async addMemberLocal () {
+  public async addMemberLocal (networkType: NetworkType) {
     const networkInfo: NetworkInfoItem[] = await this.bdkFile.getNetworkInfoJson()
     // count member number
     const memberCount = (await this.bdkFile.getExportFiles().filter(file => file.match(/(member)[0-9]+/g))).length
@@ -314,7 +314,7 @@ export default class Network extends AbstractService {
     const newMember = `member${memberNum}`
     const { publicKey } = this.createKey(`artifacts/${newMember}`)
     const memberNode = `enode://${publicKey}@${newMember}:${30403 + memberNum}`
-    const chainId = parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0'))
+    const chainId = networkType === NetworkType.QUORUM ? parseInt(await this.quorumCommand('admin.nodeInfo.protocols.eth.network', 'validator0')) : Number(JSON.parse(await this.besuCommand('net_version', 'validator0', '[""]')))
 
     this.bdkFile.copyPrivateKeyToMember(memberNum)
     this.bdkFile.copyPublicKeyToMember(memberNum)
@@ -329,7 +329,7 @@ export default class Network extends AbstractService {
     this.bdkFile.copyStaticNodesJsonToPermissionedNodesJson()
 
     // for loop to copy static-nodes.json to validator
-    const validatorCount = parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0'))
+    const validatorCount = networkType === NetworkType.QUORUM ? parseInt(await this.quorumCommand('istanbul.getValidators().length', 'validator0')) : parseInt(JSON.parse(await this.besuCommand('qbft_getValidatorsByBlockNumber', 'validator0', '["latest"]')).length)
     for (let i = 0; i < validatorCount; i += 1) {
       this.bdkFile.copyStaticNodesJsonToValidator(i)
       this.bdkFile.copyPermissionedNodesJsonToValidator(i)
@@ -341,22 +341,14 @@ export default class Network extends AbstractService {
       this.bdkFile.copyStaticNodesJsonToMember(i)
       this.bdkFile.copyPermissionedNodesJsonToMember(i)
       // TODO: add bootnode selection
-      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i, false, '', NetworkType.QUORUM)
+      memberDockerComposeYaml.addMember(this.bdkFile.getBdkPath(), i, 8645 + i * 2, chainId, 30403 + i, false, '', networkType)
       this.createNetworkInfoJson(networkInfo, `http://member${i}:${8645 + i * 2}`)
     }
     this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
     this.bdkFile.createNetworkInfoJson(networkInfo)
     await (new MemberInstance(this.config, this.infra).upOneService(`${newMember}`))
 
-    let tryTime = 0
-    while (parseInt(await this.quorumCommand('net.peerCount', newMember)) < 1) {
-      if (tryTime !== 10) {
-        tryTime += 1
-        await sleep(500)
-      } else {
-        throw new TimeLimitError('[x] Time limit reached. Please check later.')
-      }
-    }
+    await this.checkPeerCount(networkType, newMember)
 
     return memberNum
   }
@@ -478,7 +470,6 @@ export default class Network extends AbstractService {
   }
 
   private async besuCommand (args: string, option: string, params: string) {
-    console.log(args, option, params)
     const result = await this.infra.runCommand({
       autoRemove: true,
       user: false,
@@ -490,14 +481,17 @@ export default class Network extends AbstractService {
         '-c',
         `
   apk add -q --no-cache curl &&
-  curl -X POST -H "Content-Type: application/json" \
+  apk add -q --no-cache jq &&
+  curl -s -X POST -H "Content-Type: application/json" \
     --data '{"jsonrpc":"2.0","method":"${args}","params":${params},"id":1}' \
-    http://${option}:8545
+    http://${option}:8545 | jq '.result'
   `,
       ],
       ignoreError: true,
     }) as DockerResultType
-    const out = result.stdout.replace(/\s+/g, '').replace(/.\[[0-9;]*m/g, '')
+
+    // eslint-disable-next-line no-control-regex
+    const out = result.stdout.replace(/\x1b\[[0-9;]*[A-Za-z]|\x1b[0-9A-Za-z]|(\d+%|#+)|[\r\n]+/g, '').replace(/\s+/g, '')
     return out
   }
 
@@ -527,6 +521,50 @@ export default class Network extends AbstractService {
     const host = label.startsWith('validator') || label.startsWith('member') ? 'localhost' : label
     const value = `${protocol}://${host}:${match[5]}`
     networkInfo.push({ label, value })
+  }
+
+  /** @ignore */
+  private async checkPeerCount (networkType: NetworkType, node: string) {
+    let tryTime = 0
+    let peerCount = 0
+    do {
+      peerCount = networkType === NetworkType.QUORUM ? parseInt(await this.quorumCommand('net.peerCount', node)) : Number(JSON.parse(await this.besuCommand('net_peerCount', node, '[""]')))
+      if (tryTime !== 10) {
+        tryTime += 1
+        await sleep(500)
+      } else {
+        throw new TimeLimitError('[x] Time limit reached. Please check later.')
+      }
+    } while (peerCount < 1)
+  }
+
+  /** @ignore */
+  private async besuIsValidator (address: string, retryTime = 10) {
+    let tryTime = 0
+    let isValidator = false
+    let validators
+    do {
+      validators = JSON.parse(await this.besuCommand('qbft_getValidatorsByBlockNumber', 'validator0', '["latest"]'))
+      if (validators.includes(`0x${address}`)) {
+        isValidator = true
+      }
+      if (tryTime !== retryTime) {
+        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        const wallet = ethers.Wallet.createRandom().connect(provider)
+        const tx = {
+          to: '0x0000000000000000000000000000000000000000',
+          value: '0x0',
+          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+        }
+        const receipt = await wallet.sendTransaction(tx)
+        await receipt.wait()
+
+        tryTime += 1
+        await sleep(500)
+      } else {
+        throw new TimeLimitError('[x] Time limit reached. Please check later.')
+      }
+    } while (isValidator === false)
   }
 
   /** @ignore */

@@ -6,7 +6,7 @@ import { onCancel, ParamsError } from '../../../util/error'
 import ora from 'ora'
 import { AddValidatorRemoteType, AddMemberRemoteType } from '../../model/type/network.type'
 import { ethers } from 'ethers'
-import { getNetworkTypeChoices } from '../../config/network.type'
+import { getNetworkTypeChoices, NetworkType } from '../../config/network.type'
 
 export const command = 'add'
 
@@ -64,11 +64,11 @@ export const handler = async (argv: Arguments) => {
     if (connectOption === 'local') {
       if (nodeOption === 'validator') {
         const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
-        const validatorNum = await network.addValidatorLocal()
+        const validatorNum = await network.addValidatorLocal(networkType)
         spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Validator${validatorNum} Successfully!`)
       } else {
         const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
-        const memberNum = await network.addMemberLocal()
+        const memberNum = await network.addMemberLocal(networkType)
         spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Member${memberNum} Successfully!`)
       }
     } else if (connectOption === 'remote') {
@@ -98,7 +98,7 @@ export const handler = async (argv: Arguments) => {
         }
 
         const spinner = ora(`${networkTypeWithBigFirstLetter} Network Add ...`).start()
-        await network.addValidatorRemote(addValidatorRemoteConfig)
+        await network.addValidatorRemote(addValidatorRemoteConfig, networkType)
         spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Validator ${validatorAddress} Successfully!`)
       } else {
         const { enodeInfo, ipAddress } = await prompts([
