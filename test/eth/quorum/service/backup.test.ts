@@ -4,11 +4,11 @@ import assert from 'assert'
 import tar from 'tar'
 import sinon from 'sinon'
 import { resolve } from 'path'
-import config from '../../../src/eth/config'
-import Backup from '../../../src/eth/service/backup'
-import Network from '../../../src/eth/service/network'
-import { BackupError, sleep } from '../../../src/util'
-import { NetworkCreateType } from '../../../src/eth/model/type/network.type'
+import config from '../../../../src/eth/config'
+import Backup from '../../../../src/eth/service/backup'
+import Network from '../../../../src/eth/service/network'
+import { BackupError, sleep } from '../../../../src/util'
+import { NetworkCreateType } from '../../../../src/eth/model/type/network.type'
 
 // write a test for the backup class
 describe('Quorum.Backup', function () {
@@ -20,6 +20,7 @@ describe('Quorum.Backup', function () {
 
   before(async function () {
     const networkCreate: NetworkCreateType = {
+      networkType: 'quorum',
       chainId: 13371,
       validatorNumber: 1,
       memberNumber: 1,

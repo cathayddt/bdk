@@ -1,25 +1,25 @@
 /* global describe, it */
 import Dockerode from 'dockerode'
 import assert from 'assert'
-import Network from '../../../src/eth/service/network'
-import Explorer from '../../../src/eth/service/explorer'
-import config from '../../../src/eth/config'
-import { ExplorerCreateType } from '../../../src/eth/model/type/explorer.type'
+import Network from '../../../../src/eth/service/network'
+import Explorer from '../../../../src/eth/service/explorer'
+import config from '../../../../src/eth/config'
+import { ExplorerCreateType } from '../../../../src/eth/model/type/explorer.type'
 
-describe('Quorum.Explorer.Service', function () {
+describe('Besu.Explorer.Service', function () {
   this.timeout(600000)
 
   const docker: Dockerode = new Dockerode({ socketPath: '/var/run/docker.sock' })
   const dockerdOption = { all: true }
-  const network = new Network(config, 'quorum')
-  const explorer = new Explorer(config, 'quorum')
+  const network = new Network(config, 'besu')
+  const explorer = new Explorer(config, 'besu')
   const explorerCreateOptions: ExplorerCreateType = {
     httpModeEnabled: false,
     nodeName: 'validator0',
     port: 9000,
   }
 
-  describe('Quorum.Explorer.create', () => {
+  describe('Besu.Explorer.create', () => {
     it('should create and start the explorer', async () => {
       const initContainers = await docker.listContainers(dockerdOption)
       await network.createBdkFolder()
@@ -34,7 +34,7 @@ describe('Quorum.Explorer.Service', function () {
     })
   })
 
-  describe('Quorum.Explorer.getExplorerFiles', () => {
+  describe('Besu.Explorer.getExplorerFiles', () => {
     // Populate the files as needed for testing purposes
     it('should return a list of explorer files', () => {
       const explorerFiles = explorer.getExplorerFiles()
@@ -43,7 +43,7 @@ describe('Quorum.Explorer.Service', function () {
     })
   })
 
-  describe('Quorum.Explorer.delete', () => {
+  describe('Besu.Explorer.delete', () => {
     it('should delete the explorer', async () => {
       await explorer.delete()
 

@@ -39,10 +39,11 @@
     "test:dev": "nodemon --watch 'test/**/*.test.ts' -e ts,tsx --exec npm run test",
     "test:nyan": "NODE_ENV=testing mocha --reporter nyan --require ts-node/register ./test/**/*.test.ts --exit",
     "test:quorum": "nyc npm run test -- --grep Quorum",
+    "test:besu": "nyc npm run test -- --grep Besu",
     "test:fabric": "nyc npm run test -- --grep Fabric",
     "test:coverage": "nyc npm run test",
     "test:json": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter json --require ts-node/register ./test/**/*.test.ts --exit > test-results.json",
-    "git:changelog": "git-cliff --unreleased --tag v3.0.0 --prepend CHANGELOG.md",
+    "git:changelog": "git-cliff --unreleased --tag v3.1.0 --prepend CHANGELOG.md",
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {
