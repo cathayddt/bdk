@@ -104,13 +104,14 @@ export default class Network extends AbstractService {
     this.bdkFile.createNetworkInfoJson(networkInfo)
   }
 
-  public async joinNode (joinNodeConfig: JoinNodeType) {
+  public async joinNode (networkType: NetworkType, joinNodeConfig: JoinNodeType) {
     const networkInfo: NetworkInfoItem[] = this.bdkFile.getNetworkInfoJson()
     const nodeNum = Number(joinNodeConfig.node.replace(/(validator|member)+/g, ''))
     const staticNodesJson: string[] = []
     const bdkPath = this.bdkFile.getBdkPath()
     const enodeInfo = String(this.getNodeInfo(joinNodeConfig.node, 'enodeInfo'))
     const publicKey = String(this.getNodeInfo(joinNodeConfig.node, 'publicKey'))
+    const address = String(this.getNodeInfo(joinNodeConfig.node, 'address'))
 
     for (let i = 0; i < joinNodeConfig.staticNodesJson.length; i += 1) {
       if (joinNodeConfig.staticNodesJson[i].includes(publicKey)) {
@@ -141,7 +142,7 @@ export default class Network extends AbstractService {
       await (new ValidatorInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
       this.bdkFile.createNetworkInfoJson(networkInfo)
 
-      await this.istanbulIsValidator(joinNodeConfig.node)
+      networkType === NetworkType.QUORUM ? await this.istanbulIsValidator(joinNodeConfig.node) : await this.besuIsValidator(address)
 
       return nodeNum
     } else {
@@ -158,15 +159,8 @@ export default class Network extends AbstractService {
       await (new MemberInstance(this.config, this.infra).upOneService(`${joinNodeConfig.node}`))
       this.bdkFile.createNetworkInfoJson(networkInfo)
 
-      let tryTime = 0
-      while (parseInt(await this.quorumCommand('net.peerCount', joinNodeConfig.node)) < 1) {
-        if (tryTime !== 10) {
-          tryTime += 1
-          await sleep(500)
-        } else {
-          throw new TimeLimitError('[x] Time limit reached. Please check later.')
-        }
-      }
+      await this.checkPeerCount(networkType, joinNodeConfig.node)
+
       return nodeNum
     }
   }

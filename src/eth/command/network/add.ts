@@ -6,7 +6,7 @@ import { onCancel, ParamsError } from '../../../util/error'
 import ora from 'ora'
 import { AddValidatorRemoteType, AddMemberRemoteType } from '../../model/type/network.type'
 import { ethers } from 'ethers'
-import { getNetworkTypeChoices, NetworkType } from '../../config/network.type'
+import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'add'
 

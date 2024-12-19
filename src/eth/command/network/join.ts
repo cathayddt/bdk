@@ -78,7 +78,7 @@ export const handler = async (argv: Arguments) => {
     }
 
     const spinner = ora(`${networkTypeWithBigFirstLetter} Network Join ...`).start()
-    await network.joinNode(joinNodeConfig)
+    await network.joinNode(networkType, joinNodeConfig)
     spinner.succeed(`${networkTypeWithBigFirstLetter} Network Join ${node} Successfully!`)
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')
