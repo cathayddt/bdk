@@ -1,4 +1,4 @@
-# Quorum 指令文件
+# Besu/Quorum 指令文件
 
 (English version)(Work In Progress)
 
@@ -10,19 +10,9 @@
 
 ## Network
 
-### `bdk quorum network add`
+### `bdk eth network add`
 
-Description: 新增 Quorum Node
-
-|        Options        |  Type   |          Description           | Required | Default |
-| --------------------- | :-----: | ------------------------------ | :------: | ------- |
-| --help                | boolean | Show help                      |          |         |
-| --version             | boolean | Show version number            |          |         |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
-
-### `bdk quorum network check`
-
-Description: 確認 Quorum Node 資訊
+Description: 新增 Besu/Quorum Node
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -30,37 +20,9 @@ Description: 確認 Quorum Node 資訊
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
 
-### `bdk quorum network create`
+### `bdk eth network check`
 
-Description: 產生 Quorum Network 所需的相關設定檔案並建立網路
-
-|        Options        |  Type   |          Description           | Required | Default |
-| --------------------- | :-----: | ------------------------------ | :------: | ------- |
-| --help                | boolean | Show help                      |          |         |
-| --version             | boolean | Show version number            |          |         |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
-
-### `bdk quorum network delete`
-
-Description: 刪除現有的 Quorum Network
-
-|        Options        |  Type   |          Description           | Required | Default |
-| --------------------- | :-----: | ------------------------------ | :------: | ------- |
-| --help                | boolean | Show help                      |          |         |
-| --version             | boolean | Show version number            |          |         |
-
-### `bdk quorum network down`
-
-Description: 停止現有的 Quorum Network
-
-|        Options        |  Type   |          Description           | Required | Default |
-| --------------------- | :-----: | ------------------------------ | :------: | ------- |
-| --help                | boolean | Show help                      |          |         |
-| --version             | boolean | Show version number            |          |         |
-
-### `bdk quorum network generate`
-
-Description: 產生 Quorum Network 所需的相關設定檔案
+Description: 確認 Besu/Quorum Node 資訊
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -68,19 +30,9 @@ Description: 產生 Quorum Network 所需的相關設定檔案
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
 
-### `bdk quorum network get`
+### `bdk eth network create`
 
-Description: 取得 Quorum 檔案資訊
-
-|        Options        |  Type   |          Description           | Required | Default |
-| --------------------- | :-----: | ------------------------------ | :------: | ------- |
-| --help                | boolean | Show help                      |          |         |
-| --version             | boolean | Show version number            |          |         |
-| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
-
-### `bdk quorum network join`
-
-Description: 選擇現有節點加入 Quorum Network
+Description: 產生 Besu/Quorum Network 所需的相關設定檔案並建立網路
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -88,9 +40,57 @@ Description: 選擇現有節點加入 Quorum Network
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
 
-### `bdk quorum network up`
+### `bdk eth network delete`
 
-Description: 啟動現有的 Quorum Network
+Description: 刪除現有的 Besu/Quorum Network
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+
+### `bdk eth network down`
+
+Description: 停止現有的 Besu/Quorum Network
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+
+### `bdk eth network generate`
+
+Description: 產生 Besu/Quorum Network 所需的相關設定檔案
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+### `bdk eth network get`
+
+Description: 取得 Besu/Quorum 檔案資訊
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+### `bdk eth network join`
+
+Description: 選擇現有節點加入 Besu/Quorum Network
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+### `bdk eth network up`
+
+Description: 啟動現有的 Besu/Quorum Network
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -101,9 +101,9 @@ Description: 啟動現有的 Quorum Network
 
 ## Explorer
 
-### `bdk quorum explorer create`
+### `bdk eth explorer create`
 
-Description: 產生 Quorum Explorer 所需的相關設定檔案
+Description: 產生 Besu/Quorum Explorer 所需的相關設定檔案
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -111,9 +111,9 @@ Description: 產生 Quorum Explorer 所需的相關設定檔案
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答 |          |         |
 
-### `bdk quorum explorer delete`
+### `bdk eth explorer delete`
 
-Description: 刪除現有的 Quorum Explorer.
+Description: 刪除現有的 Besu/Quorum Explorer.
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -122,9 +122,9 @@ Description: 刪除現有的 Quorum Explorer.
 
 ## Backup
 
-### `bdk quorum backup export`
+### `bdk eth backup export`
 
-Description: 匯出現有的 Quorum Network
+Description: 匯出現有的 Besu/Quorum Network
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -133,9 +133,9 @@ Description: 匯出現有的 Quorum Network
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
 | -a, --all             | boolean | 是否備份所有資料                  |          |         |
 
-### `bdk quorum backup import`
+### `bdk eth backup import`
 
-Description: 匯入現有的 Quorum Network
+Description: 匯入現有的 Besu/Quorum Network
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -145,18 +145,18 @@ Description: 匯入現有的 Quorum Network
 
 ## Cluster
 
-### `bdk quorum cluster apply`
+### `bdk eth cluster apply`
 
-Description: 產生 Quorum Cluster 所需的相關設定檔案並建立網路
+Description: 產生 Besu/Quorum Cluster 所需的相關設定檔案並建立網路
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
 | --help                | boolean | Show help                      |          |         |
 | --version             | boolean | Show version number            |          |         |
 
-### `bdk quorum cluster delete`
+### `bdk eth cluster delete`
 
-Description: 刪除現有的 Quorum Cluster 網路
+Description: 刪除現有的 Besu/Quorum Cluster 網路
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
@@ -164,9 +164,9 @@ Description: 刪除現有的 Quorum Cluster 網路
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
 
-### `bdk quorum cluster generate`
+### `bdk eth cluster generate`
 
-Description: 產生 Quorum Cluster 所需的相關設定檔案
+Description: 產生 Besu/Quorum Cluster 所需的相關設定檔案
 
 |        Options        |  Type   |          Description           | Required | Default |
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |

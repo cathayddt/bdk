@@ -10,7 +10,6 @@ export const command = 'export'
 
 export const desc = '匯出現有的 Eth Network'
 
-
 interface OptType {
   interactive: boolean
 }

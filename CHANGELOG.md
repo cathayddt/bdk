@@ -3,6 +3,19 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v3.1.0](https://github.com/cathayddt/bdk/releases/tag/v3.1.0) - 2024-12-19
+
+### Features
+
+* Build `Besu network` with add, create, delete, down, generate, get, join, up function
+* Refactor bdk command to `bdk eth`
+
+### Fixes
+
+* Add node-private-key-file
+* Change the commandDir from quorum to eth, and rename test/quorum to test/eth
+* Remove ConfigEnvType from Quorum
+
 ## [v3.0.0](https://github.com/cathayddt/bdk/releases/tag/v3.0.0) - 2024-03-19
 
 ### Features

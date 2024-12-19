@@ -14,7 +14,7 @@ export interface AllocType {
  * @requires alloc - [{@link AllocType} array] 原生代幣分配設定
  */
 export interface NetworkCreateType {
-  //TODO - networkType?: ? should be removed, after cluster is integrated
+  // TODO - networkType?: ? should be removed, after cluster is integrated
   networkType?: string
   chainId: number
   validatorNumber: number
