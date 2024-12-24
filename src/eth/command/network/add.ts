@@ -23,18 +23,18 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments) => {
-  const { networkType } = await prompts([
-    {
-      type: 'select',
-      name: 'networkType',
-      message: 'What is your network?',
-      choices: getNetworkTypeChoices(),
-    },
-  ])
-  const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
-  const network = new Network(config, networkType)
-
   if (argv.interactive) {
+    const { networkType } = await prompts([
+      {
+        type: 'select',
+        name: 'networkType',
+        message: 'What is your network?',
+        choices: getNetworkTypeChoices(),
+      },
+    ])
+    const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
+    const network = new Network(config, networkType)
+
     const connectOptionList = [
       { title: 'local', value: 'local' },
       { title: 'remote', value: 'remote' },
@@ -129,7 +129,6 @@ export const handler = async (argv: Arguments) => {
         await network.addMemberRemote(addMemberRemoteConfig)
         spinner.succeed(`${networkTypeWithBigFirstLetter} Network Add Member ${memberAddress} Successfully!`)
       }
-      // TODO: addMemberRemote
     }
   } else {
     throw new ParamsError('Invalid params: Required parameter missing')

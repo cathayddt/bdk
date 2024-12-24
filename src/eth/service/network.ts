@@ -135,7 +135,7 @@ export default class Network extends AbstractService {
       const validatorDockerComposeYaml = new ValidatorDockerComposeYaml()
 
       // TODO: add bootnode selection
-      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum, false, '', NetworkType.QUORUM)
+      validatorDockerComposeYaml.addValidator(bdkPath, nodeNum, 8545 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30303 + nodeNum, false, '', networkType)
       this.createNetworkInfoJson(networkInfo, `http://validator${nodeNum}:${8545 + nodeNum * 2}`)
       this.bdkFile.createValidatorDockerComposeYaml(validatorDockerComposeYaml)
 
@@ -152,7 +152,7 @@ export default class Network extends AbstractService {
 
       const memberDockerComposeYaml = new MemberDockerComposeYaml()
       // TODO: add bootnode selection
-      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum, false, '', NetworkType.QUORUM)
+      memberDockerComposeYaml.addMember(bdkPath, nodeNum, 8645 + nodeNum * 2, joinNodeConfig.genesisJson.config.chainId, 30403 + nodeNum, false, '', networkType)
       this.createNetworkInfoJson(networkInfo, `http://member${nodeNum}:${8645 + nodeNum * 2}`)
       this.bdkFile.createMemberDockerComposeYaml(memberDockerComposeYaml)
 

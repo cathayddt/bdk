@@ -27,7 +27,7 @@ export const handler = async () => {
   const response = await prompts({
     type: 'confirm',
     name: 'value',
-    message: '⚠️ The following processes will remove all network files. Confirm to delete Quorum Network?',
+    message: `⚠️ The following processes will remove all network files. Confirm to delete ${networkType} Network?`,
     initial: false,
   }, { onCancel })
 

@@ -56,17 +56,17 @@ export const handler = async (argv: Arguments) => {
       {
         type: 'text',
         name: 'ipAddress',
-        message: 'Provide the ip address of Quorum network you want to join',
+        message: 'Provide the ip address of Quorum/Besu network you want to join',
       },
       {
         type: 'text',
         name: 'genesisJson',
-        message: 'Paste the genesis.json file of Quorum network you want to join',
+        message: 'Paste the genesis.json file of Quorum/Besu network you want to join',
       },
       {
         type: 'text',
         name: 'staticNodesJson',
-        message: 'Paste the static-nodes.json file of Quorum network you want to join',
+        message: 'Paste the static-nodes.json file of Quorum/Besu network you want to join',
       },
     ], { onCancel })
 

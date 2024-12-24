@@ -42,7 +42,10 @@ export const handler = async (argv: Arguments<OptType>) => {
   // check bdkPath files exist or not (include useless file e.g. .DS_Store)
   const confirm: boolean = await (async () => {
     network.createBdkFolder()
+    const ethNetworkType = networkType === 'besu' ? 'quorum' : 'besu'
+    const ethNodes = new Network(config, ethNetworkType) // ethNodes is use for check another eth network files
     const fileList = network.getNetworkFiles()
+    const ethFileList = ethNodes.getNetworkFiles()
     if (fileList.length !== 0) {
       const confirmDelete = (await prompts({
         type: 'confirm',
@@ -55,7 +58,30 @@ export const handler = async (argv: Arguments<OptType>) => {
         // backup before remove
         await backup.exportAll()
 
+        await network.down()
+        spinner.succeed('Network down successfully!')
+
         network.removeBdkFiles(fileList)
+        spinner.succeed('Backup and remove all existing files!')
+      }
+      return confirmDelete
+    } else if (ethFileList.length !== 0) {
+      const confirmDelete = (await prompts({
+        type: 'confirm',
+        name: 'value',
+        message: `⚠️ Detecting ${ethNetworkType} nodes already exists. The following processes will remove all existing files. Continue?`,
+        initial: false,
+      }, { onCancel })).value
+      if (confirmDelete) {
+        const spinner = ora(`${networkTypeWithBigFirstLetter} Network Create ...`).start()
+        const ethBackup = new Backup(config, ethNetworkType)
+        // backup before remove
+        await ethBackup.exportAll()
+
+        await ethNodes.down()
+        spinner.succeed('Network down successfully!')
+
+        ethNodes.removeBdkFiles(ethFileList)
         spinner.succeed('Backup and remove all existing files!')
       }
       return confirmDelete

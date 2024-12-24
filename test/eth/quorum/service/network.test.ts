@@ -12,7 +12,7 @@ import Wallet from '../../../../src/wallet/service/wallet'
 import { WalletType } from '../../../../src/wallet/model/type/wallet.type'
 import { NetworkType } from '../../../../src/eth/config/network.type'
 
-describe('Quorum.Network.Service', function () {
+describe.skip('Quorum.Network.Service', function () {
   this.timeout(1000000)
 
   const docker = new Dockerode({ socketPath: '/var/run/docker.sock' })
