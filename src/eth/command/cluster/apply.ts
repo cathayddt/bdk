@@ -1,5 +1,5 @@
 import { Argv, Arguments } from 'yargs'
-import { ethers } from 'ethers'
+import { isAddress } from 'ethers'
 import config from '../../config'
 import Cluster from '../../service/cluster'
 import Wallet from '../../../wallet/service/wallet'
@@ -132,7 +132,7 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'text',
             name: 'address',
             message: 'What is your wallet address?',
-            validate: walletAddress => ethers.utils.isAddress(walletAddress) ? true : 'Address not valid.',
+            validate: walletAddress => isAddress(walletAddress) ? true : 'Address not valid.',
           }, { onCancel })
 
           walletAddress = address

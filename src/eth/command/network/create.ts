@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { isAddress } from 'ethers'
 import prompts from 'prompts'
 import { Argv, Arguments } from 'yargs'
 import Network from '../../service/network'
@@ -44,6 +44,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     network.createBdkFolder()
     const ethNetworkType = networkType === 'besu' ? 'quorum' : 'besu'
     const ethNodes = new Network(config, ethNetworkType) // ethNodes is use for check another eth network files
+    ethNodes.createBdkFolder()
     const fileList = network.getNetworkFiles()
     const ethFileList = ethNodes.getNetworkFiles()
     if (fileList.length !== 0) {
@@ -182,7 +183,7 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'text',
             name: 'address',
             message: 'What is your wallet address?',
-            validate: walletAddress => ethers.utils.isAddress(walletAddress) ? true : 'Address not valid.',
+            validate: walletAddress => isAddress(walletAddress) ? true : 'Address not valid.',
           }, { onCancel })
 
           walletAddress = address

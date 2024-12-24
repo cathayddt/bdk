@@ -5,7 +5,7 @@ import Network from '../../service/network'
 import { onCancel, ParamsError } from '../../../util/error'
 import ora from 'ora'
 import { AddValidatorRemoteType, AddMemberRemoteType } from '../../model/type/network.type'
-import { ethers } from 'ethers'
+import { computeAddress } from 'ethers'
 import { getNetworkTypeChoices } from '../../config/network.type'
 
 export const command = 'add'
@@ -88,7 +88,7 @@ export const handler = async (argv: Arguments) => {
 
         const validatorPublicKey = `0x04${(enodeInfo.match(/enode:\/\/(.*?)@/i)[1]).replace(/^0x/, '').toLowerCase()}`
         const validatorDiscoveryPort = enodeInfo.slice(enodeInfo.lastIndexOf(':') + 1)
-        const validatorAddress = ethers.utils.computeAddress(validatorPublicKey).toLowerCase()
+        const validatorAddress = computeAddress(validatorPublicKey).toLowerCase()
 
         const addValidatorRemoteConfig: AddValidatorRemoteType = {
           validatorAddress: validatorAddress,
@@ -116,7 +116,7 @@ export const handler = async (argv: Arguments) => {
 
         const memberPublicKey = `0x04${(enodeInfo.match(/enode:\/\/(.*?)@/i)[1]).replace(/^0x/, '').toLowerCase()}`
         const memberDiscoveryPort = enodeInfo.slice(enodeInfo.lastIndexOf(':') + 1)
-        const memberAddress = ethers.utils.computeAddress(memberPublicKey).toLowerCase()
+        const memberAddress = computeAddress(memberPublicKey).toLowerCase()
 
         const addMemberRemoteConfig: AddMemberRemoteType = {
           memberAddress: memberAddress,

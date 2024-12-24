@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { ethers, HDNodeWallet } from 'ethers'
 import { WalletCreateType, WalletType } from '../model/type/wallet.type'
 
 export default class Wallet {
@@ -14,7 +14,7 @@ export default class Wallet {
 
   /** @ignore */
   public createWalletAddress (type: WalletType) {
-    let nodekey: ethers.Wallet
+    let nodekey: HDNodeWallet
     let privateKey: string
     let publicKey: string
     let address: string
@@ -23,7 +23,7 @@ export default class Wallet {
       case WalletType.ETHEREUM:
         nodekey = ethers.Wallet.createRandom()
         privateKey = nodekey.privateKey.replace(/^0x/, '')
-        publicKey = nodekey.publicKey.replace(/^0x04/, '')
+        publicKey = nodekey.signingKey.publicKey.replace(/^0x04/, '')
         address = nodekey.address.replace(/^0x/, '').toLowerCase()
         break
     }

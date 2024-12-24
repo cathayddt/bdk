@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { ethers, JsonRpcProvider } from 'ethers'
 import RLP from 'rlp'
 import { NetworkCreateType, NetworkGenerateType, JoinNodeType, AddValidatorRemoteType, AddMemberRemoteType, NetworkInfoItem } from '../model/type/network.type'
 import GenesisJsonYaml from '../model/yaml/network/gensisJson'
@@ -27,7 +27,7 @@ export default class Network extends AbstractService {
       this.createKey(`artifacts/member${i}`)
     }
 
-    const extraDataContent = [new Uint8Array(32), validatorAddressList, [], null, []]
+    const extraDataContent = [new Uint8Array(32), validatorAddressList.map(address => new Uint8Array(address)), [], null, []]
     const extraDataCoded = RLP.encode(extraDataContent)
     const extraData = `0x${Buffer.from(extraDataCoded).toString('hex')}`
 
@@ -494,7 +494,7 @@ export default class Network extends AbstractService {
     // TODO: use Shawn's code generate key
     const nodekey = ethers.Wallet.createRandom()
     const privateKey = nodekey.privateKey.replace(/^0x/, '')
-    const publicKey = nodekey.publicKey.replace(/^0x04/, '')
+    const publicKey = nodekey.signingKey.publicKey.replace(/^0x04/, '')
     const address = nodekey.address.replace(/^0x/, '').toLowerCase()
 
     this.bdkFile.createPrivateKey(dir, privateKey)
@@ -543,12 +543,12 @@ export default class Network extends AbstractService {
         isValidator = true
       }
       if (tryTime !== retryTime) {
-        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        const provider = new JsonRpcProvider('http://localhost:8545')
         const wallet = ethers.Wallet.createRandom().connect(provider)
         const tx = {
           to: '0x0000000000000000000000000000000000000000',
           value: '0x0',
-          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+          nonce: await provider.getTransactionCount(wallet.getAddress(), 'latest'),
         }
         const receipt = await wallet.sendTransaction(tx)
         await receipt.wait()
@@ -566,12 +566,12 @@ export default class Network extends AbstractService {
     let tryTime = 0
     while (await this.quorumCommand('istanbul.isValidator()', `${joinNode}`) !== 'true') {
       if (tryTime !== retryTime) {
-        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+        const provider = new JsonRpcProvider('http://localhost:8545')
         const wallet = ethers.Wallet.createRandom().connect(provider)
         const tx = {
           to: '0x0000000000000000000000000000000000000000',
           value: '0x0',
-          nonce: provider.getTransactionCount(wallet.getAddress(), 'latest'),
+          nonce: await provider.getTransactionCount(wallet.getAddress(), 'latest'),
         }
         const receipt = await wallet.sendTransaction(tx)
         await receipt.wait()
