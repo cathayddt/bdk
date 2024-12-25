@@ -39,7 +39,7 @@ bdk fabric network create -i
 | ---------------- | ---------------- |
 | [v3.1.0][v3.1.0] | [v3.1.0][v3.1.0] |
 
-[v3.0.0]: https://github.com/cathayddt/bdk/releases/tag/v3.0.0
+[v3.1.0]: https://github.com/cathayddt/bdk/releases/tag/v3.1.0
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
