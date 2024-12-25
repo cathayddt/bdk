@@ -1,5 +1,5 @@
 # Where should we write the GIF?
-Output ./docs/vhs/bdk-quorum-network-create.gif
+Output ./docs/vhs/bdk-besu-network-create.gif
 
 # Set up a 1800x600 terminal with 40px font.
 Set FontSize 40

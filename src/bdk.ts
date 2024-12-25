@@ -25,7 +25,7 @@ const argv = yargs
     return true
   })
   .commandDir('fabric')
-  .commandDir('quorum')
+  .commandDir('eth')
   .commandDir('wallet')
   .commandDir('hello')
   .commandDir('dashboard')
