@@ -17,6 +17,7 @@ describe('Quorum.Explorer.Service', function () {
     httpModeEnabled: false,
     nodeName: 'validator0',
     port: 9000,
+    networkType: 'quorum',
   }
 
   describe('Quorum.Explorer.create', () => {

@@ -6,9 +6,10 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
     httpModeEnabled: boolean = false,
     nodeName: string,
     port: number = 26000,
+    network: string,
   ) {
     super()
-    this.addNetwork('quorum', {})
+    this.addNetwork(network, {})
     this.addVolume('blockscoutpostgres', {})
     this.addService(
       'blockscout',
@@ -24,7 +25,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           'POSTGRES_USER=postgres',
           'NETWORK=quickstart',
           'NETWORK=Dev Quickstart',
-          'SUBNETWORK=Quorum',
+          `SUBNETWORK=${network}`,
           'COIN=""',
           'SHOW_PRICE_CHART=false',
           'ETHEREUM_JSONRPC_VARIANT=geth',
@@ -52,7 +53,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
         ports: [
           `${port}:4000`,
         ],
-        networks: ['quorum'],
+        networks: [network],
         volumes: (httpModeEnabled) ? [] : [`${bdkPath}/${nodeName}/data/geth.ipc:/root/geth.ipc`],
       },
     )
@@ -78,7 +79,7 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           timeout: '10s',
           retries: 5,
         },
-        networks: ['quorum'],
+        networks: [network],
       },
     )
   }

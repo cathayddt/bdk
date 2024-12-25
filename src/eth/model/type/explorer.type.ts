@@ -12,6 +12,7 @@ export interface ExplorerCreateType {
   httpModeEnabled: boolean
   nodeName: string
   port: number
+  networkType: string
 }
 
 /**

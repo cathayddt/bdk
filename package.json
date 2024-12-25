@@ -18,7 +18,8 @@
     "kth-tw (https://github.com/kth-tw)",
     "RuiSiang (https://github.com/RuiSiang)",
     "PianoChicken (https://github.com/Pianochicken)",
-    "kidneyweak (https://github.com/kidneyweakx)"
+    "kidneyweak (https://github.com/kidneyweakx)",
+    "yorkchung (https://github.com/yorkchung)"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

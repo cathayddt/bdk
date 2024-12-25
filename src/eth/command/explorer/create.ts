@@ -75,6 +75,7 @@ export const handler = async (argv: Arguments<OptType>) => {
         httpModeEnabled: false,
         nodeName: getBackupItems[0].value,
         port: 26000,
+        networkType: networkType,
       }
     }
   })()

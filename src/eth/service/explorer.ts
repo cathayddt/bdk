@@ -26,6 +26,7 @@ export default class Explorer extends AbstractService {
       payload.httpModeEnabled,
       payload.nodeName,
       payload.port,
+      payload.networkType,
     )
     this.bdkFile.createExplorerDockerComposeYaml(explorerDockerComposeYaml)
   }

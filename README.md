@@ -58,7 +58,7 @@ bdk fabric network create -i
 
 - [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v18, npm v9
 - [docker](https://docs.docker.com/engine/install)
-- [docker-compose](https://docs.docker.com/compose/install) >= 1.27
+- [docker-compose](https://docs.docker.com/compose/install) >= 2.20
 - [docker-desktop(MacOS)](https://www.docker.com/products/docker-desktop/) Need Allow Docker Sockers in Advanced Options 
 - eslint (vscode plugin, dev-only)
 

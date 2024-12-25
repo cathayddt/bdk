@@ -123,15 +123,15 @@ export class Runner implements InfraRunner<DockerResultType> {
   // Docker Compose
   private runSpawn (args: Array<string>): Promise<string> {
     return new Promise((resolve) => {
-      logger.debug(`run spawnSync: docker-compose ${args.join(' ')}`)
-      const spawnReturn = spawn('docker-compose', [...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` } })
+      logger.debug(`run spawnSync: docker compose ${args.join(' ')}`)
+      const spawnReturn = spawn('docker', ['compose', ...args], { env: { ...process.env, UID: `${config.UID}`, GID: `${config.GID}` }, stdio: 'ignore' })
       // TODO ! docker 裡面的 error 不這樣抓
       // TODO 如果 docker-compose 不存在不會報錯
-      spawnReturn.stdout.on('close', () => {
-        resolve(`docker-compose ${args.join(' ')} OK`)
-      })
       spawnReturn.on('error', (error) => {
-        throw new DockerError(`[x] command [docker-compose]: ${error.message}`)
+        throw new DockerError(`[x] command [docker compose]: ${error.message}`)
+      })
+      spawnReturn.on('exit', () => {
+        resolve(`docker compose ${args.join(' ')} OK`)
       })
     })
   }

@@ -17,6 +17,7 @@ describe('Besu.Explorer.Service', function () {
     httpModeEnabled: false,
     nodeName: 'validator0',
     port: 9000,
+    networkType: 'besu',
   }
 
   describe('Besu.Explorer.create', () => {
