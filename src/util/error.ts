@@ -17,7 +17,7 @@ export class FabricContainerError extends BdkError {
     this.stdout = stdout
   }
 }
-export class QuorumContainerError extends BdkError {
+export class EthContainerError extends BdkError {
   public stdout: string
   constructor (message: string, stdout: string) {
     super(message)
@@ -35,7 +35,7 @@ export const onCancel = (prompt: prompts.PromptObject<string>, answers: any) => 
 export const errorHandler = (err: Error) => {
   if (err instanceof FabricContainerError) {
     logger.error(err.message)
-  } else if (err instanceof QuorumContainerError) {
+  } else if (err instanceof EthContainerError) {
     logger.error(err.message)
   } else if (err instanceof BdkError) {
     logger.error(err.message)

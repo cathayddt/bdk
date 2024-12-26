@@ -20,23 +20,26 @@ BDK streamlines the normally complicated process of creating a blockchain with c
 e.g.
 
 ```
-bdk quorum network create -i
+bdk eth network create -i
 ```
-![bdk quorum network create -i](docs/vhs/bdk-quorum-network-create.gif)
+#### Quorum
+![bdk eth network create -i](docs/vhs/bdk-quorum-network-create.gif)
+#### Besu
+![bdk eth network create -i](docs/vhs/bdk-besu-network-create.gif)
 
 ```bash
 bdk fabric network create -i
 ```
-
+#### Fabric
 ![bdk fabric network create -i](docs/vhs/bdk-fabric-network-create.gif)
 
 ## 版本 (Releases)
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v3.0.0][v3.0.0] | [v3.0.0][v3.0.0] |
+| [v3.1.0][v3.1.0] | [v3.1.0][v3.1.0] |
 
-[v3.0.0]: https://github.com/cathayddt/bdk/releases/tag/v3.0.0
+[v3.1.0]: https://github.com/cathayddt/bdk/releases/tag/v3.1.0
 
 [更新內容 (Changelog)](CHANGELOG.md)
 
@@ -44,7 +47,8 @@ bdk fabric network create -i
 
 - 指令文件 CLI Documentation (Work in Progress)
 - [Fabric 使用範例 (Examples)](docs/fabric/EXAMPLE.md)
-- [Quorum 使用範例 (Examples)](docs/quorum/EXAMPLE.md)
+- [Quorum 使用範例 (Examples)](docs/eth/EXAMPLE.md)
+- [Besu 使用範例 (Examples)](docs/eth/EXAMPLE.md)
 - [開發指南 (Contributing)](.github/CONTRIBUTING.md)
 - [資安通報 (Security Issues)](SECURITY.md)
 
@@ -54,7 +58,7 @@ bdk fabric network create -i
 
 - [npm + nodejs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) node v18, npm v9
 - [docker](https://docs.docker.com/engine/install)
-- [docker-compose](https://docs.docker.com/compose/install) >= 1.27
+- [docker-compose](https://docs.docker.com/compose/install) >= 2.20
 - [docker-desktop(MacOS)](https://www.docker.com/products/docker-desktop/) Need Allow Docker Sockers in Advanced Options 
 - eslint (vscode plugin, dev-only)
 
