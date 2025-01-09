@@ -15,9 +15,13 @@ export default class Cluster extends AbstractService {
     // create genesis and account
     const k8s = new KubernetesInstance(this.config, this.infra, this.kubernetesInfra)
     this.bdkFile.checkHelmChartPath()
+    const alloc: {[address: string]: {balance: string}} = {}
+    networkCreateConfig.alloc.forEach(x => {
+      alloc[`0x${x.account.replace(/^0x/, '').toLowerCase()}`] = { balance: x.amount }
+    })
     const genesisYaml = new GenesisConfigYaml()
     genesisYaml.setProvider(provider, region)
-    genesisYaml.setGenesis(chainId, validatorNumber)
+    genesisYaml.setGenesis(chainId, validatorNumber, alloc)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
     // custom namespace
@@ -76,10 +80,14 @@ export default class Cluster extends AbstractService {
   ): Promise<void> {
     const { provider, region, chainId, validatorNumber, memberNumber } = networkCreateConfig
     this.bdkFile.checkHelmChartPath()
+    const alloc: {[address: string]: {balance: string}} = {}
+    networkCreateConfig.alloc.forEach(x => {
+      alloc[`0x${x.account.replace(/^0x/, '').toLowerCase()}`] = { balance: x.amount }
+    })
     // create genesis and account
     const genesisYaml = new GenesisConfigYaml()
     genesisYaml.setProvider(provider, region)
-    genesisYaml.setGenesis(chainId, validatorNumber)
+    genesisYaml.setGenesis(chainId, validatorNumber, alloc)
 
     this.bdkFile.createGenesisChartValues(genesisYaml)
 
