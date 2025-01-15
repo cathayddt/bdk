@@ -7,6 +7,7 @@ import ValidatorDockerComposeYaml from '../model/yaml/docker-compose/validatorDo
 import MemberDockerComposeYaml from '../model/yaml/docker-compose/memberDockerCompose'
 import { GenesisConfigYaml, ValidatorConfigYaml, MemberConfigYaml } from '../model/yaml/helm-chart'
 import { PathError } from '../../util/error'
+import { NetworkType } from '../config/network.type'
 
 export enum InstanceTypeEnum {
   validator = 'validator',
@@ -284,14 +285,14 @@ export default class BdkFile {
     fs.writeFileSync(`${this.helmPath}/kubernetes/${name}.yaml`, yaml)
   }
 
-  public getGoQuorumGenesisChartPath (): string {
+  public getGenesisChartPath (networkType: string): string {
     this.checkHelmChartPath()
-    return `${this.helmPath}/goquorum-genesis`
+    return networkType === NetworkType.QUORUM ? `${this.helmPath}/goquorum-genesis` : `${this.helmPath}/besu-genesis`
   }
 
-  public getGoQuorumNodeChartPath (): string {
+  public getNodeChartPath (networkType: string): string {
     this.checkHelmChartPath()
-    return `${this.helmPath}/goquorum-node`
+    return networkType === NetworkType.QUORUM ? `${this.helmPath}/goquorum-node` : `${this.helmPath}/besu-node`
   }
 
   public createChartValueFolder () {
@@ -336,7 +337,7 @@ export default class BdkFile {
     fs.writeFileSync(`${this.helmPath}/values/member${i}-values.yaml`, memberYaml.getYamlString())
   }
 
-  public getGenesisChartPath () {
+  public getGenesisChartValuesPath () {
     return `${this.helmPath}/values/genesis-values.yaml`
   }
 
