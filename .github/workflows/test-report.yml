@@ -10,7 +10,7 @@ permissions:
   checks: write
 jobs:
   report:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 # ubuntu-latest | ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3

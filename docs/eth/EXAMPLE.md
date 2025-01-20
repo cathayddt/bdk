@@ -170,25 +170,33 @@ kubectl config current-context
 ```bash
 bdk eth cluster apply -i
 ```
+- `What is your network?` 選擇 `Besu` 或 `Quorum`
 - `What is your cloud provider?` 選擇 `GCP/local`
 - `What is your chain id?` 選擇 81712
 - `How many validator do you want?` 選擇 4
 - `How many member do you want?` 選擇 0
 - `Do you already own a wallet?` false
 
-這樣你的本地端的 quorum 網路就建立好了，如需連線及可用 `http://localhost:8545` 做連線
+這樣你的本地端的 besu/quorum 網路就建立好了，如需連線及可用 `http://localhost:8545` 做連線
+#### Quorum 網路可使用 `svc/goquorum-node-validator-1` 連線
 ```bash
 kubectl port-forward -n quorum svc/goquorum-node-validator-1 8545
+```
+#### Besu 網路可使用 `svc/besu-node-validator-1` 連線
+```bash
+kubectl port-forward -n besu svc/besu-node-validator-1 8545
 ```
 
 ### Step 3. 刪除 K8S 網路
 ```bash
-bdk eth cluster delete
+bdk eth cluster delete -i
 ```
-按 'y' 刪除
+- `What is your network?` 選擇 `Besu` 或 `Quorum`
+- 按 `y` 或 `yes` 刪除
 
 ## 產出 helm values 和資料於本地
 如需直接使用 helm repo 來做 helm release 可利用以下 script
 ```bash
 bdk eth cluster generate -i
 ```
+- `What is your network?` 選擇 `Besu` 或 `Quorum`
