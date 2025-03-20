@@ -1,22 +1,26 @@
-interface ABIInput {
-  name: string;
-  type: string;
-  inputs: { name: string; type: string;[key: string]: any; }[];
-  [key: string]: any;
-}
+// base type
+export type ABIPrimitiveType = "uint256" | "int256" | "bool" | "address" | "string" | `bytes${number | ""}`;
 
-interface ABIConstructor {
-  type: "constructor";
-  inputs: ABIInput[];
-  [key: string]: any;
-}
+export type ABIArrayType = `${ABIPrimitiveType}[]`;
+export type ABIResult = (ABIPrimitiveType | ABIArrayType | ABIResult)[];
 
-interface ABIAll {
-  [key: string]: any;
-}
+// supported array types
+export type ABIType = ABIPrimitiveType | `${ABIPrimitiveType}[]` | "tuple" | `tuple[]`;
 
+// Recursive type: if it is a tuple, it may have internal components
+export type ABIComponent = {
+    name: string;
+    type: ABIType;
+    components?: ABIComponent[]; 
+    [key: string]: any;
+};
 
-
-type ABIItem = | ABIConstructor;
-
-export type ContractABI = ABIItem[];
+// 合約 ABI 結構
+export type ContractABI = {
+    inputs: ABIComponent[];
+    stateMutability?: string;
+    type: "constructor" | "function" | "event";
+    name?: string;
+    outputs?: ABIComponent[];
+    [key: string]: any;
+}[];
