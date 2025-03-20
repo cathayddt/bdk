@@ -1,13 +1,15 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
 import Network from '../../service/network'
-import { getContractChoices, deployContract } from '../../service/contract'
+import { getFileChoices, deployContract, getParametersFromABI } from '../../service/contract'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
-import prompts, {PromptObject} from 'prompts'
+import prompts, { PromptObject } from 'prompts'
 import ora from 'ora'
 import { getNetworkTypeChoices } from '../../config/network.type'
-import { ContractABI } from '../../model/type/abi.type'
+import { FileFormat } from '../../model/type/file.type'
 import fs from 'fs';
+import { tarDateFormat } from '../../../util/utils'
+
 
 export const command = 'deploy'
 
@@ -23,27 +25,9 @@ export const builder = (yargs: Argv<OptType>) => {
         .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 
-async function getParametersFromABI(abi: ContractABI) {
-    // 找到 constructor 這一項
-    const constructorAbi = abi.find(item => item.type === "constructor");
-
-    // 如果找不到 constructor 或是沒有輸入參數，返回空物件
-    if (!constructorAbi || constructorAbi.inputs?.length === 0) return [];
-
-    // 取得所有輸入參數
-    const inputs = constructorAbi.inputs;
-
-    // 生成每個參數的問題，確保是符合 prompts 要求的格式
-  const questions: PromptObject[] = inputs.map(input => ({
-    type: input.type === "string" ? 'text' : 'number', // 判斷類型
-    name: input.name,  // 問題名稱使用輸入參數的名稱
-    message: `請輸入 ${input.name} (${input.type})` // 顯示提示語
-  }));
-
-    return questions;
-}
-
 export const handler = async (argv: Arguments<OptType>) => {
+    if (!argv.interactive) throw new ParamsError('Invalid params: Required parameter missing');
+
     const { networkType } = await prompts([
         {
             type: 'select',
@@ -51,40 +35,49 @@ export const handler = async (argv: Arguments<OptType>) => {
             message: 'What is your network?',
             choices: getNetworkTypeChoices(),
         },
-    ])
-    const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
-    const network = new Network(config, networkType)
-    // console.log('network', network)
+    ], { onCancel })
+    // console.log()
+    //deploy contract Folder
+    const { contractFolderPath } = await prompts({
+        type: 'text',
+        name: 'contractFolderPath',
+        message: 'What is the folder path of deploy contract?',
+    }, { onCancel });
 
     //select deploy contract
     const { contractFilePath } = await prompts({
         type: 'select',
         name: 'contractFilePath',
         message: 'What is the name of deploy contract?',
-        choices: await getContractChoices(),
-    });
-    console.log('response', contractFilePath)
+        choices: await getFileChoices(contractFolderPath, FileFormat.JSON),
+    }, { onCancel });
+
+    const contractJson = JSON.parse(fs.readFileSync(contractFilePath, "utf8"));
+    const abi = contractJson.abi;
+    const questions = await getParametersFromABI(abi);
+    let params: any = [];
+    if (questions.length > 0) {
+        params = await prompts(questions, { onCancel });
+        for (const key in params) {
+            if (typeof params[key] === 'string' && params[key].startsWith('[') && params[key].endsWith(']')) {
+                params[key] = JSON.parse(params[key]);
+            }
+        }
+    }
 
     const { privateKey } = await prompts({
         type: 'text',
         name: 'privateKey',
         message: 'What is the account private key of deploy contract?',
-    });
+    }, { onCancel });
 
-
-    const contractJson = JSON.parse(fs.readFileSync(contractFilePath, "utf8"));
-
-
-    const abi = contractJson.abi;
-    const questions = await getParametersFromABI(abi);
-    let params;
-    if (questions.length > 0) {
-        params = await prompts(questions);
-        // console.log('用戶輸入的參數:', params);
-    } 
+    const spinner = ora('Contract Deploy ...').start()
     // Quorum deploy contract
-
-    await deployContract(contractFilePath, privateKey, params)
+    const contractAddress = await deployContract(contractFilePath, privateKey, params)
     // TODO: Besu deploy contract
+    const network = new Network(config, networkType)
+    network['bdkFile'].createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contractAddress.toString())
+    
+    spinner.succeed(`Contract Deploy Successfully! Address at: ${contractAddress}`)
 }
 
