@@ -1,13 +1,11 @@
 import { Argv, Arguments } from 'yargs'
 import config from '../../config'
-import Network from '../../service/network'
-import { getFileChoices, deployContract, getParametersFromABI } from '../../service/contract'
-import { onCancel, ParamsError, ProcessError } from '../../../util/error'
-import prompts, { PromptObject } from 'prompts'
+import Contract, { getFileChoices } from '../../service/contract'
+import { onCancel, ParamsError } from '../../../util/error'
+import prompts from 'prompts'
 import ora from 'ora'
 import { getNetworkTypeChoices } from '../../config/network.type'
 import { FileFormat } from '../../model/type/file.type'
-import fs from 'fs';
 import { tarDateFormat } from '../../../util/utils'
 
 
@@ -36,7 +34,8 @@ export const handler = async (argv: Arguments<OptType>) => {
             choices: getNetworkTypeChoices(),
         },
     ], { onCancel })
-    // console.log()
+    const contract = new Contract(config, networkType)
+    
     //deploy contract Folder
     const { contractFolderPath } = await prompts({
         type: 'text',
@@ -52,9 +51,8 @@ export const handler = async (argv: Arguments<OptType>) => {
         choices: await getFileChoices(contractFolderPath, FileFormat.JSON),
     }, { onCancel });
 
-    const contractJson = JSON.parse(fs.readFileSync(contractFilePath, "utf8"));
-    const abi = contractJson.abi;
-    const questions = await getParametersFromABI(abi);
+    
+    const questions = await contract.getParametersFromABI(contractFilePath);
     let params: any = [];
     if (questions.length > 0) {
         params = await prompts(questions, { onCancel });
@@ -72,11 +70,10 @@ export const handler = async (argv: Arguments<OptType>) => {
     }, { onCancel });
 
     const spinner = ora('Contract Deploy ...').start()
-    // Quorum deploy contract
-    const contractAddress = await deployContract(contractFilePath, privateKey, params)
-    // TODO: Besu deploy contract
-    const network = new Network(config, networkType)
-    network['bdkFile'].createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contractAddress.toString())
+    
+    // Besu/Quorum deploy contract
+    const contractAddress = await contract.deploy(contractFilePath, privateKey, params)
+    contract['bdkFile'].createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contractAddress.toString())
     
     spinner.succeed(`Contract Deploy Successfully! Address at: ${contractAddress}`)
 }

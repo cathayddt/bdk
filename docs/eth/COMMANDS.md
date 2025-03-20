@@ -7,6 +7,7 @@
 - [Network](#network)
 - [Explorer](#explorer)
 - [Backup](#backup)
+- [Contract](#contract)
 
 ## Network
 
@@ -173,3 +174,34 @@ Description: 產生 Besu/Quorum Cluster 所需的相關設定檔案
 | --help                | boolean | Show help                      |          |         |
 | --version             | boolean | Show version number            |          |         |
 | -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+## Contract
+
+### `bdk eth contract compile`
+
+Description: 編譯智能合約
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+### `bdk eth contract deploy`
+
+Description: 部屬智能合約到 Besu/Quorum Network
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+
+### `bdk eth contract get`
+
+Description: 取得Besu/Quorum Network 智能合約地址
+
+|        Options        |  Type   |          Description           | Required | Default |
+| --------------------- | :-----: | ------------------------------ | :------: | ------- |
+| --help                | boolean | Show help                      |          |         |
+| --version             | boolean | Show version number            |          |         |

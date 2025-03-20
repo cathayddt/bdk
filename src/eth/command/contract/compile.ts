@@ -1,8 +1,9 @@
 import { Argv, Arguments } from 'yargs'
+import config from '../../config'
 import { onCancel, ParamsError, ProcessError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
-import { compileContract, getFileChoices, } from '../../service/contract'
+import Contract, { getFileChoices } from '../../service/contract'
 
 import { getNetworkTypeChoices } from '../../config/network.type'
 import { FileFormat } from '../../model/type/file.type'
@@ -61,9 +62,9 @@ export const handler = async (argv: Arguments<OptType>) => {
     });
 
     const spinner = ora('Contract comlile ...').start()
-    // Quorum deploy contract
-    await compileContract(contractFolderPath, contractFilePath, compileFunction)
-    // TODO: Besu deploy contract
+
+    const contract = new Contract(config, 'quorum')
+    await contract.compile(contractFolderPath, contractFilePath, compileFunction)
 
     spinner.succeed(`Contract compile Successfully! file at: ${contractFilePath}/build`)
 }

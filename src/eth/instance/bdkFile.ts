@@ -376,7 +376,6 @@ export default class BdkFile {
     Object.assign(data, newEntry);
   
     fs.writeFileSync(contractFilePath, JSON.stringify(data, null, 2), 'utf8');
-    console.log(`合約地址已新增: ${contractName} -> ${contractAddress}`);
   }
   
   public getContractAddress() {
