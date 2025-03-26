@@ -357,35 +357,37 @@ export default class BdkFile {
     return fs.readdirSync(`${this.helmPath}/values`)
   }
 
-  public createContractAddress(contractName: string, contractAddress: string) {
-    this.createContractFolder();
-  
-    const contractFilePath = `${this.contractPath}/contractAddress.json`;
-  
+  public createContractAddress (contractName: string, contractAddress: string) {
+    this.createContractFolder()
+
+    const contractFilePath = `${this.contractPath}/contractAddress.json`
+
     if (!fs.existsSync(contractFilePath)) {
-      fs.writeFileSync(contractFilePath, '{}', 'utf8');
+      fs.writeFileSync(contractFilePath, '{}', 'utf8')
     }
-  
-    let data: Record<string, string> = {};
-    const fileContent = fs.readFileSync(contractFilePath, 'utf8');
+
+    let data: Record<string, string> = {}
+    const fileContent = fs.readFileSync(contractFilePath, 'utf8')
     if (fileContent.trim()) {
-      data = JSON.parse(fileContent);
+      data = JSON.parse(fileContent)
     }
-  
-    const newEntry = { [`${contractName}`]: contractAddress };
-    Object.assign(data, newEntry);
-  
-    fs.writeFileSync(contractFilePath, JSON.stringify(data, null, 2), 'utf8');
+
+    const newEntry = { [`${contractName}`]: contractAddress }
+    Object.assign(data, newEntry)
+
+    fs.writeFileSync(contractFilePath, JSON.stringify(data, null, 2), 'utf8')
   }
-  
-  public getContractAddress() {
-    this.checkPathExist(`${this.contractPath}/contractAddress.json`);
-    let data: Record<string, string> = {};
-    const fileContent = fs.readFileSync(`${this.contractPath}/contractAddress.json`, 'utf8');
-    if (fileContent.trim()) {
-      data = JSON.parse(fileContent);
+
+  public getContractAddress () {
+    if (!fs.existsSync(`${this.contractPath}/contractAddress.json`)) {
+      throw new PathError(`Network not started`)
     }
-    return data;
+    let data: Record<string, string> = {}
+    const fileContent = fs.readFileSync(`${this.contractPath}/contractAddress.json`, 'utf8')
+    if (fileContent.trim()) {
+      data = JSON.parse(fileContent)
+    }
+    return data
   }
 
   public checkPathExist (path: string) {

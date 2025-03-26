@@ -13,6 +13,7 @@ export class TimeLimitError extends BdkError {}
 export class PathError extends BdkError {}
 export class SolcError extends BdkError {}
 export class NotFoundWarn extends BdkWarn {}
+export class FileWriteError extends BdkError {}
 
 export class FabricContainerError extends BdkError {
   public stdout: string
@@ -30,7 +31,6 @@ export class EthContainerError extends BdkError {
   }
 }
 
-
 export const onCancel = (prompt: prompts.PromptObject<string>, answers: any) => {
   config.isDevMode && console.log(prompt)
   config.isDevMode && console.log(answers)
@@ -45,7 +45,7 @@ export const errorHandler = (err: Error) => {
     logger.error(err.message)
   } else if (err instanceof BdkError) {
     logger.error(err.message)
-  } else if(err instanceof BdkWarn) {
+  } else if (err instanceof BdkWarn) {
     logger.warn(err.message)
   } else {
     logger.error('Unexpected error.\n')
