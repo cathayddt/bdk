@@ -3,7 +3,7 @@ import path from 'path'
 import { ethers, isAddress } from 'ethers'
 import { AbstractService } from './Service.abstract'
 import { FileFormat } from '../model/type/file.type'
-import { NotFoundWarn, PathError, SolcError, FileWriteError } from '../../util/error'
+import { NotFoundWarn, PathError, SolcError, FileWriteError, DeployError } from '../../util/error'
 import { PromptObject } from 'prompts'
 import { logger } from '../../util'
 import { ContractABI, ABIComponent, ABIPrimitiveType, ABIArrayType, ABIResult } from '../model/type/abi.type'
@@ -62,14 +62,14 @@ export default class Contract extends AbstractService {
    * @param contractFilePath
    * @param compileFunction
    */
-  public async compile (contractFolderPath: string, contractFilePath: string, compileFunction: string) {
+  public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string) {
     switch (compileFunction) {
       case 'bdkSolc':
-        await this.bdkSolcCompile(contractFolderPath, contractFilePath)
+        this.bdkSolcCompile(contractFolderPath, contractFilePath)
         break
       case 'localSolc':
         this.checkSolcAvailability()
-        await this.localSolcCompile(contractFolderPath, contractFilePath)
+        this.localSolcCompile(contractFolderPath, contractFilePath)
         break
       default:
         logger.debug('Invalid selection')
@@ -86,40 +86,43 @@ export default class Contract extends AbstractService {
    * @returns
    */
   public async deploy (contractFilePath: string, privateKey: string, params: any, value: string) {
-    const contractJson = JSON.parse(fs.readFileSync(contractFilePath, 'utf8'))
-    const provider = new ethers.JsonRpcProvider('http://localhost:8545')
-    const wallet = new ethers.Wallet(privateKey, provider)
-    const abi = contractJson.abi
-    const bytecode = contractJson.bytecode
+    try {
+      let contractJson
+      try {
+        contractJson = JSON.parse(fs.readFileSync(contractFilePath, 'utf8'))
+      } catch (error) {
+        throw new DeployError(`Invalid JSON format in contract file: ${contractFilePath}`)
+      }
+      if (!contractJson || typeof contractJson !== 'object' || !contractJson.abi || !contractJson.bytecode) {
+        throw new DeployError(`Invalid contract JSON structure: ${contractFilePath}`)
+      }
+      const provider = new ethers.JsonRpcProvider('http://localhost:8545')
+      const wallet = new ethers.Wallet(privateKey, provider)
+      const abi = contractJson.abi
+      const bytecode = contractJson.bytecode
 
-    const factory = new ethers.ContractFactory(
-      abi,
-      bytecode,
-      wallet,
-    )
+      const factory = new ethers.ContractFactory(
+        abi,
+        bytecode,
+        wallet,
+      )
 
-    // build deploy options
-    const deployOptions = value !== '0' ? { value: ethers.parseEther(value) } : {}
+      // build deploy options
+      const deployOptions = value !== '0' ? { value: ethers.parseEther(value) } : {}
 
-    // deploy contract with params and value
-    const contract = params
-      ? await factory.deploy(...Object.values(params), deployOptions)
-      : await factory.deploy(deployOptions)
+      // deploy contract with params and value
+      const contract = params
+        ? await factory.deploy(...Object.values(params), deployOptions)
+        : await factory.deploy(deployOptions)
 
-    await contract.waitForDeployment()
-    logger.debug('合约已部署上链')
-    this.bdkFile.createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contract.target.toString())
+      await contract.waitForDeployment()
+      this.bdkFile.createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contract.target.toString())
 
-    // TODO: When Remove blockchain remove contract address from file
-    return contract.target
+      return contract.target
+    } catch (error) {
+      throw new DeployError(`❌ An error occurred during deployment: ${error}`)
+    }
   }
-
-  //   /**
-  //    * @description get contract address
-  //    */
-  //   public async get (contractName: string) {
-
-  //   }
 
   public getContractAddress () {
     return this.bdkFile.getContractAddress()
@@ -213,15 +216,33 @@ export default class Contract extends AbstractService {
   }
 
   private localSolcCompile (contractFolderPath: string, filename: string) {
-    // Execute the local solc command
     const contractPath = path.resolve(contractFolderPath, filename)
-    const output = execSync(`solc --base-path . --include-path node_modules/ --optimize --combined-json abi,bin ${contractPath}`).toString()
-
-    const parsedOutput = JSON.parse(output)
+    let output: string
+    try {
+      output = execSync(
+        `solc --base-path . --include-path node_modules/ --optimize --combined-json abi,bin ${contractPath}`,
+        { encoding: 'utf-8' }, // 確保輸出為字串
+      )
+    } catch (error: any) {
+      throw new SolcError(`SolcError❌ An error occurred during compilation: ${error.message}`)
+    }
 
     const buildDir = path.resolve(contractFolderPath, 'build')
     if (!fs.existsSync(buildDir)) {
       fs.mkdirSync(buildDir, { recursive: true })
+    }
+
+    let parsedOutput: any
+    try {
+      parsedOutput = JSON.parse(output)
+
+      if (!parsedOutput.contracts || Object.keys(parsedOutput.contracts).length === 0) {
+        console.error('Compilation failed: No contracts found in output.')
+        throw new SolcError('SolcError❌ Compilation failed: No contracts found in output.')
+      }
+    } catch (parseError) {
+      console.error('Error parsing output:', parseError)
+      throw new SolcError('SolcError❌ Failed to parse the solc output')
     }
 
     // get contracts

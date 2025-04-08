@@ -380,7 +380,7 @@ export default class BdkFile {
 
   public getContractAddress () {
     if (!fs.existsSync(`${this.contractPath}/contractAddress.json`)) {
-      throw new PathError(`Network not started`)
+      throw new PathError('Network not started')
     }
     let data: Record<string, string> = {}
     const fileContent = fs.readFileSync(`${this.contractPath}/contractAddress.json`, 'utf8')

@@ -14,6 +14,8 @@ export class PathError extends BdkError {}
 export class SolcError extends BdkError {}
 export class NotFoundWarn extends BdkWarn {}
 export class FileWriteError extends BdkError {}
+export class DeployError extends BdkError {}
+export class DataError extends BdkError {}
 
 export class FabricContainerError extends BdkError {
   public stdout: string
