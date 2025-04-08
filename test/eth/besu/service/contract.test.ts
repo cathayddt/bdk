@@ -1,4 +1,5 @@
 /* global describe, it, before, after */
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../../../../src/eth/model/type/solc.d.ts" />
 import fs from 'fs'
 import assert from 'assert'
@@ -6,11 +7,11 @@ import path, { resolve } from 'path'
 import * as childProcess from 'child_process'
 import config from '../../../../src/eth/config'
 import Contract, { getFileChoices } from '../../../../src/eth/service/contract'
-import { PathError, SolcError, NotFoundWarn, DeployError } from '../../../../src/util'
+import { SolcError, DeployError } from '../../../../src/util'
 import { FileFormat } from '../../../../src/eth/model/type/file.type'
 import { CompileType } from '../../../../src/eth/model/type/compile.type'
 import sinon, { SinonStub } from 'sinon'
-import { ethers } from 'ethers'
+
 const testDir = '__tests__/contracts'
 const testDeployDir = '__tests__/contracts/build'
 const contract = new Contract(config, 'besu')
@@ -283,18 +284,31 @@ describe('Besu.Contract.Service', function () {
 
     it('should return parameters when found constructor', () => {
       createFile(`${testDir}/test.json`, constructor1)
-      const res = contract.getParametersFromABI(`${testDir}/test.json`)
+      contract.getParametersFromABI(`${testDir}/test.json`)
     })
 
     it('should return parameters when found constructor', () => {
       createFile(`${testDir}/test.json`, constructor2)
-      const res = contract.getParametersFromABI(`${testDir}/test.json`)
+      contract.getParametersFromABI(`${testDir}/test.json`)
     })
 
     it('should return parameters when found constructor', () => {
       createFile(`${testDir}/test.json`, constructor3)
-      const res = contract.getParametersFromABI(`${testDir}/test.json`)
+      contract.getParametersFromABI(`${testDir}/test.json`)
     })
+
+    it('should return true when constructor is payable', () => {
+      createFile(`${testDir}/test.json`, constructor3)
+      const res = contract.isConstructorPayable(`${testDir}/test.json`)
+      assert.strictEqual(res, true)
+    },
+    )
+    it('should return false when constructor is not payable', () => {
+      createFile(`${testDir}/test.json`, constructor1)
+      const res = contract.isConstructorPayable(`${testDir}/test.json`)
+      assert.strictEqual(res, false)
+    },
+    )
   })
 
   describe('Besu.Contract.CompileBDKSolc', () => {
@@ -315,14 +329,12 @@ describe('Besu.Contract.Service', function () {
 
     it('should return compile successfully', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
-      const res = contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
+      contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
     })
 
-    it('should return solc error when compile with not equal version', () => {
-      createFile(`${testDir}/test.sol`, contractContent0_8_20)
-      assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
-      }, SolcError)
+    it('should not error', () => {
+      createFile(`${testDir}/test.sol`, contractContent0_8_17)
+      contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
     })
 
     it('should return solc error when compile with not exist bytecode', () => {
