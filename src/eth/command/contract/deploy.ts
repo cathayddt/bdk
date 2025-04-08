@@ -45,11 +45,11 @@ export const handler = async (argv: Arguments<OptType>) => {
   const { contractFilePath } = await prompts({
     type: 'select',
     name: 'contractFilePath',
-    message: 'What is the name of deploy contract?',
+    message: 'Which contract file do you want to deploy?',
     choices: getFileChoices(contractFolderPath, FileFormat.JSON),
   }, { onCancel })
 
-  const questions = await contract.getParametersFromABI(contractFilePath)
+  const questions = contract.getParametersFromABI(contractFilePath)
   let params: any = []
   if (questions.length > 0) {
     params = await prompts(questions, { onCancel })
@@ -65,7 +65,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     const { value } = await prompts({
       type: 'text',
       name: 'value',
-      message: 'What is the value of deploy contract?',
+      message: 'What is the value (in wei) for contract deployment?',
       validate: (value) => {
         if (!/^\d+$/.test(value)) {
           return 'Please enter a valid integer.'
@@ -77,7 +77,7 @@ export const handler = async (argv: Arguments<OptType>) => {
   }
 
   const { privateKey } = await prompts({
-    type: 'text',
+    type: 'password',
     name: 'privateKey',
     message: 'What is the account private key of deploy contract?',
   }, { onCancel })

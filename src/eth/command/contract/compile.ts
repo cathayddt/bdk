@@ -18,7 +18,11 @@ interface OptType {
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
     .example('bdk eth contract compile --interactive', 'Cathay BDK 互動式問答')
-    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
+    .option('interactive', {
+      type: 'boolean',
+      description: '是否使用 Cathay BDK 互動式問答',
+      alias: 'i',
+    })
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
@@ -27,44 +31,43 @@ export const handler = async (argv: Arguments<OptType>) => {
   const { contractFolderPath } = await prompts({
     type: 'text',
     name: 'contractFolderPath',
-    message: 'What is the folder path of compile contract?',
+    message: 'What is the folder path of the contract you want to compile?',
   }, { onCancel })
 
-  // select compile contract
+  const choices = await getFileChoices(contractFolderPath, FileFormat.SOL)
+  if (choices.length === 0) throw new ParamsError('No Solidity (.sol) files found in the specified folder.')
+
+  // 選擇要編譯的合約檔案
   const { contractFilePath } = await prompts({
     type: 'select',
     name: 'contractFilePath',
-    message: 'What is the name of deploy contract?',
-    choices: await getFileChoices(contractFolderPath, FileFormat.SOL),
+    message: 'Which contract file do you want to compile?',
+    choices,
   }, { onCancel })
 
+  // 選擇編譯方式
   const { compileFunction } = await prompts({
     type: 'select',
     name: 'compileFunction',
-    message: 'What is the compile function?',
+    message: 'Which compiler do you want to use?',
     choices: [
       {
-        title: 'bdk solc (version 0.8.17)',
+        title: 'BDK solc (version 0.8.17)',
         value: CompileType.BDK_SOLC,
-        description: 'Uses bdk\'s pre-installed solc version 0.8.17',
+        description: 'Uses BDK\'s pre-installed solc version 0.8.17',
       },
       {
         title: 'Local solc',
         value: CompileType.LOCAL_SOLC,
         description: 'Uses the solc version installed on your machine',
       },
-      // {
-      //   title: 'compileStandard',
-      //   value: 'compileStandard',
-      //   description: 'Uses the standard compile method (may require a specific version)',
-      // },
     ],
-  })
+  }, { onCancel })
 
-  const spinner = ora('Contract comlile ...').start()
+  const spinner = ora('Contract compiling...').start()
 
   const contract = new Contract(config, 'quorum')
   await contract.compile(contractFolderPath, contractFilePath, compileFunction)
 
-  spinner.succeed(`Contract compile Successfully! file at:${contractFolderPath}/build`)
+  spinner.succeed(`Contract compiled successfully! Output at: ${contractFolderPath}/build`)
 }

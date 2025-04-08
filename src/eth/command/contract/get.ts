@@ -27,7 +27,7 @@ export const handler = async () => {
   const { contractName } = await prompts({
     type: 'select',
     name: 'contractName',
-    message: 'What is the name of deploy contract?',
+    message: 'Which contract do you want to check the address for?',
     choices: choices,
   }, { onCancel })
   const spinner = ora('Get Contract Address ...').start()

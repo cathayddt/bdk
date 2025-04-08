@@ -12,7 +12,7 @@ const defaultLoggerConfig = {
     format.printf(
       info => {
         if (info[LEVEL as any] === 'info') {
-          return info.message.trim()
+          return (info.message as string).trim()
         } else {
           return `[bdk] ${info.timestamp} - ${info.level}: ${info.message}`
         }

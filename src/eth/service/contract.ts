@@ -10,7 +10,6 @@ import { ContractABI, ABIComponent, ABIPrimitiveType, ABIArrayType, ABIResult } 
 import solc from 'solc'
 import { execSync } from 'child_process'
 import { tarDateFormat } from '../../util/utils'
-
 export function getFileChoices (contractFolderPath: string, fileFormat: FileFormat) {
   try {
     if (!fs.existsSync(contractFolderPath)) {
@@ -116,7 +115,7 @@ export default class Contract extends AbstractService {
         : await factory.deploy(deployOptions)
 
       await contract.waitForDeployment()
-      this.bdkFile.createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contract.target.toString())
+      this.bdkFile.createContractAddress(`${path.parse(contractFilePath).name}_${tarDateFormat(new Date())}`, contract.target.toString())
 
       return contract.target
     } catch (error) {
