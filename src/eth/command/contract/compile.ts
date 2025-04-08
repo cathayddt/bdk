@@ -6,6 +6,7 @@ import ora from 'ora'
 import Contract, { getFileChoices } from '../../service/contract'
 
 import { FileFormat } from '../../model/type/file.type'
+import { CompileType } from '../../model/type/compile.type'
 
 export const command = 'compile'
 export const desc = '編譯 Solidity 合約'
@@ -44,12 +45,12 @@ export const handler = async (argv: Arguments<OptType>) => {
     choices: [
       {
         title: 'bdk solc (version 0.8.17)',
-        value: 'bdkSolc',
+        value: CompileType.BDK_SOLC,
         description: 'Uses bdk\'s pre-installed solc version 0.8.17',
       },
       {
         title: 'Local solc',
-        value: 'localSolc',
+        value: CompileType.LOCAL_SOLC,
         description: 'Uses the solc version installed on your machine',
       },
       // {
