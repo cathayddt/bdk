@@ -204,7 +204,7 @@ describe('Peer service:', function () {
         computeUpdateConfigTx: addOrgToChannelStepsComputeUpdateConfigTxStub,
       }))
       await peerService.addOrgToChannel({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orgName: orgPeerCreateJson[0].name,
       })
       assert.strictEqual(addOrgToChannelStepsFetchChannelConfigStub.called, true)
@@ -217,11 +217,11 @@ describe('Peer service:', function () {
     let channelName: string
     let channelPath: string
     before(async () => {
-      channelName = minimumNetwork.channelName
+      channelName = minimumNetwork.channel1Name
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.createChannelAndJoin(1)
     })
 
     after(async () => {
@@ -267,7 +267,7 @@ describe('Peer service:', function () {
       }))
 
       await peerService.addOrgToSystemChannel({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orgName: orgPeerCreateJson[0].name,
         orderer: minimumNetwork.getOrderer().fullUrl,
       })

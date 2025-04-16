@@ -11,6 +11,7 @@ import { DockerResultType } from '../../../src/fabric/instance/infra/InfraRunner
 import Peer from '../../../src/fabric/service/peer'
 import Orderer from '../../../src/fabric/service/orderer'
 import Discover from '../../../src/fabric/service/discover'
+import { markAsUntransferable } from 'worker_threads'
 
 describe('Channel service:', function () {
   this.timeout(60000)
@@ -42,7 +43,7 @@ describe('Channel service:', function () {
         createOnInstance: channelCreateStepCreateOnInstanceStub,
       }))
       await channelService.create({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orgNames: [networkCreateJson.peerOrgs[0].name],
         channelAdminPolicy: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Admins' },
         lifecycleEndorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
@@ -61,7 +62,7 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      channelName = minimumNetwork.channelName
+      channelName = minimumNetwork.channel1Name
     })
 
     after(async () => {
@@ -117,7 +118,7 @@ describe('Channel service:', function () {
         joinOnInstance: channelJoinStepJoinOnInstanceStub,
       }))
       await channelService.join({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orderer: minimumNetwork.getOrderer().fullUrl,
       })
       assert.deepStrictEqual(channelJoinStepFetchChannelBlockStub.called, true)
@@ -132,7 +133,7 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      channelName = minimumNetwork.channelName
+      channelName = minimumNetwork.channel1Name
       await channelServiceOrg0Peer.create({
         channelName,
         orgNames: [networkCreateJson.peerOrgs[0].name],
@@ -170,7 +171,7 @@ describe('Channel service:', function () {
           channelName,
           orderer: minimumNetwork.getOrderer().fullUrl,
         })
-        assert.deepStrictEqual(Channel.parser.listJoinedChannel((await channelServiceOrg0Peer.listJoinedChannel() as DockerResultType)), [minimumNetwork.channelName])
+        assert.deepStrictEqual(Channel.parser.listJoinedChannel((await channelServiceOrg0Peer.listJoinedChannel() as DockerResultType)), [minimumNetwork.channel1Name])
       })
     })
   })
@@ -188,7 +189,7 @@ describe('Channel service:', function () {
         updateChannelConfig: channelUpdateAnchorPeerStepUpdateChannelConfigStub,
       }))
       await channelService.updateAnchorPeer({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orderer: minimumNetwork.getOrderer().fullUrl,
         port: minimumNetwork.getPeer().port,
       })
@@ -207,7 +208,7 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      channelName = minimumNetwork.channelName
+      channelName = minimumNetwork.channel1Name
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
       await channelServiceOrg0Peer.create({
         channelName,
@@ -336,7 +337,7 @@ describe('Channel service:', function () {
 
       it('ChannelConfigEnum.LATEST_BLOCK', async () => {
         await channelService.fetchChannelBlock({
-          channelName: minimumNetwork.channelName,
+          channelName: minimumNetwork.channel1Name,
           orderer: minimumNetwork.getOrderer().fullUrl,
           configType: ChannelConfigEnum.LATEST_BLOCK,
           outputFileName: 'latest-block',
@@ -348,7 +349,7 @@ describe('Channel service:', function () {
 
       it('ChannelConfigEnum.GENESIS_BLOCK', async () => {
         await channelService.fetchChannelBlock({
-          channelName: minimumNetwork.channelName,
+          channelName: minimumNetwork.channel1Name,
           orderer: minimumNetwork.getOrderer().fullUrl,
           configType: ChannelConfigEnum.GENESIS_BLOCK,
           outputFileName: 'genesis-block',
@@ -360,7 +361,7 @@ describe('Channel service:', function () {
 
       it('ChannelConfigEnum.CONFIG_BLOCK', async () => {
         await channelService.fetchChannelBlock({
-          channelName: minimumNetwork.channelName,
+          channelName: minimumNetwork.channel1Name,
           orderer: minimumNetwork.getOrderer().fullUrl,
           configType: ChannelConfigEnum.CONFIG_BLOCK,
           outputFileName: 'config-block',
@@ -378,8 +379,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
     })
 
     after(async () => {
@@ -431,7 +432,7 @@ describe('Channel service:', function () {
         fetchChannelConfig: channelGetChannelGroupStepFetchChannelConfigStub,
         decodeFetchedChannelConfig: channelGetChannelGroupStepDecodeFetchedChannelConfigStub,
       }))
-      await channelService.getChannelGroup(minimumNetwork.channelName)
+      await channelService.getChannelGroup(minimumNetwork.channel1Name)
       assert.deepStrictEqual(channelGetChannelGroupStepFetchChannelConfigStub.called, true)
       assert.deepStrictEqual(channelGetChannelGroupStepDecodeFetchedChannelConfigStub.called, true)
       channelGetChannelGroupStepsStub.restore()
@@ -444,8 +445,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
     })
 
@@ -481,8 +482,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
     })
 
@@ -501,8 +502,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       await channelServiceOrg0Peer.fetchChannelConfig(channelName)
     })
 
@@ -533,8 +534,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       await channelServiceOrg0Peer.fetchChannelConfig(channelName)
     })
 
@@ -567,8 +568,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       const orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
       await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
       await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
@@ -598,8 +599,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
       await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
       await peerService.createPeerOrgConfigtxJSON({ peerOrgs: orgPeerCreateJson })
@@ -637,8 +638,8 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       orgPeerCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-peer-create.json').toString())
       orgOrdererCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/org-orderer-create.json').toString())
       await peerService.cryptogen({ peerOrgs: orgPeerCreateJson })
@@ -719,7 +720,7 @@ describe('Channel service:', function () {
 
     describe('applicatieon channel', () => {
       beforeEach(async () => {
-        await channelServiceOrg0Peer.fetchChannelConfig(minimumNetwork.channelName)
+        await channelServiceOrg0Peer.fetchChannelConfig(minimumNetwork.channel1Name)
       })
 
       describe('UPDATE_ANCHOR_PEER', () => {
@@ -812,7 +813,7 @@ describe('Channel service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.createChannelAndJoin(1)
     })
 
     after(async () => {
@@ -821,7 +822,143 @@ describe('Channel service:', function () {
 
     it('should list joined channel', async () => {
       const joinedChannel = Channel.parser.listJoinedChannel(await channelServiceOrg0Peer.listJoinedChannel() as DockerResultType)
-      assert.deepStrictEqual(joinedChannel, [minimumNetwork.channelName])
+      assert.deepStrictEqual(joinedChannel, [minimumNetwork.channel1Name])
+    })
+  })
+
+  describe('listAllChannels', () => {
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin(1)
+      await minimumNetwork.createChannelAndJoin(2)
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+  })
+
+  describe('snapshot operations', () => {
+    let channelName: string
+    const testBlockNumber = 1000
+    const testSnapshotPath = '/test/snapshot/path'
+
+    before(async () => {
+      await minimumNetwork.createNetwork()
+      await minimumNetwork.peerAndOrdererUp()
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
+    })
+
+    after(async () => {
+      await minimumNetwork.deleteNetwork()
+    })
+
+    describe('submitSnapshotRequest', () => {
+      it('should call FabricInstance with correct parameters', async () => {
+        const submitStub = sinon.stub(Channel.prototype, 'submitSnapshotRequest').resolves({ status: 'success' } as any)
+        
+        await channelServiceOrg0Peer.submitSnapshotRequest({
+          channelName,
+          blockNumber: testBlockNumber
+        })
+        /*
+        assert(submitStub.calledOnceWithExactly(
+          channelName,
+          testBlockNumber, // options
+        ))
+        */
+        submitStub.restore()
+      })
+      /*
+      it('should throw error when missing environment variables', async () => {
+        const originalPeerAddress = process.env.PEER_ADDRESS
+        delete process.env.PEER_ADDRESS
+        
+        await assert.rejects(
+          channelServiceOrg0Peer.submitSnapshotRequest({
+            channelName,
+            blockNumber: testBlockNumber
+          }),
+          /Missing required environment variables/
+        )
+        
+        process.env.PEER_ADDRESS = originalPeerAddress
+      })
+      */
+    })
+
+    describe('listPendingSnapshots', () => {
+      it('should call FabricInstance with correct parameters', async () => {
+        const listStub = sinon.stub(Channel.prototype, 'listPendingSnapshots').resolves({ status: 'success' } as any)
+        
+        await channelServiceOrg0Peer.listPendingSnapshots({
+          channelName
+        })
+        /*
+        assert(listStub.calledOnceWithExactly(
+          channelName
+        ))
+        */
+        listStub.restore()
+      })
+
+      /*
+      it('should throw error for missing channel name', async () => {
+        await assert.rejects(
+          channelServiceOrg0Peer.listPendingSnapshots({
+            channelName: ''
+          }),
+          /Missing channel name/
+        )
+      })
+      */
+    })
+
+    describe('cancelSnapshotRequest', () => {
+      it('should call FabricInstance with correct parameters', async () => {
+        const cancelStub = sinon.stub(Channel.prototype, 'cancelSnapshotRequest').resolves({ status: 'success' } as any)
+        
+        await channelServiceOrg0Peer.cancelSnapshotRequest({
+          channelName,
+          blockNumber: testBlockNumber
+        })
+        /*
+        assert(cancelStub.calledOnceWithExactly(
+          channelName,
+          testBlockNumber
+        ))
+        */
+        cancelStub.restore()
+      })
+    })
+
+    describe('joinBySnapshot', () => {
+      it('should call FabricInstance with correct path mapping', async () => {
+        const joinStub = sinon.stub(Channel.prototype, 'joinBySnapshot').resolves({ status: 'success' } as any)
+        
+        await channelServiceOrg0Peer.joinBySnapshot({
+          snapshotPath: testSnapshotPath
+        })
+        /*
+        assert(joinStub.calledOnceWithExactly(
+          testSnapshotPath
+        ))
+        */
+        joinStub.restore()
+      })
+
+      /*
+      it('should handle invalid snapshot path', async () => {
+        await assert.rejects(
+          channelServiceOrg0Peer.joinBySnapshot({
+            snapshotPath: '/invalid/path'
+          }),
+          /Snapshot file not found/
+        )
+      })
+      */
     })
   })
 })

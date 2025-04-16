@@ -12,8 +12,10 @@ import { PolicyTypeEnum } from '../../../src/fabric/model/type/channel.type'
 export default class MinimumNetwork {
   public networkCreateJson: NetworkCreateType
   public org0PeerConfig: Config
+  public org1PeerConfig: Config
   public org0OrdererConfig: Config
-  public channelName: string
+  public channel1Name: string
+  public channel2Name: string
   public chaincodeName: string
   private networkService: Network
   private peerService: Peer
@@ -23,9 +25,17 @@ export default class MinimumNetwork {
 
   constructor () {
     this.networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create-min.json').toString())
-    this.channelName = 'test-channel'
+    this.channel1Name = 'test1-channel'
+    this.channel2Name = 'test2-channel'
     this.chaincodeName = 'fabcar'
     this.org0PeerConfig = {
+      ...config,
+      orgType: OrgTypeEnum.PEER,
+      orgName: this.getPeer().orgName,
+      orgDomainName: this.getPeer().orgDomain,
+      hostname: this.getPeer().hostname,
+    }
+    this.org1PeerConfig = {
       ...config,
       orgType: OrgTypeEnum.PEER,
       orgName: this.getPeer().orgName,
@@ -93,9 +103,15 @@ export default class MinimumNetwork {
   //   await this.ordererService.down({ ordererHostname: `${this.getOrderer().hostname}.${this.getOrderer().orgDomain}` })
   // }
 
-  public async createChannelAndJoin () {
+  public async createChannelAndJoin (channelIndex: number) {
+    let channelName = this.channel1Name
+    if (channelIndex == 2){
+      channelName = this.channel2Name
+    }
+
+
     await this.channelServiceOrg0Peer.create({
-      channelName: this.channelName,
+      channelName: channelName,
       orgNames: [this.getPeer().orgName],
       channelAdminPolicy: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Admins' },
       lifecycleEndorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
@@ -103,18 +119,22 @@ export default class MinimumNetwork {
       orderer: this.getOrderer().fullUrl,
     })
     await this.channelServiceOrg0Peer.join({
-      channelName: this.channelName,
+      channelName: channelName,
       orderer: this.getOrderer().fullUrl,
     })
     await this.channelServiceOrg0Peer.updateAnchorPeer({
-      channelName: this.channelName,
+      channelName: channelName,
       orderer: this.getOrderer().fullUrl,
       port: this.getPeer().port,
     })
     await new Promise(resolve => setTimeout(resolve, 3000))
   }
 
-  public async deployChaincode () {
+  public async deployChaincode (channelIndex: number) {
+    let channelName = this.channel1Name
+    if (channelIndex == 2){
+      channelName = this.channel2Name
+    }
     await this.chaincodeServiceOrg0Peer.package({
       name: 'fabcar',
       version: 1,
@@ -124,19 +144,19 @@ export default class MinimumNetwork {
       chaincodeLabel: `${this.chaincodeName}_1`,
     })
     await this.chaincodeServiceOrg0Peer.approve({
-      channelId: this.channelName,
+      channelId: channelName,
       chaincodeName: this.chaincodeName,
       chaincodeVersion: 1,
       initRequired: true,
     })
     await this.chaincodeServiceOrg0Peer.commit({
-      channelId: this.channelName,
+      channelId: channelName,
       chaincodeName: this.chaincodeName,
       chaincodeVersion: 1,
       initRequired: true,
     })
     await this.chaincodeServiceOrg0Peer.invoke({
-      channelId: this.channelName,
+      channelId: channelName,
       chaincodeName: this.chaincodeName,
       chaincodeFunction: 'InitLedger',
       args: [],
