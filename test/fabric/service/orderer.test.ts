@@ -175,7 +175,7 @@ describe('Orderer service:', function () {
       }))
 
       await ordererServiceOrg0Orderer.addOrgToChannel({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orgName: orgOrdererCreateJson[0].name,
         orderer: minimumNetwork.getOrderer().fullUrl,
       })
@@ -193,8 +193,8 @@ describe('Orderer service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
     })
     after(async () => {
@@ -246,7 +246,7 @@ describe('Orderer service:', function () {
         computeUpdateConfigTx: addConsenterToChannelStepsComputeUpdateConfigTxStub,
       }))
       await ordererServiceOrg0Orderer.addConsenterToChannel({
-        channelName: minimumNetwork.channelName,
+        channelName: minimumNetwork.channel1Name,
         orgName: orgOrdererCreateJson[0].name,
         orderer: minimumNetwork.getOrderer().fullUrl,
         hostname: orgOrdererCreateJson[0].hostname[0],
@@ -266,8 +266,8 @@ describe('Orderer service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      channelName = minimumNetwork.channelName
+      await minimumNetwork.createChannelAndJoin(1)
+      channelName = minimumNetwork.channel1Name
       channelPath = `${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/${channelName}`
     })
 

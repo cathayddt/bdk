@@ -5,34 +5,44 @@ import config from '../../config'
 import { onCancel } from '../../../util'
 import { getChannelList } from '../../model/prompts/util'
 import ora from 'ora'
+import { stdout } from 'node:process'
 
-export const command = 'snapshot'
+export const command = 'snapshot';
 
 export const des = '對channel進行快照'
 
-export const builder = {}
+const channelList = getChannelList(config)
+const operations = ['submit','listPending', 'join', 'cancel']
 
 interface OptType {
-    interactive: boolean
-    block: number
-    channelName: string
-    snapshotPath: string
-    operation: 'submit' | 'listPending' | 'join' | 'cancel'
+  interactive: boolean
+  block: number
+  channelName: string
+  snapshotPath: string
+  operation: string
 }
 
-const operationChoices = [
-    { title: '提交快照', value: 'submit' },
-    { title: '列出待處理快照', value: 'listPending' },
-    { title: '用快照加入channel', value: 'join' },
-    { title: '取消快照', value: 'cancel'}
-]
+export const builder = (yargs: Argv<OptType>) => {
+  return yargs
+    .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
+    .option('block', { type: 'number', description: '欲提交或取消的快照區塊號碼', alias: 'b' })
+    .option('channelName', { type: 'string', choices: channelList, description: '欲快照的 Channel 名稱', alias: 'c' })
+    .option('snapshotPath', { type: 'string', description: '欲使用的快照路徑', alias: 'p' })
+    .option('operation', { type: 'string', choices: operations, description: '欲加入 Channel 的名稱', alias: 'o' })
 
-const channelList = getChannelList(config)
+}
+
+
+const operationChoices = [
+    { title: 'submitRequest', value: 'submit' },
+    { title: 'listPending', value: 'listPending' },
+    { title: 'joinBySnapshot', value: 'join' },
+    { title: 'cancelRequest', value: 'cancel'}
+]
 
 export const handler = async (argv: Arguments<OptType>) => {
     const channel = new Channel(config)
-    const spinner = ora('FabricChannelSnapshot...').start()
-  
+    //const spinner = ora('FabricChannelSnapshot...').start()
     try {
       const { operation, interactive, channelName, block, snapshotPath } = argv
 
@@ -43,7 +53,6 @@ export const handler = async (argv: Arguments<OptType>) => {
       if (!operation) {
         throw new Error('Operation type is needed!')
       }
-  
       switch(operation) {
         case 'submit':
           if (!channelName || !block) {
@@ -76,10 +85,11 @@ export const handler = async (argv: Arguments<OptType>) => {
         default:
           throw new Error('Unknown Operation Type!')
       }
-  
-      spinner.succeed(`Fabric Channel Snapshot ${operation} successfully!`)
+      
+      //spinner.succeed(`Fabric Channel Snapshot ${operation} successfully!`)
     } catch (error) {
-      spinner.fail(`Operation failed: ${error instanceof Error ? error.message : error}`)
+      console.log(error)
+      //spinner.fail(`Operation failed: ${error instanceof Error ? error.message : error}`)
       process.exit(1)
     }
   }
@@ -103,20 +113,21 @@ export const handler = async (argv: Arguments<OptType>) => {
           {
             type: 'number',
             name: 'blockNumber',
-            message: '輸入區塊號碼',
-            validate: value => value >= 0 || '不能為負數(0代表立刻快照)'
+            message: '輸入區塊號碼'
           }
         ], { onCancel })
-        await channel.submitSnapshotRequest(submitData)
+        const submitResult = await channel.submitSnapshotRequest(submitData)
+        console.log('stdout' in submitResult ? submitResult.stdout.replace(/\r\n/g, ''): "")
         break
   
-      case 'list':
+      case 'listPending':
         const listData = await prompts({
           type: 'text',
           name: 'channelName',
           message: '輸入Channel名稱'
         }, { onCancel })
-        await channel.listPendingSnapshots(listData)
+        const listResult = await channel.listPendingSnapshots(listData)
+        console.log('stdout' in listResult ? listResult.stdout.replace(/\r\n/g, ''): "")
         break
   
       case 'cancel':
@@ -130,10 +141,11 @@ export const handler = async (argv: Arguments<OptType>) => {
             type: 'number',
             name: 'blockNumber',
             message: '輸入區塊號碼',
-            validate: value => value > 0 || '必須大於0'
+            // validate: value => value > 0 || '必須大於0'
           }
         ], { onCancel })
-        await channel.cancelSnapshotRequest(cancelData)
+        const cancelResult = await channel.cancelSnapshotRequest(cancelData)
+        console.log('stdout' in cancelResult ? cancelResult.stdout.replace(/\r\n/g, ''): "")
         break
   
       case 'join':
@@ -142,7 +154,8 @@ export const handler = async (argv: Arguments<OptType>) => {
           name: 'snapshotPath',
           message: '輸入Snapshot路徑'
         }, { onCancel })
-        await channel.joinBySnapshot(joinData)
+        const joinResult = await channel.joinBySnapshot(joinData)
+        console.log('stdout' in joinResult ? joinResult.stdout.replace(/\r\n/g, ''): "")
         break
     }
   }

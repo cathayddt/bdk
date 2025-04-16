@@ -63,8 +63,8 @@ describe('Chaincode service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      await minimumNetwork.deployChaincode()
+      await minimumNetwork.createChannelAndJoin(1)
+      await minimumNetwork.deployChaincode(1)
     })
 
     after(async () => {
@@ -74,7 +74,7 @@ describe('Chaincode service:', function () {
     describe('discoverEndorsers', () => {
       it('should discover endorsers', async () => {
         const result = await chaincodeServiceOrg0Peer.invokeSteps().discoverEndorsers({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: minimumNetwork.chaincodeName,
           chaincodeFunction: 'CreateCar',
           args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
@@ -87,7 +87,7 @@ describe('Chaincode service:', function () {
     describe('discoverChannelConfig', () => {
       it('should discover channel config', async () => {
         const result = await chaincodeServiceOrg0Peer.invokeSteps().discoverChannelConfig({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: minimumNetwork.chaincodeName,
           chaincodeFunction: 'CreateCar',
           args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
@@ -103,7 +103,7 @@ describe('Chaincode service:', function () {
 
       before(async () => {
         const discoverEndorsersResult = await chaincodeServiceOrg0Peer.invokeSteps().discoverEndorsers({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: minimumNetwork.chaincodeName,
           chaincodeFunction: 'CreateCar',
           args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
@@ -111,7 +111,7 @@ describe('Chaincode service:', function () {
         }) as DockerResultType
         peerAddresses = Chaincode.parser.invokeStepDiscoverEndorsers(discoverEndorsersResult)
         const discoverChannelConfigResult = await chaincodeServiceOrg0Peer.invokeSteps().discoverChannelConfig({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: minimumNetwork.chaincodeName,
           chaincodeFunction: 'CreateCar',
           args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
@@ -122,7 +122,7 @@ describe('Chaincode service:', function () {
 
       it('should invoke on instance', async () => {
         const result = await chaincodeServiceOrg0Peer.invokeSteps().invokeOnInstance({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: minimumNetwork.chaincodeName,
           chaincodeFunction: 'CreateCar',
           args: ['CAR_ORG0_PEER0', 'BMW', 'X6', 'blue', 'Org1'],
@@ -141,8 +141,8 @@ describe('Chaincode service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      await minimumNetwork.deployChaincode()
+      await minimumNetwork.createChannelAndJoin(1)
+      await minimumNetwork.deployChaincode(1)
     })
 
     after(async () => {
@@ -151,7 +151,7 @@ describe('Chaincode service:', function () {
 
     it('should query chaincode', async () => {
       const result = await chaincodeServiceOrg0Peer.query({
-        channelId: minimumNetwork.channelName,
+        channelId: minimumNetwork.channel1Name,
         chaincodeName: minimumNetwork.chaincodeName,
         chaincodeFunction: 'queryAllCars',
         args: [],
@@ -181,7 +181,7 @@ describe('Chaincode service:', function () {
     beforeEach(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.createChannelAndJoin(1)
       await chaincodeService.package({
         name: 'fabcar',
         version: 1,
@@ -225,8 +225,8 @@ describe('Chaincode service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      await minimumNetwork.deployChaincode()
+      await minimumNetwork.createChannelAndJoin(1)
+      await minimumNetwork.deployChaincode(1)
     })
 
     after(async () => {
@@ -265,7 +265,7 @@ describe('Chaincode service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.createChannelAndJoin(1)
       await chaincodeService.package({
         name: 'fabcar',
         version: 1,
@@ -283,7 +283,7 @@ describe('Chaincode service:', function () {
     describe('discover', () => {
       it('should discover orderer for approve', async () => {
         const result = await chaincodeServiceOrg0Peer.approveSteps().discover({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -297,7 +297,7 @@ describe('Chaincode service:', function () {
 
       before(async () => {
         const discoverResult = await chaincodeServiceOrg0Peer.approveSteps().discover({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -307,7 +307,7 @@ describe('Chaincode service:', function () {
 
       it('should approve on instance', async () => {
         const result = await chaincodeServiceOrg0Peer.approveSteps().approveOnInstance({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -349,7 +349,7 @@ describe('Chaincode service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
+      await minimumNetwork.createChannelAndJoin(1)
       await chaincodeService.package({
         name: 'fabcar',
         version: 1,
@@ -359,7 +359,7 @@ describe('Chaincode service:', function () {
         chaincodeLabel: 'fabcar_1',
       })
       await chaincodeServiceOrg0Peer.approve({
-        channelId: minimumNetwork.channelName,
+        channelId: minimumNetwork.channel1Name,
         chaincodeName: 'fabcar',
         chaincodeVersion: 1,
         initRequired: true,
@@ -373,7 +373,7 @@ describe('Chaincode service:', function () {
     describe('discoverChannelConfig', () => {
       it('should discover orderer for commit', async () => {
         const result = await chaincodeServiceOrg0Peer.commitSteps().discoverChannelConfig({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -385,7 +385,7 @@ describe('Chaincode service:', function () {
     describe('discoverPeers', () => {
       it('should discover peers for commit', async () => {
         const result = await chaincodeServiceOrg0Peer.commitSteps().discoverPeers({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -400,14 +400,14 @@ describe('Chaincode service:', function () {
 
       before(async () => {
         const discoverChanelConfigResult = await chaincodeServiceOrg0Peer.commitSteps().discoverChannelConfig({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
         }) as DockerResultType
         orderer = Chaincode.parser.commitStepDiscoverChannelConfig(discoverChanelConfigResult)
         const discoverPeersResult = await chaincodeServiceOrg0Peer.commitSteps().discoverPeers({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -417,7 +417,7 @@ describe('Chaincode service:', function () {
 
       it('should commit on instance', async () => {
         const result = await chaincodeServiceOrg0Peer.commitSteps().commitOnInstance({
-          channelId: minimumNetwork.channelName,
+          channelId: minimumNetwork.channel1Name,
           chaincodeName: 'fabcar',
           chaincodeVersion: 1,
           initRequired: true,
@@ -433,8 +433,8 @@ describe('Chaincode service:', function () {
     before(async () => {
       await minimumNetwork.createNetwork()
       await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin()
-      await minimumNetwork.deployChaincode()
+      await minimumNetwork.createChannelAndJoin(1)
+      await minimumNetwork.deployChaincode(1)
     })
 
     after(async () => {
@@ -442,7 +442,7 @@ describe('Chaincode service:', function () {
     })
 
     it('should get all committed chaincode', async () => {
-      const result = await chaincodeServiceOrg0Peer.getCommittedChaincode(minimumNetwork.channelName) as DockerResultType
+      const result = await chaincodeServiceOrg0Peer.getCommittedChaincode(minimumNetwork.channel1Name) as DockerResultType
       assert.deepStrictEqual(Chaincode.parser.getCommittedChaincode(result), [minimumNetwork.chaincodeName])
     })
   })
