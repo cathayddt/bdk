@@ -1,7 +1,7 @@
 import HelmChartYaml from './helmChartYaml'
 
 class GenesisConfigYaml extends HelmChartYaml {
-  public setGenesis (chainID: number, nodeCount: number) {
+  public setGenesis (chainID: number, nodeCount: number, alloc: { [address: string]: { balance: string } }) {
     this.setQuorumFlags({
       privacy: false,
       removeKeysOnDelete: false,
@@ -25,6 +25,7 @@ class GenesisConfigYaml extends HelmChartYaml {
           coinbase: '0x0000000000000000000000000000000000000000',
           includeQuickStartAccounts: false,
         },
+        alloc: alloc,
       },
       blockchain: {
         nodes: {
