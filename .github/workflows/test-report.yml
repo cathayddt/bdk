@@ -19,6 +19,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build:console
+    - name: Install solc
+      run: npm install -g solc
     - run: npm run test:json
       
     - uses: dorny/test-reporter@v1

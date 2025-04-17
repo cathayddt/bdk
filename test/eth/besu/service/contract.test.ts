@@ -237,11 +237,42 @@ const constructor3 = `{
   "bytecode": "6080604052600080546001600160a01b03191633179055610184806100256000396000f3fe6080604052600436106100385760003560e01c806312065fe0146100445780633ccfd60b146100645780638da5cb5b1461007b57600080fd5b3661003f57005b600080fd5b34801561005057600080fd5b506040514781526020015b60405180910390f35b34801561007057600080fd5b506100796100b3565b005b34801561008757600080fd5b5060005461009b906001600160a01b031681565b6040516001600160a01b03909116815260200161005b565b6000546001600160a01b031633146101115760405162461bcd60e51b815260206004820152601760248201527f4f6e6c79206f776e65722063616e207769746864726177000000000000000000604482015260640160405180910390fd5b600080546040516001600160a01b03909116914780156108fc02929091818181858888f1935050505015801561014b573d6000803e3d6000fd5b5056fea2646970667358221220dbc7a96d24bdc0f936e12d24fc1858c123527d3dd2e21927e4f23537f4e2707964736f6c63430008110033"
 }`
 
+const contractImport = `
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.0 <0.9.0;
+import "./AnotherContract.sol";
+
+contract MyContract {
+    AnotherContract public another;
+    
+    constructor(address _anotherContractAddress) {
+        another = AnotherContract(_anotherContractAddress);
+    }
+    
+    function getValueFromAnotherContract() public view returns (uint256) {
+        return another.getValue();
+    }
+}
+`
+
+const contractImport2 = `
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.0 <0.9.0;
+
+contract AnotherContract {
+    uint256 private value = 42;
+
+    function getValue() public view returns (uint256) {
+        return value;
+    }
+}
+`
+
 const privateKey = '0x6f5a95897341cac724e68d0d269cca26854ce90a79c3e784e7792015e032ac1e'
 const params: any = []
 
 describe('Besu.Contract.Service', function () {
-  this.timeout(10000)
+  this.timeout(5000)
   describe('Besu.Contract.Service.Tool', () => {
     before(() => {
       createFolder(testDir)
@@ -274,6 +305,12 @@ describe('Besu.Contract.Service', function () {
       createFile(`${testDir}/test.sol`)
       const fileChoices = getFileChoices(testDir, FileFormat.SOL)
       assert.deepStrictEqual(fileChoices, [{ title: 'test.sol', value: `${testDir}/test.sol` }])
+    })
+
+    it('should return file choices', () => {
+      createFile(`${testDir}/test.json`)
+      const fileChoices = getFileChoices(testDir, FileFormat.JSON)
+      assert.deepStrictEqual(fileChoices, [{ title: 'test.sol', value: `${testDir}/test.json` }])
     })
 
     it('should return empty array when not found constructor', () => {
@@ -319,6 +356,11 @@ describe('Besu.Contract.Service', function () {
     after(() => {
       deleteFolder(testDir)
     })
+
+    it('should not error when compile param error', () => {
+      contract.compile(testDir, 'test.sol', 'error')
+    })
+
     it('should have error when solc compile error', () => {
       createFolder(testDir)
       createFile(`${testDir}/test.sol`)
@@ -327,7 +369,7 @@ describe('Besu.Contract.Service', function () {
       }, SolcError)
     })
 
-    it('should return compile successfully', () => {
+    it('should return bdkSolc compile successfully', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
       contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
     })
@@ -341,6 +383,15 @@ describe('Besu.Contract.Service', function () {
       createFile(`${testDir}/test.sol`, contractContentNotExistBytecode)
       assert.throws(() => {
         contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
+      }, SolcError, 'Solidity Compile Error')
+    })
+
+    it('should return bdkSolc compile successfully', () => {
+      createFile(`${testDir}/import.sol`)
+      createFile(`${testDir}/Util1.sol`)
+
+      assert.throws(() => {
+        contract.compile(testDir, 'import.sol', CompileType.BDK_SOLC)
       }, SolcError, 'Solidity Compile Error')
     })
   })
@@ -372,9 +423,9 @@ describe('Besu.Contract.Service', function () {
       }, SolcError)
     })
 
-    it('should return compile successfully', () => {
+    it('should return LocalSolc compile successfully', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
-      const res = contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
+      contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
     })
 
     it('should return solc error when compile with not equal version', () => {
@@ -393,8 +444,8 @@ describe('Besu.Contract.Service', function () {
   })
 
   describe('Besu.Contract.Deploy', () => {
-    let factoryStub: sinon.SinonStub
-    let contractStub: sinon.SinonStub
+    // let factoryStub: sinon.SinonStub
+    // let contractStub: sinon.SinonStub
     before(() => {
       createFolder(testDir)
     })
@@ -427,7 +478,7 @@ describe('Besu.Contract.Service', function () {
       // .resolves(fakeContract);
 
       createFile(`${testDeployDir}/test.json`, ContractJson)
-      const res = await contract.deploy(`${testDeployDir}/test.json`, privateKey, params, '0')
+      await contract.deploy(`${testDeployDir}/test.json`, privateKey, params, '0')
     })
   })
 })

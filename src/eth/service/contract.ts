@@ -28,9 +28,6 @@ export function getFileChoices (contractFolderPath: string, fileFormat: FileForm
       case FileFormat.SOL:
         filterFiles = files.filter(file => file.endsWith('.sol'))
         break
-      case FileFormat.ABI:
-        filterFiles = files.filter(file => file.endsWith('.abi'))
-        break
       case FileFormat.BIN:
         filterFiles = files.filter(file => file.endsWith('.bin'))
         break
@@ -117,7 +114,6 @@ export default class Contract extends AbstractService {
 
       await contract.waitForDeployment()
       this.bdkFile.createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contract.target.toString())
-
       return contract.target
     } catch (error) {
       throw new DeployError(`❌ An error occurred during deployment: ${error}`)
@@ -195,7 +191,7 @@ export default class Contract extends AbstractService {
       Object.keys(output.contracts).forEach((sourceFile) => {
         Object.keys(output.contracts[sourceFile]).forEach((contractName) => {
           const contractData = output.contracts[sourceFile][contractName]
-          if (!contractData.abi || !contractData.evm || !contractData.evm.bytecode || !contractData.evm.bytecode.object) {
+          if (!contractData?.abi || !contractData?.evm?.bytecode?.object) {
             throw new SolcError(`❌ Missing abi or bytecode for contract ${contractName}`)
           }
           const contractPath = path.join(buildDir, `${contractName}.json`)
@@ -308,7 +304,7 @@ export default class Contract extends AbstractService {
           message: `Please enter ${input.name} (${input.type}) ex:${JSON.stringify(parseTuple(input, input.name))}`,
           validate: (value: any) => {
             try {
-              const parsedValue = JSON.parse(value)
+              JSON.parse(value)
               return true
             } catch (e) {
               return 'Invalid input format. Please ensure you enter a valid JSON format.'
