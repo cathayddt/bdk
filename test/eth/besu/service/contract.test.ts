@@ -387,8 +387,8 @@ describe('Besu.Contract.Service', function () {
     })
 
     it('should return bdkSolc compile successfully', () => {
-      createFile(`${testDir}/import.sol`)
-      createFile(`${testDir}/Util1.sol`)
+      createFile(`${testDir}/import.sol`, contractImport)
+      createFile(`${testDir}/Util1.sol`, contractImport2)
 
       assert.throws(() => {
         contract.compile(testDir, 'import.sol', CompileType.BDK_SOLC)

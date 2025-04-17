@@ -19,8 +19,14 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build:console
-    - name: Install solc
-      run: npm install -g solc
+    - name: Install solc 0.8.17
+      run: |
+        apt-get update
+        apt-get install -y python3 python3-pip curl
+        pip3 install solc-select
+        solc-select install 0.8.17
+        solc-select use 0.8.17
+        solc --version
     - run: npm run test:json
       
     - uses: dorny/test-reporter@v1
