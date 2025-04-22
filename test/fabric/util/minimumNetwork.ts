@@ -38,9 +38,9 @@ export default class MinimumNetwork {
     this.org1PeerConfig = {
       ...config,
       orgType: OrgTypeEnum.PEER,
-      orgName: this.getPeer().orgName,
-      orgDomainName: this.getPeer().orgDomain,
-      hostname: this.getPeer().hostname,
+      orgName: this.getPeer(1,0).orgName,
+      orgDomainName: this.getPeer(1,0).orgDomain,
+      hostname: this.getPeer(1,0).hostname,
     }
     this.org0OrdererConfig = {
       ...config,
@@ -94,6 +94,7 @@ export default class MinimumNetwork {
 
   public async peerAndOrdererUp () {
     await this.peerService.up({ peerHostname: `${this.getPeer().hostname}.${this.getPeer().orgDomain}` })
+    await this.peerService.up({ peerHostname: `${this.getPeer(1,0).hostname}.${this.getPeer(1,0).orgDomain}` })
     await this.ordererService.up({ ordererHostname: `${this.getOrderer().hostname}.${this.getOrderer().orgDomain}` })
     await new Promise(resolve => setTimeout(resolve, 1000))
   }

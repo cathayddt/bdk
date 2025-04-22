@@ -12,6 +12,8 @@ import Peer from '../../../src/fabric/service/peer'
 import Orderer from '../../../src/fabric/service/orderer'
 import Discover from '../../../src/fabric/service/discover'
 import { markAsUntransferable } from 'worker_threads'
+import { execSync } from 'child_process';
+
 
 describe('Channel service:', function () {
   this.timeout(60000)
@@ -20,6 +22,7 @@ describe('Channel service:', function () {
   let networkCreateJson: NetworkCreateType
   let channelService: Channel
   let channelServiceOrg0Peer: Channel
+  let channelServiceOrg1Peer: Channel
   let channelServiceOrg0Orderer: Channel
   let peerService: Peer
   let ordererService: Orderer
@@ -29,6 +32,7 @@ describe('Channel service:', function () {
     networkCreateJson = JSON.parse(fs.readFileSync('./cicd/test_script/network-create-min.json').toString())
     channelService = new Channel(config)
     channelServiceOrg0Peer = new Channel(minimumNetwork.org0PeerConfig)
+    channelServiceOrg1Peer = new Channel(minimumNetwork.org1PeerConfig)
     channelServiceOrg0Orderer = new Channel(minimumNetwork.org0OrdererConfig)
     peerService = new Peer(config)
     ordererService = new Orderer(config)
@@ -826,23 +830,9 @@ describe('Channel service:', function () {
     })
   })
 
-  describe('listAllChannels', () => {
-    before(async () => {
-      await minimumNetwork.createNetwork()
-      await minimumNetwork.peerAndOrdererUp()
-      await minimumNetwork.createChannelAndJoin(1)
-      await minimumNetwork.createChannelAndJoin(2)
-    })
-
-    after(async () => {
-      await minimumNetwork.deleteNetwork()
-    })
-  })
-
   describe('snapshot operations', () => {
     let channelName: string
-    const testBlockNumber = 1000
-    const testSnapshotPath = '/test/snapshot/path'
+    const testSnapshotPath = '/var/hyperledger/production/snapshots/completed/test1-channel/1/'
 
     before(async () => {
       await minimumNetwork.createNetwork()
@@ -856,109 +846,93 @@ describe('Channel service:', function () {
     })
 
     describe('submitSnapshotRequest', () => {
-      it('should call FabricInstance with correct parameters', async () => {
-        const submitStub = sinon.stub(Channel.prototype, 'submitSnapshotRequest').resolves({ status: 'success' } as any)
-        
+      it('should call FabricInstance with the return "submit reqeust successfully".', async () => {
         await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          blockNumber: testBlockNumber
+          blockNumber: 0
         })
-        /*
-        assert(submitStub.calledOnceWithExactly(
+        
+        const result = await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          testBlockNumber, // options
-        ))
-        */
-        submitStub.restore()
+          blockNumber: 10
+        })
+
+        // Execute Docker command to copy snapshot path in org1's peer container making joinBysnapshot test works properly later
+        try {
+          const peerOrg0ContainerName = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`;
+          const peerOrg1ContainerName = `${minimumNetwork.getPeer(1,0).hostname}.${minimumNetwork.getPeer(1,0).orgDomain}`;
+          const dockerMkdirCommand = `docker exec ${peerOrg1ContainerName} mkdir -p ${testSnapshotPath}`
+          const dockerCopyCommand = `docker cp ${peerOrg0ContainerName}:${testSnapshotPath}. - | docker cp - ${peerOrg1ContainerName}:${testSnapshotPath}`;
+          execSync(dockerMkdirCommand).toString();
+          execSync(dockerCopyCommand).toString();
+        } catch (error) {
+          console.error('Error executing Docker command:', error);
+          throw error;
+        }
+
+        // console.log(result)
+        // check whether the return is successfully
+        assert.match('stdout' in result ? result.stdout: '', /Snapshot request submitted successfully/)
       })
-      /*
-      it('should throw error when missing environment variables', async () => {
-        const originalPeerAddress = process.env.PEER_ADDRESS
-        delete process.env.PEER_ADDRESS
-        
-        await assert.rejects(
-          channelServiceOrg0Peer.submitSnapshotRequest({
-            channelName,
-            blockNumber: testBlockNumber
-          }),
-          /Missing required environment variables/
-        )
-        
-        process.env.PEER_ADDRESS = originalPeerAddress
-      })
-      */
     })
 
     describe('listPendingSnapshots', () => {
-      it('should call FabricInstance with correct parameters', async () => {
-        const listStub = sinon.stub(Channel.prototype, 'listPendingSnapshots').resolves({ status: 'success' } as any)
-        
-        await channelServiceOrg0Peer.listPendingSnapshots({
+      it('should call FabricInstance with the return that list the pending snapshots.', async () => {
+        await channelServiceOrg0Peer.submitSnapshotRequest({
+          channelName,
+          blockNumber: 100
+        })
+        const result = await channelServiceOrg0Peer.listPendingSnapshots({
           channelName
         })
-        /*
-        assert(listStub.calledOnceWithExactly(
-          channelName
-        ))
-        */
-        listStub.restore()
+        // console.log(result)
+        // check wheter the return contains the block number in submit request
+        assert.match('stdout' in result ? result.stdout: '', /100/)
       })
-
-      /*
-      it('should throw error for missing channel name', async () => {
-        await assert.rejects(
-          channelServiceOrg0Peer.listPendingSnapshots({
-            channelName: ''
-          }),
-          /Missing channel name/
-        )
-      })
-      */
     })
 
     describe('cancelSnapshotRequest', () => {
-      it('should call FabricInstance with correct parameters', async () => {
-        const cancelStub = sinon.stub(Channel.prototype, 'cancelSnapshotRequest').resolves({ status: 'success' } as any)
-        
+      it('should call FabricInstance with the return that does not list the snapshots after cancel request.', async () => {
+        await channelServiceOrg0Peer.submitSnapshotRequest({
+          channelName,
+          blockNumber: 20
+        })
+        await channelServiceOrg0Peer.submitSnapshotRequest({
+          channelName,
+          blockNumber: 30
+        })
+
+        /*
+        const resultWithoutCancel = await channelServiceOrg0Peer.listPendingSnapshots({
+          channelName
+        })
+        */
+        // console.log(resultWithoutCancel)
+        // cancel request
         await channelServiceOrg0Peer.cancelSnapshotRequest({
           channelName,
-          blockNumber: testBlockNumber
+          blockNumber: 30
         })
-        /*
-        assert(cancelStub.calledOnceWithExactly(
-          channelName,
-          testBlockNumber
-        ))
-        */
-        cancelStub.restore()
+        const resultWithCancel = await channelServiceOrg0Peer.listPendingSnapshots({
+          channelName
+        })
+        // console.log(resultWithCancel)
+        // check whether the canceled request has been excluded in the listPending return
+        assert.doesNotMatch('stdout' in resultWithCancel ? resultWithCancel.stdout: '', /30/)
       })
     })
 
     describe('joinBySnapshot', () => {
-      it('should call FabricInstance with correct path mapping', async () => {
-        const joinStub = sinon.stub(Channel.prototype, 'joinBySnapshot').resolves({ status: 'success' } as any)
-        
-        await channelServiceOrg0Peer.joinBySnapshot({
+      it('should call FabricInstance with correct path mapping', async () => {        
+        await channelServiceOrg1Peer.joinBySnapshot({
           snapshotPath: testSnapshotPath
         })
-        /*
-        assert(joinStub.calledOnceWithExactly(
-          testSnapshotPath
-        ))
-        */
-        joinStub.restore()
+        // execute "peer channel list" to check wheter the peer has joined the channel successfully
+        const dockerPeerCommand = `docker exec peer0.org1.bdk.example.com peer channel list`
+        const result = execSync(dockerPeerCommand).toString()
+        // console.log(PeerChannelList)
+        assert.match(result,/test1-channel/)
       })
-
-      /*
-      it('should handle invalid snapshot path', async () => {
-        await assert.rejects(
-          channelServiceOrg0Peer.joinBySnapshot({
-            snapshotPath: '/invalid/path'
-          }),
-          /Snapshot file not found/
-        )
-      })
-      */
     })
   })
 })
