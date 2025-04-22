@@ -395,22 +395,22 @@ export default class FabricInstance extends AbstractInstance {
       options)
   }
 
-  public async submitSnapshotRequest(
+  public async submitSnapshotRequest (
     channelName: string,
     blockNumber: number,
-    options?: OptionsType
+    options?: OptionsType,
   ): Promise<InfraRunnerResultType> {
-    //this.validateTLSCert();
-    //console.log(`${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`)
-    return this.infraRunCommand(
+    // this.validateTLSCert();
+    // console.log(`${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`)
+    return await this.infraRunCommand(
       [
         'peer', 'snapshot', 'submitrequest',
         '-c', channelName,
         '-b', blockNumber.toString(),
         '--peerAddress', process.env.PEER_ADDRESS!,
-        //'--tlsRootCertFile', this.getDockerCertPath()
-        //'--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.PEER_ADDRESS!.split(':')[0]}/ca.crt`
-        '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`
+        // '--tlsRootCertFile', this.getDockerCertPath()
+        // '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.PEER_ADDRESS!.split(':')[0]}/ca.crt`
+        '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`,
       ],
       OrgTypeEnum.PEER,
       undefined,
@@ -425,75 +425,58 @@ export default class FabricInstance extends AbstractInstance {
     options?: OptionsType
   ): Promise<InfraRunnerResultType> {
     //this.validateTLSCert();
-    return this.infraRunCommand(
+    return await this.infraRunCommand(
       [
         'peer', 'snapshot', 'listpending',
         '-c', channelName,
         '--peerAddress', process.env.PEER_ADDRESS!,
-        '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`
+        '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`,
       ],
       OrgTypeEnum.PEER,
       undefined,
-      //[this.getTLSPathMapping()],
+      // [this.getTLSPathMapping()],
       undefined,
-      options
+      options,
     )
   }
 
-  public async cancelSnapshotRequest(
+  public async cancelSnapshotRequest (
     channelName: string,
     blockNumber: number,
-    options?: OptionsType
+    options?: OptionsType,
   ): Promise<InfraRunnerResultType> {
-    //this.validateTLSCert();
-    return this.infraRunCommand(
+    // this.validateTLSCert();
+    return await this.infraRunCommand(
       [
         'peer', 'snapshot', 'cancelrequest',
         '-c', channelName,
         '-b', blockNumber.toString(),
         '--peerAddress', process.env.PEER_ADDRESS!,
-        '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`
+        '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`,
       ],
       OrgTypeEnum.PEER,
       undefined,
-      //[this.getTLSPathMapping()],
+      // [this.getTLSPathMapping()],
       undefined,
-      options
+      options,
     )
   }
 
-  public async joinBySnapshot(
+  public async joinBySnapshot (
     snapshotPath: string,
-    options?: OptionsType
+    options?: OptionsType,
   ): Promise<InfraRunnerResultType> {
     //const dockerPath = `${this.dockerPath}/channel-artifacts/test/snapshots/${path.basename(snapshotPath)}`
-    return this.infraRunCommand(
+    return await this.infraRunCommand(
       [
         'peer', 'channel', 'joinbysnapshot',
-        '--snapshotpath', snapshotPath
+        '--snapshotpath', snapshotPath,
       ],
       OrgTypeEnum.PEER,
       undefined,
-      //[`${snapshotPath}:${dockerPath}`],
+      // [`${snapshotPath}:${dockerPath}`],
       undefined,
-      options
+      options,
     )
   }
-  // get necessary informaiton for calling peer commands
-  // ********** Start **********
-  private getDockerCertPath(): string {
-    return `${this.dockerPath}/${process.env.TLS_ROOT_CERT_FILE!}`
-  }
-
-  private getTLSPathMapping(): string {
-    const hostPath = path.dirname(process.env.TLS_ROOT_CERT_FILE!)
-    return `${hostPath}:${this.dockerPath}/${hostPath}`
-  }
-
-  private validateTLSCert(): void {
-    if (!fs.existsSync(process.env.TLS_ROOT_CERT_FILE!)) {
-      throw new Error(`TLS certificate not found at: ${process.env.TLS_ROOT_CERT_FILE}`)
-    }
-  }
-  // ********** End **********
 }

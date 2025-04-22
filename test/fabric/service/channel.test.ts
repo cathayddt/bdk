@@ -11,9 +11,8 @@ import { DockerResultType } from '../../../src/fabric/instance/infra/InfraRunner
 import Peer from '../../../src/fabric/service/peer'
 import Orderer from '../../../src/fabric/service/orderer'
 import Discover from '../../../src/fabric/service/discover'
-import { markAsUntransferable } from 'worker_threads'
-import { execSync } from 'child_process';
-
+// import { markAsUntransferable } from 'worker_threads'
+import { execSync } from 'child_process'
 
 describe('Channel service:', function () {
   this.timeout(60000)
@@ -849,30 +848,30 @@ describe('Channel service:', function () {
       it('should call FabricInstance with the return "submit reqeust successfully".', async () => {
         await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          blockNumber: 0
+          blockNumber: 0,
         })
-        
+
         const result = await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          blockNumber: 10
+          blockNumber: 10,
         })
 
         // Execute Docker command to copy snapshot path in org1's peer container making joinBysnapshot test works properly later
         try {
-          const peerOrg0ContainerName = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`;
-          const peerOrg1ContainerName = `${minimumNetwork.getPeer(1,0).hostname}.${minimumNetwork.getPeer(1,0).orgDomain}`;
+          const peerOrg0ContainerName = `${minimumNetwork.getPeer().hostname}.${minimumNetwork.getPeer().orgDomain}`
+          const peerOrg1ContainerName = `${minimumNetwork.getPeer(1, 0).hostname}.${minimumNetwork.getPeer(1, 0).orgDomain}`
           const dockerMkdirCommand = `docker exec ${peerOrg1ContainerName} mkdir -p ${testSnapshotPath}`
-          const dockerCopyCommand = `docker cp ${peerOrg0ContainerName}:${testSnapshotPath}. - | docker cp - ${peerOrg1ContainerName}:${testSnapshotPath}`;
-          execSync(dockerMkdirCommand).toString();
-          execSync(dockerCopyCommand).toString();
+          const dockerCopyCommand = `docker cp ${peerOrg0ContainerName}:${testSnapshotPath}. - | docker cp - ${peerOrg1ContainerName}:${testSnapshotPath}`
+          execSync(dockerMkdirCommand).toString()
+          execSync(dockerCopyCommand).toString()
         } catch (error) {
-          console.error('Error executing Docker command:', error);
-          throw error;
+          console.error('Error executing Docker command:', error)
+          throw error
         }
 
         // console.log(result)
         // check whether the return is successfully
-        assert.match('stdout' in result ? result.stdout: '', /Snapshot request submitted successfully/)
+        assert.match('stdout' in result ? result.stdout : '', /Snapshot request submitted successfully/)
       })
     })
 
@@ -880,14 +879,14 @@ describe('Channel service:', function () {
       it('should call FabricInstance with the return that list the pending snapshots.', async () => {
         await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          blockNumber: 100
+          blockNumber: 100,
         })
         const result = await channelServiceOrg0Peer.listPendingSnapshots({
-          channelName
+          channelName,
         })
         // console.log(result)
         // check wheter the return contains the block number in submit request
-        assert.match('stdout' in result ? result.stdout: '', /100/)
+        assert.match('stdout' in result ? result.stdout : '', /100/)
       })
     })
 
@@ -895,11 +894,11 @@ describe('Channel service:', function () {
       it('should call FabricInstance with the return that does not list the snapshots after cancel request.', async () => {
         await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          blockNumber: 20
+          blockNumber: 20,
         })
         await channelServiceOrg0Peer.submitSnapshotRequest({
           channelName,
-          blockNumber: 30
+          blockNumber: 30,
         })
 
         /*
@@ -923,15 +922,15 @@ describe('Channel service:', function () {
     })
 
     describe('joinBySnapshot', () => {
-      it('should call FabricInstance with correct path mapping', async () => {        
+      it('should call FabricInstance with correct path mapping', async () => {
         await channelServiceOrg1Peer.joinBySnapshot({
-          snapshotPath: testSnapshotPath
+          snapshotPath: testSnapshotPath,
         })
         // execute "peer channel list" to check wheter the peer has joined the channel successfully
-        const dockerPeerCommand = `docker exec peer0.org1.bdk.example.com peer channel list`
+        const dockerPeerCommand = 'docker exec peer0.org1.bdk.example.com peer channel list'
         const result = execSync(dockerPeerCommand).toString()
         // console.log(PeerChannelList)
-        assert.match(result,/test1-channel/)
+        assert.match(result, /test1-channel/)
       })
     })
   })

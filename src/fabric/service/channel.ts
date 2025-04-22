@@ -16,7 +16,7 @@ import {
   EnvelopeVerifyEnum,
   ChannelSubmitAndCancelSnapshotType,
   ChannelListPendingSnapshotType,
-  ChannelJoinBySnapshotType
+  ChannelJoinBySnapshotType,
 } from '../model/type/channel.type'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
@@ -25,7 +25,7 @@ import { AbstractService, ParserType } from './Service.abstract'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { ProcessError } from '../../util'
 import fs from 'fs'
-import { stdout } from 'process'
+// import { stdout } from 'process'
 
 interface ChannelParser extends ParserType {
   listJoinedChannel: (result: DockerResultType) => string[]
@@ -436,19 +436,19 @@ export default class Channel extends AbstractService {
   /**
    * @description 提交快照請求
    */
-  public async submitSnapshotRequest(
-    params: ChannelSubmitAndCancelSnapshotType
+  public async submitSnapshotRequest (
+    params: ChannelSubmitAndCancelSnapshotType,
   ): Promise<InfraRunnerResultType> {
     // return await (new FabricInstance(this.config, this.infra)).submitSnapshotRequest(params.channelName,params.blockNumber)
-    const result = await (new FabricInstance(this.config, this.infra)).submitSnapshotRequest(params.channelName,params.blockNumber)
+    const result = await (new FabricInstance(this.config, this.infra)).submitSnapshotRequest(params.channelName, params.blockNumber)
     return result
   }
 
   /**
    * @description 列出待處理快照
    */
-  public async listPendingSnapshots(
-    params: ChannelListPendingSnapshotType
+  public async listPendingSnapshots (
+    params: ChannelListPendingSnapshotType,
   ): Promise<InfraRunnerResultType> {
     return await (new FabricInstance(this.config, this.infra)).listPendingSnapshots(params.channelName)
   }
@@ -456,8 +456,8 @@ export default class Channel extends AbstractService {
   /**
    * @description 取消快照請求
    */
-  public async cancelSnapshotRequest(
-    params: ChannelSubmitAndCancelSnapshotType
+  public async cancelSnapshotRequest (
+    params: ChannelSubmitAndCancelSnapshotType,
   ): Promise<InfraRunnerResultType> {
     return await (new FabricInstance(this.config, this.infra)).cancelSnapshotRequest(params.channelName, params.blockNumber)
   }
@@ -465,25 +465,9 @@ export default class Channel extends AbstractService {
   /**
    * @description 透過快照加入通道
    */
-  public async joinBySnapshot(
-    params: ChannelJoinBySnapshotType
+  public async joinBySnapshot (
+    params: ChannelJoinBySnapshotType,
   ): Promise<InfraRunnerResultType> {
     return await (new FabricInstance(this.config, this.infra)).joinBySnapshot(params.snapshotPath)
-  }
-
-  /**
-   * @description List all channels in the network
-   */
-  public async listAllChannels(): Promise<string[]> {
-    try {
-      const hostBasePath = `${this.config.infraConfig.bdkPath}/${this.config.networkName}`;
-      const channels = fs.readdirSync(`${hostBasePath}/config-yaml`)
-        .filter(x => /Channel$/.test(x))
-        .map(x => x.replace(/Channel$/, ''));
-      return channels;
-    } catch (error) {
-      logger.error('Error listing all channels:', error);
-      throw new Error('Failed to list all channels');
-    }
   }
 }
