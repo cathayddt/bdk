@@ -3,6 +3,10 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-04-22
+
+### Features
+* Add `fabric channel snapshot` command with 4 operations: submitRequest, listPending, cancelRequest, joinBySnapshot
 ## [v3.2.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-01-15
 
 ### Features
