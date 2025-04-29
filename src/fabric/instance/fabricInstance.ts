@@ -3,8 +3,8 @@ import { OrgTypeEnum } from '../model/type/config.type'
 import { InfraRunner, InfraRunnerResultType } from './infra/InfraRunner.interface'
 import { AbstractInstance } from './Instance.abstract'
 
-import path from 'path'
-import fs from 'fs'
+// import path from 'path'
+// import fs from 'fs'
 
 interface OptionsType {
   tag?: string
@@ -414,17 +414,17 @@ export default class FabricInstance extends AbstractInstance {
       ],
       OrgTypeEnum.PEER,
       undefined,
-      //[this.getTLSPathMapping()],
+      // [this.getTLSPathMapping()],
       undefined,
-      options
+      options,
     )
   }
 
-  public async listPendingSnapshots(
+  public async listPendingSnapshots (
     channelName: string,
-    options?: OptionsType
+    options?: OptionsType,
   ): Promise<InfraRunnerResultType> {
-    //this.validateTLSCert();
+    // this.validateTLSCert();
     return await this.infraRunCommand(
       [
         'peer', 'snapshot', 'listpending',
@@ -466,7 +466,7 @@ export default class FabricInstance extends AbstractInstance {
     snapshotPath: string,
     options?: OptionsType,
   ): Promise<InfraRunnerResultType> {
-    //const dockerPath = `${this.dockerPath}/channel-artifacts/test/snapshots/${path.basename(snapshotPath)}`
+    // const dockerPath = `${this.dockerPath}/channel-artifacts/test/snapshots/${path.basename(snapshotPath)}`
     return await this.infraRunCommand(
       [
         'peer', 'channel', 'joinbysnapshot',

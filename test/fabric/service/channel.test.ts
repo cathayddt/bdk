@@ -910,14 +910,14 @@ describe('Channel service:', function () {
         // cancel request
         await channelServiceOrg0Peer.cancelSnapshotRequest({
           channelName,
-          blockNumber: 30
+          blockNumber: 30,
         })
         const resultWithCancel = await channelServiceOrg0Peer.listPendingSnapshots({
-          channelName
+          channelName,
         })
         // console.log(resultWithCancel)
         // check whether the canceled request has been excluded in the listPending return
-        assert.doesNotMatch('stdout' in resultWithCancel ? resultWithCancel.stdout: '', /30/)
+        assert.doesNotMatch('stdout' in resultWithCancel ? resultWithCancel.stdout : '', /30/)
       })
     })
 

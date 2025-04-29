@@ -12,7 +12,7 @@ export const command = 'snapshot'
 export const des = '對channel進行快照'
 
 const channelList = getChannelList(config)
-const operations = ['submit','listPending', 'join', 'cancel']
+const operations = ['submit', 'listPending', 'join', 'cancel']
 
 interface OptType {
   interactive: boolean
@@ -50,7 +50,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     if (!operation) {
       throw new Error('Operation type is needed!')
     }
-    switch(operation) {
+    switch (operation) {
       case 'submit':
         if (!channelName || !block) {
           throw new Error('Channel name and block number are needed!')
@@ -93,9 +93,9 @@ async function runInteractiveMode (channel: Channel) {
     message: 'Operation type',
     choices: operationChoices,
   }, { onCancel })
-  
+
   switch (operation) {
-    case 'submit':
+    case 'submit': {
       const submitData = await prompts([
         {
           type: 'text',
@@ -106,12 +106,13 @@ async function runInteractiveMode (channel: Channel) {
           type: 'number',
           name: 'blockNumber',
           message: '輸入區塊號碼',
-        }
+        },
       ], { onCancel })
       const submitResult = await channel.submitSnapshotRequest(submitData)
       console.log('stdout' in submitResult ? submitResult.stdout.replace(/\r\n/g, '') : '')
       break
-    case 'listPending':
+    }
+    case 'listPending': {
       const listData = await prompts({
         type: 'text',
         name: 'channelName',
@@ -120,7 +121,8 @@ async function runInteractiveMode (channel: Channel) {
       const listResult = await channel.listPendingSnapshots(listData)
       console.log('stdout' in listResult ? listResult.stdout.replace(/\r\n/g, '') : '')
       break
-    case 'cancel':
+    }
+    case 'cancel': {
       const cancelData = await prompts([
         {
           type: 'text',
@@ -132,19 +134,21 @@ async function runInteractiveMode (channel: Channel) {
           name: 'blockNumber',
           message: '輸入區塊號碼',
           // validate: value => value > 0 || '必須大於0'
-        }
+        },
       ], { onCancel })
       const cancelResult = await channel.cancelSnapshotRequest(cancelData)
-      console.log('stdout' in cancelResult ? cancelResult.stdout.replace(/\r\n/g, ''): '')
+      console.log('stdout' in cancelResult ? cancelResult.stdout.replace(/\r\n/g, '') : '')
       break
-    case 'join':
+    }
+    case 'join': {
       const joinData = await prompts({
         type: 'text',
         name: 'snapshotPath',
         message: '輸入Snapshot路徑',
       }, { onCancel })
       const joinResult = await channel.joinBySnapshot(joinData)
-      console.log('stdout' in joinResult ? joinResult.stdout.replace(/\r\n/g, ''): '')
+      console.log('stdout' in joinResult ? joinResult.stdout.replace(/\r\n/g, '') : '')
       break
+    }
   }
 }

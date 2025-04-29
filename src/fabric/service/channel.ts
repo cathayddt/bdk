@@ -24,7 +24,7 @@ import FabricInstance from '../instance/fabricInstance'
 import { AbstractService, ParserType } from './Service.abstract'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { ProcessError } from '../../util'
-import fs from 'fs'
+// import fs from 'fs'
 // import { stdout } from 'process'
 
 interface ChannelParser extends ParserType {
