@@ -3,6 +3,19 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v3.4.0](https://github.com/cathayddt/bdk/releases/tag/v3.4.0) - 2025-05-19
+
+### Features
+
+* Support contract compile and deploy on Besu and Quorum
+* Initial implementation of contract deployment
+
+### Testing
+
+* Reduce uncoverage
+* Add unit tests for contract deploy and tool
+* Add unit tests for compile and deploy
+
 ## [v3.2.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-01-15
 
 ### Features

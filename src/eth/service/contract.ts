@@ -72,9 +72,7 @@ export async function loadRemoteVersion(selectedVersion: string): Promise<any> {
       selectedVersion,
       (err: Error | null, solcInstance: any) => {
         if (err) {
-          console.error('❌ Load failed:', err);
-          reject(err);
-          return;
+          throw new SolcError(`❌ Load failed: ${err}`)
         }
         resolve(solcInstance);
       }
@@ -266,12 +264,10 @@ export default class Contract extends AbstractService {
       parsedOutput = JSON.parse(output)
 
       if (!parsedOutput.contracts || Object.keys(parsedOutput.contracts).length === 0) {
-        console.error('Compilation failed: No contracts found in output.')
         throw new SolcError('SolcError❌ Compilation failed: No contracts found in output.')
       }
     } catch (parseError) {
-      console.error('Error parsing output:', parseError)
-      throw new SolcError('SolcError❌ Failed to parse the solc output')
+      throw new SolcError(`SolcError❌ Failed to parse the solc output ${parseError}`)
     }
 
     // get contracts

@@ -44,8 +44,7 @@
     "test:fabric": "nyc npm run test -- --grep Fabric",
     "test:coverage": "nyc npm run test",
     "test:json": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter json --require ts-node/register ./test/**/*.test.ts --exit > test-results.json",
-    "test:single": "mocha --reporter spec --require ts-node/register",
-    "git:changelog": "git-cliff --unreleased --tag v3.2.0 --prepend CHANGELOG.md",
+    "git:changelog": "git-cliff --unreleased --tag v3.4.0 --prepend CHANGELOG.md",
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {
