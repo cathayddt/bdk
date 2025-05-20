@@ -3,7 +3,7 @@ import config from '../../config'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
-import Contract, { getFileChoices } from '../../service/contract'
+import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion } from '../../service/contract'
 
 import { FileFormat } from '../../model/type/file.type'
 import { CompileType } from '../../model/type/compile.type'
@@ -35,7 +35,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     type: 'select',
     name: 'contractFilePath',
     message: 'What is the name of deploy contract?',
-    choices: await getFileChoices(contractFolderPath, FileFormat.SOL),
+    choices: getFileChoices(contractFolderPath, FileFormat.SOL),
   }, { onCancel })
 
   const { compileFunction } = await prompts({
@@ -46,25 +46,47 @@ export const handler = async (argv: Arguments<OptType>) => {
       {
         title: 'bdk solc (version 0.8.17)',
         value: CompileType.BDK_SOLC,
-        description: 'Uses bdk\'s pre-installed solc version 0.8.17',
+        description: 'Uses bdk\'s remote solc version 0.8.17',
       },
       {
         title: 'Local solc',
         value: CompileType.LOCAL_SOLC,
         description: 'Uses the solc version installed on your machine',
       },
-      // {
-      //   title: 'compileStandard',
-      //   value: 'compileStandard',
-      //   description: 'Uses the standard compile method (may require a specific version)',
-      // },
+      {
+        title: 'Load remote solc',
+        value: CompileType.REMOTE_SOLC,
+        description: 'Load a specific version of solc from the internet',
+      },
     ],
   })
+
+  if(compileFunction === CompileType.REMOTE_SOLC) {
+    const choices = await fetchSolcVersions()
+    const response = await prompts({
+      type: 'select',
+      name: 'version',
+      message: 'Please select the Solidity version to use:',
+      choices
+    });
+  
+    const fullFilename = response.version;
+    if (!fullFilename) {
+      console.log('❌ No version selected, operation aborted');
+      return;
+    }
+  
+    const selectedVersion = fullFilename.replace("soljson-", "").replace(".js", "");
+  
+    const loadSpinner = ora(`🔄 Loading Solidity ${selectedVersion}...`).start()
+    const solcInstance = await loadRemoteVersion(selectedVersion)
+    loadSpinner.succeed(`Solc version ${selectedVersion} loaded successfully`)
+  }
 
   const spinner = ora('Contract comlile ...').start()
 
   const contract = new Contract(config, 'quorum')
-  await contract.compile(contractFolderPath, contractFilePath, compileFunction)
+  contract.compile(contractFolderPath, contractFilePath, compileFunction)
 
   spinner.succeed(`Contract compile Successfully! file at:${contractFolderPath}/build`)
 }

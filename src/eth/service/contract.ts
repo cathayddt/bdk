@@ -10,6 +10,7 @@ import { ContractABI, ABIComponent, ABIPrimitiveType, ABIArrayType, ABIResult } 
 import solc from 'solc'
 import { execSync } from 'child_process'
 import { tarDateFormat } from '../../util/utils'
+import axios from 'axios'
 
 export function getFileChoices (contractFolderPath: string, fileFormat: FileFormat) {
   try {
@@ -52,6 +53,35 @@ export function getFileChoices (contractFolderPath: string, fileFormat: FileForm
   }
 }
 
+//get solc all versions
+export async function fetchSolcVersions() {
+  const res = await axios.get('https://binaries.soliditylang.org/bin/list.json');
+  const choices = Object.entries(res.data.releases)
+    .sort((a, b) => b[0].localeCompare(a[0], undefined, { numeric: true })) // 從新到舊排序
+    .map(([displayVer, fullVer]) => ({
+      title: displayVer,
+      value: fullVer 
+    }));
+  return choices;
+}
+
+// load solc remote version use version number 
+export async function loadRemoteVersion(selectedVersion: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    solc.loadRemoteVersion(
+      selectedVersion,
+      (err: Error | null, solcInstance: any) => {
+        if (err) {
+          console.error('❌ Load failed:', err);
+          reject(err);
+          return;
+        }
+        resolve(solcInstance);
+      }
+    );
+  });
+}
+
 export default class Contract extends AbstractService {
   /**
    * @description compile contract
@@ -67,6 +97,9 @@ export default class Contract extends AbstractService {
       case 'localSolc':
         this.checkSolcAvailability()
         this.localSolcCompile(contractFolderPath, contractFilePath)
+        break
+      case 'remoteSolc':
+        this.bdkSolcCompile(contractFolderPath, contractFilePath)
         break
       default:
         logger.debug('Invalid selection')
