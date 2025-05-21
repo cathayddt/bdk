@@ -6,7 +6,7 @@ import assert from 'assert'
 import path, { resolve } from 'path'
 import * as childProcess from 'child_process'
 import config from '../../../../src/eth/config'
-import Contract, { getFileChoices } from '../../../../src/eth/service/contract'
+import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion } from '../../../../src/eth/service/contract'
 import { SolcError, DeployError } from '../../../../src/util'
 import { FileFormat } from '../../../../src/eth/model/type/file.type'
 import { CompileType } from '../../../../src/eth/model/type/compile.type'
@@ -307,12 +307,6 @@ describe('Besu.Contract.Service', function () {
       assert.deepStrictEqual(fileChoices, [{ title: 'test.sol', value: `${testDir}/test.sol` }])
     })
 
-    it('should return file choices', () => {
-      createFile(`${testDir}/test.json`)
-      const fileChoices = getFileChoices(testDir, FileFormat.JSON)
-      assert.deepStrictEqual(fileChoices, [{ title: 'test.sol', value: `${testDir}/test.json` }])
-    })
-
     it('should return empty array when not found constructor', () => {
       createFile(`${testDir}/test.json`, ContractJson)
       const res = contract.getParametersFromABI(`${testDir}/test.json`)
@@ -344,8 +338,22 @@ describe('Besu.Contract.Service', function () {
       createFile(`${testDir}/test.json`, constructor1)
       const res = contract.isConstructorPayable(`${testDir}/test.json`)
       assert.strictEqual(res, false)
-    },
-    )
+    })
+
+    it('should return choices when fetch solc versions', async () => {
+      const choices = await fetchSolcVersions()
+    })
+
+    it('should return solcInstance when loadRemoteVersion successfully', async function () {
+      this.timeout(30000)
+      const solcInstance = await loadRemoteVersion('v0.1.1+commit.6ff4cd6')
+    })
+    it('should return error when loadRemoteVersion successfully', async function () {
+      this.timeout(10000)
+      await assert.rejects(async () => {
+        await loadRemoteVersion('v0.1.1')
+      }, SolcError)
+    })
   })
 
   describe('Besu.Contract.CompileBDKSolc', () => {

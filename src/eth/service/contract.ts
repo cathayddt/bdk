@@ -53,31 +53,31 @@ export function getFileChoices (contractFolderPath: string, fileFormat: FileForm
   }
 }
 
-//get solc all versions
-export async function fetchSolcVersions() {
-  const res = await axios.get('https://binaries.soliditylang.org/bin/list.json');
+// get solc all versions
+export async function fetchSolcVersions () {
+  const res = await axios.get('https://binaries.soliditylang.org/bin/list.json')
   const choices = Object.entries(res.data.releases)
     .sort((a, b) => b[0].localeCompare(a[0], undefined, { numeric: true })) // 從新到舊排序
     .map(([displayVer, fullVer]) => ({
       title: displayVer,
-      value: fullVer 
-    }));
-  return choices;
+      value: fullVer,
+    }))
+  return choices
 }
 
-// load solc remote version use version number 
-export async function loadRemoteVersion(selectedVersion: string): Promise<any> {
-  return new Promise((resolve, reject) => {
+// load solc remote version use version number
+export async function loadRemoteVersion (selectedVersion: string): Promise<any> {
+  return await new Promise((resolve, reject) => {
     solc.loadRemoteVersion(
       selectedVersion,
       (err: Error | null, solcInstance: any) => {
         if (err) {
-          throw new SolcError(`❌ Load failed: ${err}`)
+          return reject(new SolcError(`${err}`)) // 用 reject 傳出錯誤
         }
-        resolve(solcInstance);
-      }
-    );
-  });
+        resolve(solcInstance)
+      },
+    )
+  })
 }
 
 export default class Contract extends AbstractService {

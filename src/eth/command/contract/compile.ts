@@ -61,23 +61,23 @@ export const handler = async (argv: Arguments<OptType>) => {
     ],
   })
 
-  if(compileFunction === CompileType.REMOTE_SOLC) {
+  if (compileFunction === CompileType.REMOTE_SOLC) {
     const choices = await fetchSolcVersions()
     const response = await prompts({
       type: 'select',
       name: 'version',
       message: 'Please select the Solidity version to use:',
-      choices
-    });
-  
-    const fullFilename = response.version;
+      choices,
+    })
+
+    const fullFilename = response.version
     if (!fullFilename) {
-      console.log('❌ No version selected, operation aborted');
-      return;
+      console.log('❌ No version selected, operation aborted')
+      return
     }
-  
-    const selectedVersion = fullFilename.replace("soljson-", "").replace(".js", "");
-  
+
+    const selectedVersion = fullFilename.replace('soljson-', '').replace('.js', '')
+
     const loadSpinner = ora(`🔄 Loading Solidity ${selectedVersion}...`).start()
     const solcInstance = await loadRemoteVersion(selectedVersion)
     loadSpinner.succeed(`Solc version ${selectedVersion} loaded successfully`)
