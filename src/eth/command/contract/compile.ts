@@ -72,14 +72,13 @@ export const handler = async (argv: Arguments<OptType>) => {
 
     const fullFilename = response.version
     if (!fullFilename) {
-      console.log('❌ No version selected, operation aborted')
-      return
+      throw new ParamsError('Invalid params: Required parameter missing')
     }
 
     const selectedVersion = fullFilename.replace('soljson-', '').replace('.js', '')
 
     const loadSpinner = ora(`🔄 Loading Solidity ${selectedVersion}...`).start()
-    const solcInstance = await loadRemoteVersion(selectedVersion)
+    await loadRemoteVersion(selectedVersion)
     loadSpinner.succeed(`Solc version ${selectedVersion} loaded successfully`)
   }
 

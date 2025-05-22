@@ -72,7 +72,7 @@ export async function loadRemoteVersion (selectedVersion: string): Promise<any> 
       selectedVersion,
       (err: Error | null, solcInstance: any) => {
         if (err) {
-          return reject(new SolcError(`${err}`)) // 用 reject 傳出錯誤
+          return reject(new SolcError(`${err}`))
         }
         resolve(solcInstance)
       },

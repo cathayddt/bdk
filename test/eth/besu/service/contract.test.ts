@@ -3,16 +3,17 @@
 /// <reference path="../../../../src/eth/model/type/solc.d.ts" />
 import fs from 'fs'
 import assert from 'assert'
-import path, { resolve } from 'path'
+import path from 'path'
 import * as childProcess from 'child_process'
 import config from '../../../../src/eth/config'
 import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion } from '../../../../src/eth/service/contract'
 import { SolcError, DeployError } from '../../../../src/util'
 import { FileFormat } from '../../../../src/eth/model/type/file.type'
 import { CompileType } from '../../../../src/eth/model/type/compile.type'
-import sinon, { SinonStub } from 'sinon'
+import sinon from 'sinon'
 
-const testDir = '__tests__/contracts'
+const baseDir = '__tests__'
+const testDir = `${baseDir}/contracts`
 const testDeployDir = '__tests__/contracts/build'
 const contract = new Contract(config, 'besu')
 const contractContent0_8_17 = `
@@ -279,7 +280,7 @@ describe('Besu.Contract.Service', function () {
     })
 
     after(() => {
-      deleteFolder(testDir)
+      deleteFolder(baseDir)
     })
     it('should have error when path is error', () => {
       const res = getFileChoices('__invalid_path__', FileFormat.SOL)
@@ -332,8 +333,8 @@ describe('Besu.Contract.Service', function () {
       createFile(`${testDir}/test.json`, constructor3)
       const res = contract.isConstructorPayable(`${testDir}/test.json`)
       assert.strictEqual(res, true)
-    },
-    )
+    })
+
     it('should return false when constructor is not payable', () => {
       createFile(`${testDir}/test.json`, constructor1)
       const res = contract.isConstructorPayable(`${testDir}/test.json`)
@@ -341,12 +342,12 @@ describe('Besu.Contract.Service', function () {
     })
 
     it('should return choices when fetch solc versions', async () => {
-      const choices = await fetchSolcVersions()
+      await fetchSolcVersions()
     })
 
     it('should return solcInstance when loadRemoteVersion successfully', async function () {
       this.timeout(30000)
-      const solcInstance = await loadRemoteVersion('v0.1.1+commit.6ff4cd6')
+      await loadRemoteVersion('v0.1.1+commit.6ff4cd6')
     })
     it('should return error when loadRemoteVersion successfully', async function () {
       this.timeout(10000)
@@ -362,7 +363,7 @@ describe('Besu.Contract.Service', function () {
     })
 
     after(() => {
-      deleteFolder(testDir)
+      deleteFolder(baseDir)
     })
 
     it('should not error when compile param error', () => {
@@ -411,7 +412,7 @@ describe('Besu.Contract.Service', function () {
     })
 
     after(() => {
-      deleteFolder(testDir)
+      deleteFolder(baseDir)
     })
 
     it('should throw error when solc is not available', () => {
@@ -459,7 +460,7 @@ describe('Besu.Contract.Service', function () {
     })
 
     after(() => {
-      deleteFolder(testDir)
+      deleteFolder(baseDir)
     })
 
     it('Should return deploy error when contract json is invalid', async () => {
@@ -477,14 +478,6 @@ describe('Besu.Contract.Service', function () {
     })
 
     it('should return deploy successfully', async () => {
-      // let fakeContract = sinon.createStubInstance(ethers.Contract, {
-      // target: '0x77644e819d6C5da6b5aB6C9b3A6A4A95A204A396',
-      // waitForDeployment: sinon.stub().resolves(),
-      // }) as unknown as ethers.Contract;
-
-      // let deployStub = sinon.stub(ethers.ContractFactory.prototype, 'deploy')
-      // .resolves(fakeContract);
-
       createFile(`${testDeployDir}/test.json`, ContractJson)
       await contract.deploy(`${testDeployDir}/test.json`, privateKey, params, '0')
     })
