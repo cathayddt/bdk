@@ -407,7 +407,7 @@ export default class FabricInstance extends AbstractInstance {
         'peer', 'snapshot', 'submitrequest',
         '-c', channelName,
         '-b', blockNumber.toString(),
-        '--peerAddress', process.env.PEER_ADDRESS!,
+        '--peerAddress', `${process.env.PEER_ADDRESS}`,
         // '--tlsRootCertFile', this.getDockerCertPath()
         // '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.PEER_ADDRESS!.split(':')[0]}/ca.crt`
         '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`,
@@ -429,7 +429,7 @@ export default class FabricInstance extends AbstractInstance {
       [
         'peer', 'snapshot', 'listpending',
         '-c', channelName,
-        '--peerAddress', process.env.PEER_ADDRESS!,
+        '--peerAddress', `${process.env.PEER_ADDRESS}`,
         '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`,
       ],
       OrgTypeEnum.PEER,
@@ -451,7 +451,7 @@ export default class FabricInstance extends AbstractInstance {
         'peer', 'snapshot', 'cancelrequest',
         '-c', channelName,
         '-b', blockNumber.toString(),
-        '--peerAddress', process.env.PEER_ADDRESS!,
+        '--peerAddress', `${process.env.PEER_ADDRESS}`,
         '--tlsRootCertFile', `${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`,
       ],
       OrgTypeEnum.PEER,
