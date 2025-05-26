@@ -37,7 +37,7 @@ bdk fabric network create -i
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v3.2.0][v3.2.0] | [v3.2.0][v3.2.0] |
+| [v3.3.0][v3.3.0] | [v3.3.0][v3.3.0] |
 
 [v3.2.0]: https://github.com/cathayddt/bdk/releases/tag/v3.2.0
 

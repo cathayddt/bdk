@@ -832,3 +832,86 @@ export BDK_HOSTNAME='orderer0'
 # application 
 bdk fabric org orderer add --interactive
 ```
+
+## Joining a Channel Using Snapshot
+
+### Step 1: Execute `submitSnapshot` on a peer already in the channel
+
+```bash
+# peer0 in Org0 is already in the channel (channel name: test)
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+choose
+- Operation : submitRequest
+- Channel Name : test
+- Block Number : 0 (execute snapshot immediately) or N (execute snapshot after N blocks)
+
+### Step 2 (Optional) : Check submitted snapshot requests
+
+```bash
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+choose
+- Operation : listPending
+- Channel Name : test
+
+This command lists all pending snapshot requests (requests with blockNumber=0 will not appear).
+
+### Step 3 (Optional): Delete unnecessary snapshot requests
+
+```bash
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+choose
+- Channel Name : test
+- Block Number : N (the snapshot request for block N will be deleted)
+
+After deletion, run listPending again to verify the request has been removed.
+
+### Step 4: Copy snapshot data to the new peer's container
+
+```bash
+# By default, snapshot data is stored in the peer container at:
+# `/var/hyperledger/production/snapshots/completed/{channelName}/{blockHeight}`
+
+# Copy snapshot data to the new peer container (assuming channelName: test, blockHeight: 1)
+docker cp peer0.org0.example.com:/var/hyperledger/production/snapshots/completed/test/1/. - | docker cp - peer0.org1.example.com:/var/hyperledger/production/snapshots/completed/test/1/
+```
+
+### Step 5: Use `joinBySnapshot` to add the new peer to the channel
+
+```bash
+export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org1.example.com:8051
+
+bdk fabric channel snapshot -i
+```
+
+choose
+- Snapshot Path : /var/hyperledger/production/snapshots/completed/test/1/
+
+### Step 6: Verify whether the new peer has joined the channel successfully
+
+```bash
+# Inside peer0.org1.example.com's container, run `peer channel list` to check if it has joined
+peer channel list
+```

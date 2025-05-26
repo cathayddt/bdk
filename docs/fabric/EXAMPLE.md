@@ -817,3 +817,85 @@ export BDK_HOSTNAME='orderer0'
 # application 
 bdk fabric org orderer add --interactive
 ```
+
+## 使用 Snapshot 加入 Channel
+
+### Step 1 : 選擇已在 channel 內的 peer 執行 submitSnapshot
+
+```bash
+# Org0 中的 peer0 已在 Channel 內 (channel name: test)
+export export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Operation : submitRequest
+- Channel Name : test
+- Block Number : 0 (立即執行 snapshot) or N (N個block後再執行 snapshot)
+
+### Step 2 (Optional) : 查看已提交的 snapshot request
+```bash
+export export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Operation : listPending
+- Channel Name : test
+
+此指令會列出所有正在 pending 的 snapshot request (在submitRequest時 block number為0的 request不會顯示)
+
+### Step 3 (Optional) : 刪除多餘的 snapshot request
+
+```bash
+export export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Channel Name : test
+- Block Number : N (block N 的 snapshot request 將被刪除)
+
+刪除後可再次執行 listPending 來查看 snapshot request 是否已被刪除
+
+### Step 4 : 將 Snapshot 完的 Channel 狀態資料複製到欲加入 channel 的 peer container 內
+
+```bash
+# 預設 snapshot 得到的資料會放在peer container 內的 /var/hyperledger/prodcution/snapshots/completed/{channelName}/{blockHeight}
+
+# 複製 snapshot data 到欲加入channel 的 peer container內 (假設 channelName : test, blockHeight : 1)
+docker cp peer0.org0.example.com:/var/hyperledger/production/snapshots/completed/test/1/. - | docker cp - peer0.org1.example.com:/var/hyperledger/production/snapshots/completed/test/1/
+```
+
+### Step 5 : 用 joinBySnapshot 將新的 peer 加入 channel
+
+```bash
+export export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org1.example.com:8051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Snapshot Path : /var/hyperledger/production/snapshots/completed/test/1/
+
+### Step 6 : 確認新的 peer 是否加入 channel
+
+```bash
+# 到 peer0.org1.example.com 的 container 內下指令 peer channel list 查看是否已被加入 channel
+peer channel list
+```
