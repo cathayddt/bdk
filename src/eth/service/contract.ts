@@ -7,6 +7,7 @@ import { NotFoundWarn, PathError, SolcError, FileWriteError, DeployError } from 
 import { PromptObject } from 'prompts'
 import { logger } from '../../util'
 import { ContractABI, ABIComponent, ABIPrimitiveType, ABIArrayType, ABIResult } from '../model/type/abi.type'
+import { MinimalSolcInstance } from '../model/type/compile.type'
 import solc from 'solc'
 import { execSync } from 'child_process'
 import { tarDateFormat } from '../../util/utils'
@@ -66,7 +67,7 @@ export async function fetchSolcVersions () {
 }
 
 // load solc remote version use version number
-export async function loadRemoteVersion (selectedVersion: string): Promise<any> {
+export async function loadRemoteVersion (selectedVersion: string): Promise<MinimalSolcInstance> {
   return await new Promise((resolve, reject) => {
     solc.loadRemoteVersion(
       selectedVersion,
@@ -87,7 +88,7 @@ export default class Contract extends AbstractService {
    * @param contractFilePath
    * @param compileFunction
    */
-  public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string) {
+  public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string, solcInstance: MinimalSolcInstance | null = null) {
     switch (compileFunction) {
       case 'bdkSolc':
         this.bdkSolcCompile(contractFolderPath, contractFilePath)
@@ -97,7 +98,7 @@ export default class Contract extends AbstractService {
         this.localSolcCompile(contractFolderPath, contractFilePath)
         break
       case 'remoteSolc':
-        this.bdkSolcCompile(contractFolderPath, contractFilePath)
+        this.bdkSolcCompile(contractFolderPath, contractFilePath, solcInstance)
         break
       default:
         logger.debug('Invalid selection')
@@ -165,7 +166,7 @@ export default class Contract extends AbstractService {
     }
   }
 
-  private bdkSolcCompile (contractFolderPath: string, filename: string): void {
+  private bdkSolcCompile (contractFolderPath: string, filename: string, solcInstance: MinimalSolcInstance | null = null): void {
     function getSources (contractFolderPath: string, filename: string) {
       const processedFiles = new Set()
       const sources: Record<string, { content: string }> = {}
@@ -208,7 +209,7 @@ export default class Contract extends AbstractService {
       }
 
       // Compile the contract
-      const output = JSON.parse(solc.compile(JSON.stringify(input)))
+      const output = solcInstance ? JSON.parse(solcInstance.compile(JSON.stringify(input))) : JSON.parse(solc.compile(JSON.stringify(input), solcInstance))
       logger.debug('output', output)
 
       if (output.errors) {
@@ -248,7 +249,7 @@ export default class Contract extends AbstractService {
     try {
       output = execSync(
         `solc --base-path . --include-path node_modules/ --optimize --combined-json abi,bin ${contractPath}`,
-        { encoding: 'utf-8' }, // 確保輸出為字串
+        { encoding: 'utf-8' },
       )
     } catch (error: any) {
       throw new SolcError(`SolcError❌ An error occurred during compilation: ${error.message}`)

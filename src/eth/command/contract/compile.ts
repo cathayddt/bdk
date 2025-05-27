@@ -6,7 +6,7 @@ import ora from 'ora'
 import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion } from '../../service/contract'
 
 import { FileFormat } from '../../model/type/file.type'
-import { CompileType } from '../../model/type/compile.type'
+import { CompileType, MinimalSolcInstance } from '../../model/type/compile.type'
 
 export const command = 'compile'
 export const desc = '編譯 Solidity 合約'
@@ -61,6 +61,7 @@ export const handler = async (argv: Arguments<OptType>) => {
     ],
   })
 
+  let solcInstance: MinimalSolcInstance | null = null
   if (compileFunction === CompileType.REMOTE_SOLC) {
     const choices = await fetchSolcVersions()
     const response = await prompts({
@@ -78,14 +79,14 @@ export const handler = async (argv: Arguments<OptType>) => {
     const selectedVersion = fullFilename.replace('soljson-', '').replace('.js', '')
 
     const loadSpinner = ora(`🔄 Loading Solidity ${selectedVersion}...`).start()
-    await loadRemoteVersion(selectedVersion)
+    solcInstance = await loadRemoteVersion(selectedVersion)
     loadSpinner.succeed(`Solc version ${selectedVersion} loaded successfully`)
   }
 
   const spinner = ora('Contract comlile ...').start()
 
   const contract = new Contract(config, 'quorum')
-  contract.compile(contractFolderPath, contractFilePath, compileFunction)
+  contract.compile(contractFolderPath, contractFilePath, compileFunction, solcInstance)
 
   spinner.succeed(`Contract compile Successfully! file at:${contractFolderPath}/build`)
 }

@@ -62,18 +62,18 @@ export const handler = async (argv: Arguments<OptType>) => {
 
   let etherValue = '0'
   if (contract.isConstructorPayable(contractFilePath)) {
-    const { value } = await prompts({
-      type: 'text',
-      name: 'value',
-      message: 'What is the value of deploy contract?',
-      validate: (value) => {
-        if (!/^\d+$/.test(value)) {
-          return 'Please enter a valid integer.'
-        }
-        return true
+    const response = await prompts([
+      {
+        type: 'text',
+        name: 'value',
+        message: 'Enter amount of ETH to send on deployment (e.g. 0.1):',
+        validate: (value) => {
+          return isNaN(parseFloat(value)) ? 'Please enter a valid number' : true
+        },
       },
-    }, { onCancel })
-    etherValue = value || '0'
+    ], { onCancel })
+
+    etherValue = response.value || '0'
   }
 
   const { privateKey } = await prompts({

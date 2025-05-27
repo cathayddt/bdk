@@ -1,9 +1,9 @@
-export type ABIPrimitiveType = 'uint256' | 'int256' | 'bool' | 'address' | 'string' | `bytes${number | ''}`;
+export type ABIPrimitiveType = 'uint256' | 'int256' | 'bool' | 'address' | 'string' | `bytes${number | ''}`
 
-export type ABIArrayType = `${ABIPrimitiveType}[]`;
-export type ABIResult = (ABIPrimitiveType | ABIArrayType | ABIResult)[];
+export type ABIArrayType = `${ABIPrimitiveType}[]`
+export type ABIResult = (ABIPrimitiveType | ABIArrayType | ABIResult)[]
 
-export type ABIType = ABIPrimitiveType | `${ABIPrimitiveType}[]` | 'tuple' | 'tuple[]';
+export type ABIType = ABIPrimitiveType | `${ABIPrimitiveType}[]` | 'tuple' | 'tuple[]'
 
 export interface ABIComponent {
   name: string
