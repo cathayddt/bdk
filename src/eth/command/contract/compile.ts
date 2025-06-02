@@ -3,7 +3,7 @@ import config from '../../config'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
-import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion } from '../../service/contract'
+import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersion} from '../../service/contract'
 
 import { FileFormat } from '../../model/type/file.type'
 import { CompileType, MinimalSolcInstance } from '../../model/type/compile.type'
@@ -49,14 +49,14 @@ export const handler = async (argv: Arguments<OptType>) => {
         description: 'Uses bdk\'s remote solc version 0.8.17',
       },
       {
+        title: 'Load remote solc',
+        value: CompileType.REMOTE_SOLC,
+        description: 'Automatically load a specific version of solc from the Internet',
+      },
+      {
         title: 'Local solc',
         value: CompileType.LOCAL_SOLC,
         description: 'Uses the solc version installed on your machine',
-      },
-      {
-        title: 'Load remote solc',
-        value: CompileType.REMOTE_SOLC,
-        description: 'Load a specific version of solc from the internet',
       },
     ],
   })
@@ -64,19 +64,8 @@ export const handler = async (argv: Arguments<OptType>) => {
   let solcInstance: MinimalSolcInstance | null = null
   if (compileFunction === CompileType.REMOTE_SOLC) {
     const choices = await fetchSolcVersions()
-    const response = await prompts({
-      type: 'select',
-      name: 'version',
-      message: 'Please select the Solidity version to use:',
-      choices,
-    })
-
-    const fullFilename = response.version
-    if (!fullFilename) {
-      throw new ParamsError('Invalid params: Required parameter missing')
-    }
-
-    const selectedVersion = fullFilename.replace('soljson-', '').replace('.js', '')
+    const pragmaVersion = await getPragmaVersion(contractFilePath)
+    const selectedVersion = findVersion(pragmaVersion, choices)
 
     const loadSpinner = ora(`🔄 Loading Solidity ${selectedVersion}...`).start()
     solcInstance = await loadRemoteVersion(selectedVersion)

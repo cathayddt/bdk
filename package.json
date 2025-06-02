@@ -48,6 +48,7 @@
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.8.3",
     "axios": "^1.6.5",
     "deep-object-diff": "^1.1.0",
     "dockerode": "^3.3.5",
@@ -89,7 +90,7 @@
     "mocha": "^11.0.1",
     "nodemon": "^3.0.2",
     "nyc": "^15.1.0",
-    "semver": "^7.3.5",
+    "semver": "^7.7.2",
     "sinon": "^9.2.0",
     "source-map-support": "^0.5.19",
     "ts-node": "^10.9.1",
