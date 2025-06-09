@@ -367,7 +367,7 @@ describe('Besu.Contract.Service', function () {
     })
     it('should return solc version when getPragmaVersion successfully', async () => {
       createFile(`${testDir}/test.json`, contractContent0_8_17)
-      const solcVersion = await getPragmaVersion(`${testDir}/test.json`)
+      await getPragmaVersion(`${testDir}/test.json`)
     })
     it('should return error when getPragmaVersion failed', async () => {
       createFile(`${testDir}/test.json`, ContractInvalidJson)
@@ -375,18 +375,18 @@ describe('Besu.Contract.Service', function () {
         async () => {
           await getPragmaVersion(`${testDir}/test.json`)
         },
-        SolcError
+        SolcError,
       )
     })
     it('should return solc version when findVersion successfully', () => {
       createFile(`${testDir}/test.json`, contractContent0_8_20)
-      const solcVersion = findVersion(`0.8.20`, choices)
+      const solcVersion = findVersion('0.8.20', choices)
       assert.strictEqual(solcVersion, 'v0.8.20+commit.a1b79de6')
     })
     it('should return solc error when findVersion not found match version', () => {
       createFile(`${testDir}/test.json`, contract0_11_20)
       assert.throws(() => {
-        findVersion(`0.11.20`, choices)
+        findVersion('0.11.20', choices)
       }, SolcError)
     })
   })
@@ -521,7 +521,7 @@ describe('Besu.Contract.Service', function () {
 /**
  * 建立資料夾
  */
-function createFolder(folderPath: string): void {
+function createFolder (folderPath: string): void {
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true })
   }
@@ -530,7 +530,7 @@ function createFolder(folderPath: string): void {
 /**
  * 建立檔案
  */
-function createFile(filePath: string, content: string = ''): void {
+function createFile (filePath: string, content: string = ''): void {
   createFolder(path.dirname(filePath))
   fs.writeFileSync(filePath, content)
 }
@@ -538,7 +538,7 @@ function createFile(filePath: string, content: string = ''): void {
 /**
  * 刪除資料夾
  */
-function deleteFolder(folderPath: string): void {
+function deleteFolder (folderPath: string): void {
   if (fs.existsSync(folderPath)) {
     fs.rmSync(folderPath, { recursive: true, force: true })
   }

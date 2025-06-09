@@ -120,7 +120,3 @@ src/command/test.ts
 
 # Pnpm lockfile
 pnpm-lock.yaml
-
-
-#tmp files
-./testC/ 

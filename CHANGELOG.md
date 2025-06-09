@@ -3,10 +3,11 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
-## [v3.4.0](https://github.com/cathayddt/bdk/releases/tag/v3.4.0) - 2025-06-02
+## [v3.4.0](https://github.com/cathayddt/bdk/releases/tag/v3.4.0) - 2025-06-09
 
 ### Features
 
+* Automatically load a specific version of solc from the Internet
 * Added remote download solc version function
 * Support contract compile and deploy on Besu and Quorum
 * Initial implementation of contract deployment
@@ -17,42 +18,15 @@ All notable changes to BDK project will be documented here.
 
 ### Testing
 
+* Add getPragmaVersion、findVersion unit test
 * Complete loadRemoteVersion unit test
 * Reduce uncoverage
 * Add unit tests for contract deploy and tool
 * Add unit tests for compile and deploy
 
-## [v3.4.0](https://github.com/cathayddt/bdk/releases/tag/v3.4.0) - 2025-05-27
+### Documentation
 
-### Features
-
-* Added remote download solc version function
-* Support contract compile and deploy on Besu and Quorum
-* Initial implementation of contract deployment
-
-### Fixes
-
-* Load remote solc not used
-
-### Testing
-
-* Complete loadRemoteVersion unit test
-* Reduce uncoverage
-* Add unit tests for contract deploy and tool
-* Add unit tests for compile and deploy
-
-## [v3.4.0](https://github.com/cathayddt/bdk/releases/tag/v3.4.0) - 2025-05-19
-
-### Features
-
-* Support contract compile and deploy on Besu and Quorum
-* Initial implementation of contract deployment
-
-### Testing
-
-* Reduce uncoverage
-* Add unit tests for contract deploy and tool
-* Add unit tests for compile and deploy
+* Added contract compilation, deployment, and query documents
 
 ## [v3.2.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-01-15
 

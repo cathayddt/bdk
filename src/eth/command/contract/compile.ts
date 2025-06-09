@@ -3,7 +3,7 @@ import config from '../../config'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
-import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersion} from '../../service/contract'
+import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersion } from '../../service/contract'
 
 import { FileFormat } from '../../model/type/file.type'
 import { CompileType, MinimalSolcInstance } from '../../model/type/compile.type'

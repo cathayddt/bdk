@@ -17,8 +17,8 @@ export const builder = (yargs: Argv<OptType>) => {
 }
 
 export const handler = async (argv: Arguments<OptType>) => {
-    if (!argv.interactive) throw new ParamsError('Invalid params: Required parameter missing')
-  
+  if (!argv.interactive) throw new ParamsError('Invalid params: Required parameter missing')
+
   const { networkType } = await prompts([
     {
       type: 'select',

@@ -204,7 +204,7 @@ bdk eth cluster generate -i
 
 ## 部屬 ERC20 合約
 ### 建立 ERC20 合約
-在本地端建立一個新的檔案 `MyToken.sol`，並複製以下程式碼進去
+在本地端建立一個新的檔案 `MyToken.sol`，並貼上以下程式碼：
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
@@ -222,7 +222,7 @@ contract MyToken is ERC20 {
 #透過以下命令編譯合約
 bdk eth contract compile -i
 ```
-依序輸入以下資訊：
+根據提示選擇以下項目：
 - `What is the folder path of compile contract?` 輸入合約所在資料夾 `/home/../contracts`
 - `What is the name of deploy contract?` 選擇 `MyToken.sol`
 - `What is the compile function?` 選擇 `Load remote solc`自動下載所需合約版本編譯合約
@@ -232,7 +232,7 @@ bdk eth contract compile -i
 ```bash
 bdk eth contract deploy -i
 ```
-依序輸入以下資訊：
+根據提示選擇以下項目：
 - `What is your network?` 選擇 `Besu` 或 `Quorum`
 - `What is the folder path of deploy contract?` 輸入合約所在資料夾 `../../contracts/build` 編譯後合約存放在build資料夾中
 - `What is the name of deploy contract?` 選擇 `MyToken.json`
@@ -245,5 +245,6 @@ bdk eth contract deploy -i
 ```bash
 bdk eth contract get -i
 ```
+根據提示選擇以下項目：
 - `What is your network?` 選擇 `Besu` 或 `Quorum`
 - `What is the name of deploy contract?` 選擇 `MyToken_時間戳記`
