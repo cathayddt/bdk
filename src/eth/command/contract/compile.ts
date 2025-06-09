@@ -44,11 +44,6 @@ export const handler = async (argv: Arguments<OptType>) => {
     message: 'What is the compile function?',
     choices: [
       {
-        title: 'bdk solc (version 0.8.17)',
-        value: CompileType.BDK_SOLC,
-        description: 'Uses bdk\'s remote solc version 0.8.17',
-      },
-      {
         title: 'Load remote solc',
         value: CompileType.REMOTE_SOLC,
         description: 'Automatically load a specific version of solc from the Internet',

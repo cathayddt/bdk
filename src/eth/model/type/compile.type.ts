@@ -5,6 +5,6 @@ export enum CompileType {
 }
 
 export interface MinimalSolcInstance {
-  compile: (input: string) => string
+  compile: (input: string, ...args: any[]) => string
   version: () => string
 }

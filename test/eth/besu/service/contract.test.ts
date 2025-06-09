@@ -6,7 +6,7 @@ import assert from 'assert'
 import path from 'path'
 import * as childProcess from 'child_process'
 import config from '../../../../src/eth/config'
-import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion } from '../../../../src/eth/service/contract'
+import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersion } from '../../../../src/eth/service/contract'
 import { SolcError, DeployError } from '../../../../src/util'
 import { FileFormat } from '../../../../src/eth/model/type/file.type'
 import { CompileType } from '../../../../src/eth/model/type/compile.type'
@@ -41,6 +41,10 @@ const contractContent0_8_20 = `
 const contractContentNotExistBytecode = `
     // SPDX-License-Identifier: MIT
     pragma solidity ^0.8.17;
+    `
+const contract0_11_20 = `
+    // SPDX-License-Identifier: MIT
+    pragma solidity ^0.11.20;
     `
 const ContractInvalidJson = 'Contract Json Format Error'
 const ContractInvalidFormat = '{"bytecode": "6080604052602a600055348015601457600080fd5b5060788060226000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80632096525514602d575b600080fd5b60005460405190815260200160405180910390f3fea2646970667358221220cf41b1c90bb1735c875a4939160d7dfde75914396a42d88b235d0bbce2160a5b64736f6c63430008110033"}'
@@ -268,7 +272,13 @@ contract AnotherContract {
     }
 }
 `
-
+const choices = [
+  { title: '0.8.30', value: 'soljson-v0.8.30+commit.73712a01.js' },
+  { title: '0.8.29', value: 'soljson-v0.8.29+commit.ab55807c.js' },
+  { title: '0.8.28', value: 'soljson-v0.8.28+commit.7893614a.js' },
+  { title: '0.8.27', value: 'soljson-v0.8.27+commit.40a35a09.js' },
+  { title: '0.8.20', value: 'soljson-v0.8.20+commit.a1b79de6.js' },
+]
 const privateKey = '0x6f5a95897341cac724e68d0d269cca26854ce90a79c3e784e7792015e032ac1e'
 const params: any = []
 
@@ -353,6 +363,30 @@ describe('Besu.Contract.Service', function () {
       this.timeout(10000)
       await assert.rejects(async () => {
         await loadRemoteVersion('v0.1.1')
+      }, SolcError)
+    })
+    it('should return solc version when getPragmaVersion successfully', async () => {
+      createFile(`${testDir}/test.json`, contractContent0_8_17)
+      const solcVersion = await getPragmaVersion(`${testDir}/test.json`)
+    })
+    it('should return error when getPragmaVersion failed', async () => {
+      createFile(`${testDir}/test.json`, ContractInvalidJson)
+      await assert.rejects(
+        async () => {
+          await getPragmaVersion(`${testDir}/test.json`)
+        },
+        SolcError
+      )
+    })
+    it('should return solc version when findVersion successfully', () => {
+      createFile(`${testDir}/test.json`, contractContent0_8_20)
+      const solcVersion = findVersion(`0.8.20`, choices)
+      assert.strictEqual(solcVersion, 'v0.8.20+commit.a1b79de6')
+    })
+    it('should return solc error when findVersion not found match version', () => {
+      createFile(`${testDir}/test.json`, contract0_11_20)
+      assert.throws(() => {
+        findVersion(`0.11.20`, choices)
       }, SolcError)
     })
   })
@@ -487,7 +521,7 @@ describe('Besu.Contract.Service', function () {
 /**
  * 建立資料夾
  */
-function createFolder (folderPath: string): void {
+function createFolder(folderPath: string): void {
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true })
   }
@@ -496,7 +530,7 @@ function createFolder (folderPath: string): void {
 /**
  * 建立檔案
  */
-function createFile (filePath: string, content: string = ''): void {
+function createFile(filePath: string, content: string = ''): void {
   createFolder(path.dirname(filePath))
   fs.writeFileSync(filePath, content)
 }
@@ -504,7 +538,7 @@ function createFile (filePath: string, content: string = ''): void {
 /**
  * 刪除資料夾
  */
-function deleteFolder (folderPath: string): void {
+function deleteFolder(folderPath: string): void {
   if (fs.existsSync(folderPath)) {
     fs.rmSync(folderPath, { recursive: true, force: true })
   }

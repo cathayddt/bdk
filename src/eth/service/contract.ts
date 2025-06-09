@@ -3,7 +3,7 @@ import path from 'path'
 import { ethers, isAddress } from 'ethers'
 import { AbstractService } from './Service.abstract'
 import { FileFormat } from '../model/type/file.type'
-import { NotFoundWarn, PathError, SolcError, FileWriteError, DeployError } from '../../util/error'
+import { NotFoundWarn, PathError, SolcError, SolcWarn, FileWriteError, DeployError } from '../../util/error'
 import { PromptObject } from 'prompts'
 import { logger } from '../../util'
 import { ContractABI, ABIComponent, ABIPrimitiveType, ABIArrayType, ABIResult } from '../model/type/abi.type'
@@ -81,7 +81,7 @@ export function findVersion(pragmaRange: string, choices: { title: string, value
 export async function fetchSolcVersions(): Promise<{ title: string; value: string }[]> {
   const res = await axios.get('https://binaries.soliditylang.org/bin/list.json')
 
-  const choices = Object.entries(res.data.releases as Record<string, string>) 
+  const choices = Object.entries(res.data.releases as Record<string, string>)
     .sort((a, b) => b[0].localeCompare(a[0], undefined, { numeric: true }))
     .map(([displayVer, fullVer]) => ({
       title: displayVer,
@@ -171,7 +171,6 @@ export default class Contract extends AbstractService {
 
       await contract.waitForDeployment()
       this.bdkFile.createContractAddress(`${contractFilePath.split('/').pop()?.split('.')[0]}_${tarDateFormat(new Date())}`, contract.target.toString())
-      console.log("contract",contract)
       return contract.target
     } catch (error) {
       throw new DeployError(`❌ An error occurred during deployment: ${error}`)
@@ -208,9 +207,15 @@ export default class Contract extends AbstractService {
         let match
         while ((match = importRegex.exec(content)) !== null) {
           const importedFile = match[1]
+          let importPath: string
           if (importedFile.startsWith('.')) {
-            const importPath = path.resolve(path.dirname(filePath), importedFile)
+            importPath = path.resolve(path.dirname(filePath), importedFile)
             readFile(importPath)
+          } else {
+            // node_modules module
+            importPath = require.resolve(importedFile, {
+              paths: [contractFolderPath],
+            })
           }
         }
       }
@@ -234,9 +239,23 @@ export default class Contract extends AbstractService {
         },
       }
 
+      const importCallback = function (importPath: string) {
+        try {
+          const resolvedPath = require.resolve(importPath, { paths: [contractFolderPath] })
+          const content = fs.readFileSync(resolvedPath, 'utf8')
+          return { contents: content }
+        } catch (err) {
+          return { error: `File not found: ${importPath}` }
+        }
+      }
+
       // Compile the contract
-      const output = solcInstance ? JSON.parse(solcInstance.compile(JSON.stringify(input))) : JSON.parse(solc.compile(JSON.stringify(input), solcInstance))
-      logger.debug('output', output)
+      const output = solcInstance ? JSON.parse(solcInstance.compile(JSON.stringify(input), {
+        import: importCallback,
+      })) :
+        JSON.parse(solc.compile(JSON.stringify(input), {
+          import: importCallback,
+        }))
 
       if (output.errors) {
         throw new SolcError(`❌ Solidity Compile Error: ${output.errors}`)
@@ -250,7 +269,8 @@ export default class Contract extends AbstractService {
         Object.keys(output.contracts[sourceFile]).forEach((contractName) => {
           const contractData = output.contracts[sourceFile][contractName]
           if (!contractData?.abi || !contractData?.evm?.bytecode?.object) {
-            throw new SolcError(`❌ Missing abi or bytecode for contract ${contractName}`)
+            return
+            // throw new SolcWarn(`⚠️ Skipping contract ${contractName}: no ABI or Bytecode.`)
           }
           const contractPath = path.join(buildDir, `${contractName}.json`)
           try {

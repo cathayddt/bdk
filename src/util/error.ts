@@ -12,6 +12,7 @@ export class BackupError extends BdkError {}
 export class TimeLimitError extends BdkError {}
 export class PathError extends BdkError {}
 export class SolcError extends BdkError {}
+export class SolcWarn extends BdkWarn {}
 export class NotFoundWarn extends BdkWarn {}
 export class FileWriteError extends BdkError {}
 export class DeployError extends BdkError {}
