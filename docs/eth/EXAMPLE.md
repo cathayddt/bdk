@@ -8,6 +8,7 @@
 - [加入 Remote 節點](#加入-remote-節點)
 - [備份還原 Node](#備份還原-node)
 - [建立 Cluster](#建立-cluster)
+- [部屬 ERC20 合約](#部屬-erc20-合約)
 
 ## 確認 BDK 安裝狀態
 
@@ -200,3 +201,49 @@ bdk eth cluster delete -i
 bdk eth cluster generate -i
 ```
 - `What is your network?` 選擇 `Besu` 或 `Quorum`
+
+## 部屬 ERC20 合約
+### 建立 ERC20 合約
+在本地端建立一個新的檔案 `MyToken.sol`，並複製以下程式碼進去
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract MyToken is ERC20 {
+    constructor(string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
+        _mint(msg.sender, initialSupply * 10 ** decimals());
+    }
+}
+```
+### 編譯 ERC20 合約
+```bash
+#透過以下命令編譯合約
+bdk eth contract compile -i
+```
+依序輸入以下資訊：
+- `What is the folder path of compile contract?` 輸入合約所在資料夾 `/home/../contracts`
+- `What is the name of deploy contract?` 選擇 `MyToken.sol`
+- `What is the compile function?` 選擇 `Load remote solc`自動下載所需合約版本編譯合約
+ > ✅ 編譯成功後，會在 `/home/../contracts/build` 資料夾中產生對應的 JSON 檔案。
+
+### 部屬合約
+```bash
+bdk eth contract deploy -i
+```
+依序輸入以下資訊：
+- `What is your network?` 選擇 `Besu` 或 `Quorum`
+- `What is the folder path of deploy contract?` 輸入合約所在資料夾 `../../contracts/build` 編譯後合約存放在build資料夾中
+- `What is the name of deploy contract?` 選擇 `MyToken.json`
+- `Please enter name (string)` 輸入Token名稱
+- `Please enter symbol (string)` 輸入Token符號
+- `Please enter initialSupply (uint256)` 輸入Token初始發行量
+- `What is the account private key of deploy contract?` 輸入部署合約的帳號私鑰
+
+### 查詢合約地址
+```bash
+bdk eth contract get -i
+```
+- `What is your network?` 選擇 `Besu` 或 `Quorum`
+- `What is the name of deploy contract?` 選擇 `MyToken_時間戳記`
