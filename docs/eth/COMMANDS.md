@@ -205,3 +205,4 @@ Description: 取得Besu/Quorum Network 智能合約地址
 | --------------------- | :-----: | ------------------------------ | :------: | ------- |
 | --help                | boolean | Show help                      |          |         |
 | --version             | boolean | Show version number            |          |         |
+| -i, --interactive     | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
