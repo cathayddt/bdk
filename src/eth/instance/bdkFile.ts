@@ -22,6 +22,7 @@ export default class BdkFile {
   private backupPath: string
   private envPath: string
   private orgPath: string
+  private contractPath: string
   private thisPath = path.resolve(__dirname)
 
   constructor (config: Config, networkName: string = config.networkName) {
@@ -31,6 +32,7 @@ export default class BdkFile {
     this.backupPath = `${config.infraConfig.bdkPath}/backup`
     this.envPath = `${config.infraConfig.bdkPath}/.env`
     this.orgPath = ''
+    this.contractPath = `${this.bdkPath}/contract`
   }
 
   public createBdkFolder () {
@@ -39,6 +41,10 @@ export default class BdkFile {
 
   public createArtifactsFolder () {
     fs.mkdirSync(`${this.bdkPath}/artifacts/goQuorum`, { recursive: true })
+  }
+
+  public createContractFolder () {
+    fs.mkdirSync(`${this.bdkPath}/contract`, { recursive: true })
   }
 
   public createGenesisJson (genesisJson: GenesisJsonType) {
@@ -349,6 +355,39 @@ export default class BdkFile {
     this.checkHelmChartPath()
     fs.mkdirSync(`${this.helmPath}/values`, { recursive: true })
     return fs.readdirSync(`${this.helmPath}/values`)
+  }
+
+  public createContractAddress (contractName: string, contractAddress: string) {
+    this.createContractFolder()
+
+    const contractFilePath = `${this.contractPath}/contractAddress.json`
+
+    if (!fs.existsSync(contractFilePath)) {
+      fs.writeFileSync(contractFilePath, '{}', 'utf8')
+    }
+
+    let data: Record<string, string> = {}
+    const fileContent = fs.readFileSync(contractFilePath, 'utf8')
+    if (fileContent.trim()) {
+      data = JSON.parse(fileContent)
+    }
+
+    const newEntry = { [`${contractName}`]: contractAddress }
+    Object.assign(data, newEntry)
+
+    fs.writeFileSync(contractFilePath, JSON.stringify(data, null, 2), 'utf8')
+  }
+
+  public getContractAddress () {
+    if (!fs.existsSync(`${this.contractPath}/contractAddress.json`)) {
+      throw new PathError('Network not started')
+    }
+    let data: Record<string, string> = {}
+    const fileContent = fs.readFileSync(`${this.contractPath}/contractAddress.json`, 'utf8')
+    if (fileContent.trim()) {
+      data = JSON.parse(fileContent)
+    }
+    return data
   }
 
   public checkPathExist (path: string) {

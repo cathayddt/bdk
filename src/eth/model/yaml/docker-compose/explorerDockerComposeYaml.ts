@@ -33,15 +33,17 @@ class ExplorerDockerComposeYaml extends DockerComposeYaml {
           'INDEXER_DISABLE_INTERNAL_TRANSACTIONS_FETCHER=true',
         ]
           .concat(
-            httpModeEnabled ? [
-              'ETHEREUM_JSONRPC_TRANSPORT=http',
-              `ETHEREUM_JSONRPC_HTTP_URL=http://${nodeName}:8545`,
-              `ETHEREUM_JSONRPC_TRACE_URL=http://${nodeName}:8545`,
-              `ETHEREUM_JSONRPC_WS_URL=ws://${nodeName}:8546`,
-            ] : [
-              'ETHEREUM_JSONRPC_TRANSPORT=ipc',
-              'IPC_PATH=/root/geth.ipc',
-            ],
+            httpModeEnabled
+              ? [
+                'ETHEREUM_JSONRPC_TRANSPORT=http',
+                `ETHEREUM_JSONRPC_HTTP_URL=http://${nodeName}:8545`,
+                `ETHEREUM_JSONRPC_TRACE_URL=http://${nodeName}:8545`,
+                `ETHEREUM_JSONRPC_WS_URL=ws://${nodeName}:8546`,
+              ]
+              : [
+                'ETHEREUM_JSONRPC_TRANSPORT=ipc',
+                'IPC_PATH=/root/geth.ipc',
+              ],
           ),
         entrypoint: ['/bin/sh', '-c', 'cd /opt/app/; echo $$MIX_ENV && mix do ecto.create, ecto.migrate; mix phx.server;'],
         depends_on: {
