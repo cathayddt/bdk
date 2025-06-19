@@ -8,14 +8,9 @@ All notable changes to BDK project will be documented here.
 ### Features
 
 * Automatically load a specific version of solc from the Internet
-* Added remote download solc version function
+* Add `bdk eth contract` command
 * Support contract compile and deploy on Besu and Quorum
 * Initial implementation of contract deployment
-
-### Fixes
-
-* Solc deployment error when the contract version is greater than 0.8.20
-* Load remote solc not used
 
 ### Testing
 
