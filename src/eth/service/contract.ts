@@ -14,7 +14,7 @@ import { tarDateFormat } from '../../util/utils'
 import axios from 'axios'
 import semver from 'semver'
 
-export function getFileChoices (contractFolderPath: string, fileFormat: FileFormat) {
+export function getFileChoices(contractFolderPath: string, fileFormat: FileFormat) {
   try {
     if (!fs.existsSync(contractFolderPath)) {
       throw new PathError(`❌ Folder not found: ${contractFolderPath}`)
@@ -55,7 +55,7 @@ export function getFileChoices (contractFolderPath: string, fileFormat: FileForm
   }
 }
 
-export async function getPragmaVersion (contractPath: string): Promise<string> {
+export async function getPragmaVersion(contractPath: string): Promise<string> {
   const sourceCode = await fs.promises.readFile(contractPath, 'utf-8')
 
   const match = sourceCode.match(/pragma\s+solidity\s+([^;]+);/)
@@ -66,19 +66,33 @@ export async function getPragmaVersion (contractPath: string): Promise<string> {
   return match[1].trim()
 }
 
-export function findVersion (pragmaRange: string, choices: { title: string; value: string }[]) {
-  const versions = choices.map(c => c.title)
-  const matched = semver.minSatisfying(versions, pragmaRange)
-  const fullFilename = choices.find(c => c.title === matched) || null
-  if (!fullFilename) {
-    throw new SolcError(`No matching solc version found for pragma version: ${pragmaRange}`)
+export function findVersionAndEvm(
+  pragmaRange: string,
+  choices: { title: string; value: string }[]
+) {
+  const versions = choices.map(c => c.title);
+  const matched = semver.maxSatisfying(versions, pragmaRange);
+
+  if (!matched) {
+    throw new SolcError(`No matching solc version for pragma: ${pragmaRange}`);
   }
-  const selectedChoice = fullFilename.value.replace('soljson-', '').replace('.js', '')
-  return selectedChoice
+
+  const shouldUseParis = semver.gte(matched, '0.8.20');
+
+  const selectedChoice = choices.find(c => c.title === matched)!;
+  const versionName = selectedChoice.value
+    .replace('soljson-', '')
+    .replace('.js', '');
+
+  return {
+    version: versionName,
+    shouldUseParis: shouldUseParis,
+  };
 }
 
+
 // get solc all versions
-export async function fetchSolcVersions (): Promise<{ title: string; value: string }[]> {
+export async function fetchSolcVersions(): Promise<{ title: string; value: string }[]> {
   const res = await axios.get('https://binaries.soliditylang.org/bin/list.json')
 
   const choices = Object.entries(res.data.releases as Record<string, string>)
@@ -92,7 +106,7 @@ export async function fetchSolcVersions (): Promise<{ title: string; value: stri
 }
 
 // load solc remote version use version number
-export async function loadRemoteVersion (selectedVersion: string): Promise<MinimalSolcInstance> {
+export async function loadRemoteVersion(selectedVersion: string): Promise<MinimalSolcInstance> {
   return await new Promise((resolve, reject) => {
     solc.loadRemoteVersion(
       selectedVersion,
@@ -106,6 +120,33 @@ export async function loadRemoteVersion (selectedVersion: string): Promise<Minim
   })
 }
 
+export function checkSolcAvailability(): boolean {
+  try {
+    const result = execSync('solc --version', { encoding: 'utf-8' });
+    logger.debug('✅ solc output:', result.trim());
+
+    const match = result.match(/Version:\s+([^\s]+)/);
+    if (!match) {
+      throw new SolcError('❌ Failed to parse solc version');
+    }
+
+    const rawVersion = match[1];
+    // 去掉 build metadata
+    const cleanVersion = rawVersion.split('+')[0];
+
+    if (!semver.valid(cleanVersion)) {
+      throw new SolcError(`❌ Invalid semver: ${cleanVersion}`);
+    }
+
+    const useParis = semver.gte(cleanVersion, '0.8.20');
+    logger.debug(`✅ Clean version: ${cleanVersion}, useParis: ${useParis}`);
+    return useParis;
+
+  } catch (error: unknown) {
+    throw new SolcError('❌ solc is not available or version parsing failed');
+  }
+}
+
 export default class Contract extends AbstractService {
   /**
    * @description compile contract
@@ -113,17 +154,16 @@ export default class Contract extends AbstractService {
    * @param contractFilePath
    * @param compileFunction
    */
-  public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string, solcInstance: MinimalSolcInstance | null = null) {
+  public compile(contractFolderPath: string, contractFilePath: string, compileFunction: string, useParis: boolean, solcInstance: MinimalSolcInstance | null = null) {
     switch (compileFunction) {
       case 'bdkSolc':
-        this.bdkSolcCompile(contractFolderPath, contractFilePath)
+        this.bdkSolcCompile(contractFolderPath, contractFilePath, useParis)
         break
       case 'localSolc':
-        this.checkSolcAvailability()
-        this.localSolcCompile(contractFolderPath, contractFilePath)
+        this.localSolcCompile(contractFolderPath, contractFilePath, useParis)
         break
       case 'remoteSolc':
-        this.bdkSolcCompile(contractFolderPath, contractFilePath, solcInstance)
+        this.bdkSolcCompile(contractFolderPath, contractFilePath, useParis, solcInstance)
         break
       default:
         logger.debug('Invalid selection')
@@ -139,7 +179,7 @@ export default class Contract extends AbstractService {
    * @param params
    * @returns
    */
-  public async deploy (contractFilePath: string, privateKey: string, params: any, value: string) {
+  public async deploy(contractFilePath: string, privateKey: string, params: any, value: string) {
     try {
       let contractJson
       try {
@@ -177,26 +217,16 @@ export default class Contract extends AbstractService {
     }
   }
 
-  public getContractAddress () {
+  public getContractAddress() {
     return this.bdkFile.getContractAddress()
   }
 
-  private checkSolcAvailability (): void {
-    try {
-      // 嘗試執行 `solc --version` 來檢查是否可用
-      const result = execSync('solc --version', { encoding: 'utf-8' })
-      logger.debug('✅  solc is available:', result.trim())
-    } catch (error: unknown) {
-      throw new SolcError('❌ solc is not available')
-    }
-  }
-
-  private bdkSolcCompile (contractFolderPath: string, filename: string, solcInstance: MinimalSolcInstance | null = null): void {
-    function getSources (contractFolderPath: string, filename: string) {
+  private bdkSolcCompile(contractFolderPath: string, filename: string, usePairs: boolean, solcInstance: MinimalSolcInstance | null = null): void {
+    function getSources(contractFolderPath: string, filename: string) {
       const processedFiles = new Set()
       const sources: Record<string, { content: string }> = {}
 
-      function readFile (filePath: string) {
+      function readFile(filePath: string) {
         if (processedFiles.has(filePath)) return
         processedFiles.add(filePath)
 
@@ -238,6 +268,7 @@ export default class Contract extends AbstractService {
           },
         },
       }
+      if(usePairs) (input.settings as Record<string, any>).evmVersion  = "paris"
 
       const importCallback = function (importPath: string) {
         try {
@@ -269,8 +300,8 @@ export default class Contract extends AbstractService {
         Object.keys(output.contracts[sourceFile]).forEach((contractName) => {
           const contractData = output.contracts[sourceFile][contractName]
           if (!contractData?.abi || !contractData?.evm?.bytecode?.object) {
+            logger.warn(`⚠️ Contract ${contractName} has no ABI or bytecode.`)
             return
-            // throw new SolcWarn(`⚠️ Skipping contract ${contractName}: no ABI or Bytecode.`)
           }
           const contractPath = path.join(buildDir, `${contractName}.json`)
           try {
@@ -289,12 +320,17 @@ export default class Contract extends AbstractService {
     }
   }
 
-  private localSolcCompile (contractFolderPath: string, filename: string) {
+  private localSolcCompile(contractFolderPath: string, filename: string, useParis: boolean = false): void {
     const contractPath = path.resolve(contractFolderPath, filename)
     let output: string
+    const cliCmd = [
+      `solc --base-path . --include-path node_modules/ --optimize`,
+      useParis ? `--evm-version paris` : '',
+      `--combined-json abi,bin ${contractPath}`
+    ].join(' ');
     try {
       output = execSync(
-        `solc --base-path . --include-path node_modules/ --optimize --combined-json abi,bin ${contractPath}`,
+        cliCmd,
         { encoding: 'utf-8' },
       )
     } catch (error: any) {
@@ -335,14 +371,14 @@ export default class Contract extends AbstractService {
     }
   }
 
-  public isConstructorPayable (contractFilePath: string): boolean {
+  public isConstructorPayable(contractFilePath: string): boolean {
     const contractJson = JSON.parse(fs.readFileSync(contractFilePath, 'utf8'))
     const abi: ContractABI = contractJson.abi
     const constructorAbi = abi.find(item => item.type === 'constructor')
     return constructorAbi?.stateMutability === 'payable'
   }
 
-  public getParametersFromABI (contractFilePath: string): PromptObject[] {
+  public getParametersFromABI(contractFilePath: string): PromptObject[] {
     const contractJson = JSON.parse(fs.readFileSync(contractFilePath, 'utf8'))
     const abi: ContractABI = contractJson.abi
     const constructorAbi = abi.find(item => item.type === 'constructor')
@@ -350,7 +386,7 @@ export default class Contract extends AbstractService {
 
     const inputs = constructorAbi.inputs
 
-    function getPromptType (type: string): PromptObject['type'] {
+    function getPromptType(type: string): PromptObject['type'] {
       if (type.endsWith('[]')) return 'text'
       if (type.startsWith('uint') || type.startsWith('int')) return 'number'
       if (type === 'bool') return 'toggle'
@@ -358,7 +394,7 @@ export default class Contract extends AbstractService {
       return 'text'
     }
 
-    function parseTuple (input: ABIComponent, parentName = ''): ABIResult {
+    function parseTuple(input: ABIComponent, parentName = ''): ABIResult {
       if (!input.components || !Array.isArray(input.components)) {
         return []
       }
