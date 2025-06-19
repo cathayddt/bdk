@@ -61,7 +61,7 @@ export const handler = async (argv: Arguments<OptType>) => {
   if (compileFunction === CompileType.REMOTE_SOLC) {
     const choices = await fetchSolcVersions()
     const pragmaVersion = await getPragmaVersion(contractFilePath)
-    const {version, shouldUseParis} = findVersionAndEvm(pragmaVersion, choices)
+    const { version, shouldUseParis } = findVersionAndEvm(pragmaVersion, choices)
     useParis = shouldUseParis
     const loadSpinner = ora(`🔄 Loading Solidity ${version}...`).start()
     solcInstance = await loadRemoteVersion(version)
