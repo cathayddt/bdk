@@ -380,8 +380,8 @@ describe('Besu.Contract.Service', function () {
     })
     it('should return solc version when findVersion successfully', () => {
       createFile(`${testDir}/test.json`, contractContent0_8_20)
-      const { version, shouldUseParis } = findVersionAndEvm('0.8.20', choices)
-      assert.strictEqual(version, 'v0.8.20+commit.a1b79de6')
+      const version = findVersionAndEvm('0.8.20', choices)
+      assert.strictEqual(version, 'vs0.8.20+commit.a1b79de6')
     })
     it('should return solc error when findVersion not found match version', () => {
       createFile(`${testDir}/test.json`, contract0_11_20)
@@ -404,31 +404,31 @@ describe('Besu.Contract.Service', function () {
     })
 
     it('should not error when compile param error', () => {
-      contract.compile(testDir, 'test.sol', 'error', false)
+      contract.compile(testDir, 'test.sol', 'error')
     })
 
     it('should have error when solc compile error', () => {
       createFolder(testDir)
       createFile(`${testDir}/test.sol`)
       assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC, true)
+        contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
       }, SolcError)
     })
 
     it('should return bdkSolc compile successfully', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
-      contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC, false)
+      contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
     })
 
     it('should not error', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
-      contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC, false)
+      contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
     })
 
     it('should return solc error when compile with not exist bytecode', () => {
       createFile(`${testDir}/test.sol`, contractContentNotExistBytecode)
       assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC, true)
+        contract.compile(testDir, 'test.sol', CompileType.BDK_SOLC)
       }, SolcError, 'Solidity Compile Error')
     })
 
@@ -437,7 +437,7 @@ describe('Besu.Contract.Service', function () {
       createFile(`${testDir}/Util1.sol`, contractImport2)
 
       assert.throws(() => {
-        contract.compile(testDir, 'import.sol', CompileType.BDK_SOLC, true)
+        contract.compile(testDir, 'import.sol', CompileType.BDK_SOLC)
       }, SolcError, 'Solidity Compile Error')
     })
   })
@@ -456,7 +456,7 @@ describe('Besu.Contract.Service', function () {
       execSyncStub = sinon.stub(childProcess, 'execSync')
       execSyncStub.throws(new Error('Command failed'))
       assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC, false)
+        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
       }, SolcError)
       sinon.restore()
     })
@@ -465,26 +465,26 @@ describe('Besu.Contract.Service', function () {
       createFolder(testDir)
       createFile(`${testDir}/test.sol`)
       assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC, false)
+        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
       }, SolcError)
     })
 
     it('should return LocalSolc compile successfully', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
-      contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC, false)
+      contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
     })
 
     it('should return solc error when compile with not equal version', () => {
       createFile(`${testDir}/test.sol`, contractContent0_8_20)
       assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC, false)
+        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
       }, SolcError)
     })
 
     it('should return solc error when compile with not exist bytecode', () => {
       createFile(`${testDir}/test.sol`, contractContentNotExistBytecode)
       assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC, false)
+        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
       }, SolcError)
     })
   })

@@ -77,17 +77,12 @@ export function findVersionAndEvm (
     throw new SolcError(`No matching solc version for pragma: ${pragmaRange}`)
   }
 
-  const shouldUseParis = semver.gte(matched, '0.8.20')
-
   const selectedChoice = choices.find(c => c.title === matched)!
-  const versionName = selectedChoice.value
+  const version = selectedChoice.value
     .replace('soljson-', '')
     .replace('.js', '')
 
-  return {
-    version: versionName,
-    shouldUseParis: shouldUseParis,
-  }
+  return version
 }
 
 // get solc all versions
@@ -119,27 +114,10 @@ export async function loadRemoteVersion (selectedVersion: string): Promise<Minim
   })
 }
 
-export function checkSolcAvailability (): boolean {
+export function checkSolcAvailability (): void {
   try {
     const result = execSync('solc --version', { encoding: 'utf-8' })
     logger.debug('✅ solc output:', result.trim())
-
-    const match = result.match(/Version:\s+([^\s]+)/)
-    if (!match) {
-      throw new SolcError('❌ Failed to parse solc version')
-    }
-
-    const rawVersion = match[1]
-    // 去掉 build metadata
-    const cleanVersion = rawVersion.split('+')[0]
-
-    if (!semver.valid(cleanVersion)) {
-      throw new SolcError(`❌ Invalid semver: ${cleanVersion}`)
-    }
-
-    const useParis = semver.gte(cleanVersion, '0.8.20')
-    logger.debug(`✅ Clean version: ${cleanVersion}, useParis: ${useParis}`)
-    return useParis
   } catch (error: unknown) {
     throw new SolcError('❌ solc is not available or version parsing failed')
   }
@@ -152,16 +130,17 @@ export default class Contract extends AbstractService {
    * @param contractFilePath
    * @param compileFunction
    */
-  public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string, useParis: boolean, solcInstance: MinimalSolcInstance | null = null) {
+  public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string, solcInstance: MinimalSolcInstance | null = null) {
     switch (compileFunction) {
       case 'bdkSolc':
-        this.bdkSolcCompile(contractFolderPath, contractFilePath, useParis)
+        this.bdkSolcCompile(contractFolderPath, contractFilePath)
         break
       case 'localSolc':
-        this.localSolcCompile(contractFolderPath, contractFilePath, useParis)
+        checkSolcAvailability()
+        this.localSolcCompile(contractFolderPath, contractFilePath)
         break
       case 'remoteSolc':
-        this.bdkSolcCompile(contractFolderPath, contractFilePath, useParis, solcInstance)
+        this.bdkSolcCompile(contractFolderPath, contractFilePath, solcInstance)
         break
       default:
         logger.debug('Invalid selection')
@@ -219,7 +198,7 @@ export default class Contract extends AbstractService {
     return this.bdkFile.getContractAddress()
   }
 
-  private bdkSolcCompile (contractFolderPath: string, filename: string, usePairs: boolean, solcInstance: MinimalSolcInstance | null = null): void {
+  private bdkSolcCompile (contractFolderPath: string, filename: string, solcInstance: MinimalSolcInstance | null = null): void {
     function getSources (contractFolderPath: string, filename: string) {
       const processedFiles = new Set()
       const sources: Record<string, { content: string }> = {}
@@ -259,6 +238,7 @@ export default class Contract extends AbstractService {
         language: 'Solidity',
         sources: sources,
         settings: {
+          evmVersion: 'istanbul',
           outputSelection: {
             '*': {
               '*': ['abi', 'evm.bytecode.object'],
@@ -266,7 +246,6 @@ export default class Contract extends AbstractService {
           },
         },
       }
-      if (usePairs) (input.settings as Record<string, any>).evmVersion = 'paris'
 
       const importCallback = function (importPath: string) {
         try {
@@ -318,12 +297,12 @@ export default class Contract extends AbstractService {
     }
   }
 
-  private localSolcCompile (contractFolderPath: string, filename: string, useParis: boolean = false): void {
+  private localSolcCompile (contractFolderPath: string, filename: string): void {
     const contractPath = path.resolve(contractFolderPath, filename)
     let output: string
     const cliCmd = [
       'solc --base-path . --include-path node_modules/ --optimize',
-      useParis ? '--evm-version paris' : '',
+      '--evm-version istanbul',
       `--combined-json abi,bin ${contractPath}`,
     ].join(' ')
     try {

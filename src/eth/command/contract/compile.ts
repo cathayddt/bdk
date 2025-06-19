@@ -3,7 +3,7 @@ import config from '../../config'
 import { onCancel, ParamsError } from '../../../util/error'
 import prompts from 'prompts'
 import ora from 'ora'
-import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersionAndEvm, checkSolcAvailability } from '../../service/contract'
+import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersionAndEvm } from '../../service/contract'
 
 import { FileFormat } from '../../model/type/file.type'
 import { CompileType, MinimalSolcInstance } from '../../model/type/compile.type'
@@ -57,23 +57,21 @@ export const handler = async (argv: Arguments<OptType>) => {
   })
 
   let solcInstance: MinimalSolcInstance | null = null
-  let useParis = false
+  // load solc instance
   if (compileFunction === CompileType.REMOTE_SOLC) {
     const choices = await fetchSolcVersions()
     const pragmaVersion = await getPragmaVersion(contractFilePath)
-    const { version, shouldUseParis } = findVersionAndEvm(pragmaVersion, choices)
-    useParis = shouldUseParis
+    const version = findVersionAndEvm(pragmaVersion, choices)
+
     const loadSpinner = ora(`🔄 Loading Solidity ${version}...`).start()
     solcInstance = await loadRemoteVersion(version)
     loadSpinner.succeed(`Solc version ${version} loaded successfully`)
-  } else if (compileFunction === CompileType.LOCAL_SOLC) {
-    useParis = checkSolcAvailability()
   }
 
   const spinner = ora('Contract comlile ...').start()
 
   const contract = new Contract(config, 'quorum')
-  contract.compile(contractFolderPath, contractFilePath, compileFunction, useParis, solcInstance)
+  contract.compile(contractFolderPath, contractFilePath, compileFunction, solcInstance)
 
   spinner.succeed(`Contract compile Successfully! file at:${contractFolderPath}/build`)
 }
