@@ -3,7 +3,7 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
-## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-06-18
+## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-06-19
 
 ### Features
 
@@ -14,10 +14,12 @@ All notable changes to BDK project will be documented here.
 
 ### Fixes
 
+* Solc deployment error when the contract version is greater than 0.8.20
 * Load remote solc not used
 
 ### Testing
 
+* Add checkSolcAvailability test
 * Add getPragmaVersion、findVersion unit test
 * Complete loadRemoteVersion unit test
 * Reduce uncoverage
