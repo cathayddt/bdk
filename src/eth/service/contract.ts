@@ -77,7 +77,10 @@ export function findVersionAndEvm (
     throw new SolcError(`No matching solc version for pragma: ${pragmaRange}`)
   }
 
-  const selectedChoice = choices.find(c => c.title === matched)!
+  const selectedChoice = choices.find(c => c.title === matched)
+  if (!selectedChoice) {
+    throw new SolcError(`No matching solc version for title: ${matched}`)
+  }
   const version = selectedChoice.value
     .replace('soljson-', '')
     .replace('.js', '')

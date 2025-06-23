@@ -19,8 +19,8 @@ jobs:
     - run: npm run build:console
     - name: Install solc 0.8.17
       run: |
-        apt-get update
-        apt-get install -y python3 python3-pip curl
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip curl
         pip3 install solc-select
         solc-select install 0.8.17
         solc-select use 0.8.17
