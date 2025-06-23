@@ -151,6 +151,8 @@ export default class Contract extends AbstractService {
     }
   }
 
+  public createWallet = (privateKey: string, provider: any) => new ethers.Wallet(privateKey, provider)
+
   /**
    *
    * @description deploy contract
@@ -171,7 +173,7 @@ export default class Contract extends AbstractService {
         throw new DeployError(`Invalid contract JSON structure: ${contractFilePath}`)
       }
       const provider = new ethers.JsonRpcProvider('http://localhost:8545')
-      const wallet = new ethers.Wallet(privateKey, provider)
+      const wallet = this.createWallet(privateKey, provider)
       const abi = contractJson.abi
       const bytecode = contractJson.bytecode
 

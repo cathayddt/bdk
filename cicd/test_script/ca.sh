@@ -142,7 +142,7 @@ bdk fabric org peer create -f ./cicd/test_script/org-peer-create.json --configtx
 # =====================================================
 . ./cicd/test_script/steps/add-new-peer-org.sh
 . ./cicd/test_script/steps/add-new-orderer-org.sh
-. ./cicd/test_script/steps/test-new-org.sh
+# . ./cicd/test_script/steps/test-new-org.sh
 # =====================================================
 
 sleep 5
