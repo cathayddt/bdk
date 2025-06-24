@@ -880,22 +880,13 @@ export PEER_ADDRESS=peer0.org0.example.com:7051
 bdk fabric channel snapshot -i
 ```
 choose
+- Operation : cancelRequest
 - Channel Name : test
 - Block Number : N (the snapshot request for block N will be deleted)
 
 After deletion, run listPending again to verify the request has been removed.
 
-### Step 4: Copy snapshot data to the new peer's container
-
-```bash
-# By default, snapshot data is stored in the peer container at:
-# `/var/hyperledger/production/snapshots/completed/{channelName}/{blockHeight}`
-
-# Copy snapshot data to the new peer container (assuming channelName: test, blockHeight: 1)
-docker cp peer0.org0.example.com:/var/hyperledger/production/snapshots/completed/test/1/. - | docker cp - peer0.org1.example.com:/var/hyperledger/production/snapshots/completed/test/1/
-```
-
-### Step 5: Use `joinBySnapshot` to add the new peer to the channel
+### Step 4: Use `joinBySnapshot` to add the new peer to the channel
 
 ```bash
 export BDK_ORG_NAME='Org1'
@@ -907,9 +898,10 @@ bdk fabric channel snapshot -i
 ```
 
 choose
+- Operation : joinBySnapshot
 - Snapshot Path : /var/hyperledger/production/snapshots/completed/test/1/
 
-### Step 6: Verify whether the new peer has joined the channel successfully
+### Step 5: Verify whether the new peer has joined the channel successfully
 
 ```bash
 # Inside peer0.org1.example.com's container, run `peer channel list` to check if it has joined

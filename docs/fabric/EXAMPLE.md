@@ -865,21 +865,13 @@ bdk fabric channel snapshot -i
 ```
 
 選擇
+- Operation : cancelRequest
 - Channel Name : test
 - Block Number : N (block N 的 snapshot request 將被刪除)
 
 刪除後可再次執行 listPending 來查看 snapshot request 是否已被刪除
 
-### Step 4 : 將 Snapshot 完的 Channel 狀態資料複製到欲加入 channel 的 peer container 內
-
-```bash
-# 預設 snapshot 得到的資料會放在peer container 內的 /var/hyperledger/prodcution/snapshots/completed/{channelName}/{blockHeight}
-
-# 複製 snapshot data 到欲加入channel 的 peer container內 (假設 channelName : test, blockHeight : 1)
-docker cp peer0.org0.example.com:/var/hyperledger/production/snapshots/completed/test/1/. - | docker cp - peer0.org1.example.com:/var/hyperledger/production/snapshots/completed/test/1/
-```
-
-### Step 5 : 用 joinBySnapshot 將新的 peer 加入 channel
+### Step 4 : 用 joinBySnapshot 將新的 peer 加入 channel
 
 ```bash
 export BDK_ORG_NAME='Org1'
@@ -891,9 +883,11 @@ bdk fabric channel snapshot -i
 ```
 
 選擇
+- Operation : joinBySnapshot
 - Snapshot Path : /var/hyperledger/production/snapshots/completed/test/1/
+  snapshot完的data會存在 /var/hyperledger/production/snapshots/completed/{channelName}/{blockHeight}/
 
-### Step 6 : 確認新的 peer 是否加入 channel
+### Step 5 : 確認新的 peer 是否加入 channel
 
 ```bash
 # 到 peer0.org1.example.com 的 container 內下指令 peer channel list 查看是否已被加入 channel
