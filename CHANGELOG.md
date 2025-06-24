@@ -3,7 +3,7 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
-## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-05-27
+## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-06-24
 
 ### Fixes
 
@@ -13,11 +13,6 @@ All notable changes to BDK project will be documented here.
 * Add export type in index.ts [#52](https://github.com/cathayddt/bdk/issues/52)
 * Approve and update don't use arrow function [#45](https://github.com/cathayddt/bdk/issues/45)
 
-## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-04-22
-
-### Features
-
-* Add `fabric channel snapshot` command with 4 operations: submitRequest, listPending, cancelRequest, joinBySnapshot
 
 ## [v3.2.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-01-15
 

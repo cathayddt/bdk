@@ -824,7 +824,7 @@ bdk fabric org orderer add --interactive
 
 ```bash
 # Org0 中的 peer0 已在 Channel 內 (channel name: test)
-export export BDK_ORG_NAME='Org0'
+export BDK_ORG_NAME='Org0'
 export BDK_ORG_DOMAIN='org0.example.com'
 export BDK_HOSTNAME='peer0'
 export PEER_ADDRESS=peer0.org0.example.com:7051
@@ -839,7 +839,7 @@ bdk fabric channel snapshot -i
 
 ### Step 2 (Optional) : 查看已提交的 snapshot request
 ```bash
-export export BDK_ORG_NAME='Org0'
+export BDK_ORG_NAME='Org0'
 export BDK_ORG_DOMAIN='org0.example.com'
 export BDK_HOSTNAME='peer0'
 export PEER_ADDRESS=peer0.org0.example.com:7051
@@ -856,7 +856,7 @@ bdk fabric channel snapshot -i
 ### Step 3 (Optional) : 刪除多餘的 snapshot request
 
 ```bash
-export export BDK_ORG_NAME='Org0'
+export BDK_ORG_NAME='Org0'
 export BDK_ORG_DOMAIN='org0.example.com'
 export BDK_HOSTNAME='peer0'
 export PEER_ADDRESS=peer0.org0.example.com:7051
@@ -882,7 +882,7 @@ docker cp peer0.org0.example.com:/var/hyperledger/production/snapshots/completed
 ### Step 5 : 用 joinBySnapshot 將新的 peer 加入 channel
 
 ```bash
-export export BDK_ORG_NAME='Org1'
+export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
 export BDK_HOSTNAME='peer0'
 export PEER_ADDRESS=peer0.org1.example.com:8051
