@@ -9,7 +9,7 @@ import { logger } from '../../util'
 import { ContractABI, ABIComponent, ABIPrimitiveType, ABIArrayType, ABIResult } from '../model/type/abi.type'
 import { MinimalSolcInstance } from '../model/type/compile.type'
 import solc from 'solc'
-import { execSync } from 'child_process'
+import * as childProcess from 'child_process'
 import { tarDateFormat } from '../../util/utils'
 import axios from 'axios'
 import semver from 'semver'
@@ -119,8 +119,7 @@ export async function loadRemoteVersion (selectedVersion: string): Promise<Minim
 
 export function checkSolcAvailability (): void {
   try {
-    const result = execSync('solc --version', { encoding: 'utf-8' })
-    logger.debug('✅ solc output:', result.trim())
+    childProcess.execSync('solc --version', { encoding: 'utf-8' })
   } catch (error: unknown) {
     throw new SolcError('❌ solc is not available or version parsing failed')
   }
@@ -311,10 +310,7 @@ export default class Contract extends AbstractService {
       `--combined-json abi,bin ${contractPath}`,
     ].join(' ')
     try {
-      output = execSync(
-        cliCmd,
-        { encoding: 'utf-8' },
-      )
+      output = childProcess.execSync(cliCmd, { encoding: 'utf-8' })
     } catch (error: any) {
       throw new SolcError(`SolcError❌ An error occurred during compilation: ${error.message}`)
     }

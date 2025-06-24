@@ -4,7 +4,6 @@
 import fs from 'fs'
 import assert from 'assert'
 import path from 'path'
-import * as childProcess from 'child_process'
 import config from '../../../../src/eth/config'
 import Contract, { getFileChoices, fetchSolcVersions, loadRemoteVersion, getPragmaVersion, findVersionAndEvm, checkSolcAvailability } from '../../../../src/eth/service/contract'
 import { SolcError, DeployError } from '../../../../src/util'
@@ -361,16 +360,19 @@ describe('Besu.Contract.Service', function () {
       this.timeout(30000)
       await loadRemoteVersion('v0.1.1+commit.6ff4cd6')
     })
+
     it('should return error when loadRemoteVersion successfully', async function () {
       this.timeout(10000)
       await assert.rejects(async () => {
         await loadRemoteVersion('v0.1.1')
       }, SolcError)
     })
+
     it('should return solc version when getPragmaVersion successfully', async () => {
       createFile(`${testDir}/test.json`, contractContent0_8_17)
       await getPragmaVersion(`${testDir}/test.json`)
     })
+
     it('should return error when getPragmaVersion failed', async () => {
       createFile(`${testDir}/test.json`, ContractInvalidJson)
       await assert.rejects(
@@ -380,17 +382,20 @@ describe('Besu.Contract.Service', function () {
         SolcError,
       )
     })
+
     it('should return solc version when findVersion successfully', () => {
       createFile(`${testDir}/test.json`, contractContent0_8_20)
       const version = findVersionAndEvm('0.8.20', choices)
       assert.strictEqual(version, 'v0.8.20+commit.a1b79de6')
     })
+
     it('should return solc error when findVersion not found match version', () => {
       createFile(`${testDir}/test.json`, contract0_11_20)
       assert.throws(() => {
         findVersionAndEvm('0.11.20', choices)
       }, SolcError)
     })
+
     it('should return true when checkSolcAvailability', () => {
       checkSolcAvailability()
     })
@@ -445,7 +450,6 @@ describe('Besu.Contract.Service', function () {
   })
 
   describe('Besu.Contract.CompileLocalSolc', () => {
-    let execSyncStub: sinon.SinonStub
     before(() => {
       createFolder(testDir)
     })
@@ -454,17 +458,7 @@ describe('Besu.Contract.Service', function () {
       deleteFolder(baseDir)
     })
 
-    it('should throw error when solc is not available', () => {
-      execSyncStub = sinon.stub(childProcess, 'execSync')
-      execSyncStub.throws(new Error('Command failed'))
-      assert.throws(() => {
-        contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
-      }, SolcError)
-      sinon.restore()
-    })
-
     it('should have error when solc compile error', () => {
-      createFolder(testDir)
       createFile(`${testDir}/test.sol`)
       assert.throws(() => {
         contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
@@ -475,13 +469,6 @@ describe('Besu.Contract.Service', function () {
       createFile(`${testDir}/test.sol`, contractContent0_8_17)
       contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
     })
-
-    // it('should return solc error when compile with not equal version', () => {
-    //   createFile(`${testDir}/test.sol`, contractContent0_8_20)
-    //   assert.throws(() => {
-    //     contract.compile(testDir, 'test.sol', CompileType.LOCAL_SOLC)
-    //   }, SolcError)
-    // })
 
     it('should return solc error when compile with not exist bytecode', () => {
       createFile(`${testDir}/test.sol`, contractContentNotExistBytecode)

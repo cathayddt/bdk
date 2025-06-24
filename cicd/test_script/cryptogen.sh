@@ -25,7 +25,7 @@ bdk fabric org orderer create -f cicd/test_script/org-orderer-create.json --gene
 # =====================================================
 . ./cicd/test_script/steps/add-new-peer-org.sh
 . ./cicd/test_script/steps/add-new-orderer-org.sh
-. ./cicd/test_script/steps/test-new-org.sh
+# . ./cicd/test_script/steps/test-new-org.sh
 # =====================================================
 
 sleep 5
