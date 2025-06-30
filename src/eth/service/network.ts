@@ -597,7 +597,7 @@ export default class Network extends AbstractService {
   /** @ignore */
   public getNetworkFiles () {
     const networkFilesList = this.bdkFile.getExportFiles().filter(
-      file => file.match(/(validator|member|artifacts|network-info)+/g),
+      file => file.match(/(validator|member|artifacts|network-info|contract)+/g),
     )
     return networkFilesList
   }

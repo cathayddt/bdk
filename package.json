@@ -1,6 +1,6 @@
 {
   "name": "@cathayddt/bdk",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Blockchain Deploy Kit",
   "homepage": "https://github.com/cathayddt/bdk#readme",
   "bugs": {
@@ -31,7 +31,7 @@
     "preversion": "npm run eslint && npm run build-ts",
     "build-ts": "rm -rf dist && tsc",
     "eslint": "eslint -c .eslintrc \"./src/**/*.*(ts|tsx)\" \"./test/**/*.ts\"",
-    "eslint:fix": "tsc --noEmit && node_modules/.bin/eslint -c .eslintrc ./src/**/*.*(ts|tsx) ./test/**/*.ts --quiet --fix",
+    "eslint:fix": "tsc --noEmit && node_modules/.bin/eslint -c .eslintrc 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts' --quiet --fix",
     "init:autocomplete": "bdk fabric completion > $HOME/.bash_bdk",
     "build:console": "ts-node src/console.ts",
     "start:dev": "NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' src/console.ts",
@@ -44,7 +44,7 @@
     "test:fabric": "nyc npm run test -- --grep Fabric",
     "test:coverage": "nyc npm run test",
     "test:json": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter json --require ts-node/register ./test/**/*.test.ts --exit > test-results.json",
-    "git:changelog": "git-cliff --unreleased --tag v3.2.0 --prepend CHANGELOG.md",
+    "git:changelog": "git-cliff --unreleased --tag v3.3.0 --prepend CHANGELOG.md",
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {
@@ -62,6 +62,7 @@
     "prompts": "^2.4.0",
     "react": "^17.0.2",
     "rlp": "^3.0.0",
+    "solc": "^0.8.17",
     "string-format": "^2.0.0",
     "tar": "^6.1.12",
     "winston": "^3.3.3",
@@ -88,7 +89,7 @@
     "mocha": "^11.0.1",
     "nodemon": "^3.0.2",
     "nyc": "^15.1.0",
-    "semver": "^7.3.5",
+    "semver": "^7.7.2",
     "sinon": "^9.2.0",
     "source-map-support": "^0.5.19",
     "ts-node": "^10.9.1",

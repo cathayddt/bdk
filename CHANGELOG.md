@@ -3,6 +3,28 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-06-19
+
+### Features
+
+* Automatically load a specific version of solc from the Internet
+* Add `bdk eth contract` command
+* Support contract compile and deploy on Besu and Quorum
+* Initial implementation of contract deployment
+
+### Testing
+
+* Add checkSolcAvailability test
+* Add getPragmaVersion、findVersion unit test
+* Complete loadRemoteVersion unit test
+* Reduce uncoverage
+* Add unit tests for contract deploy and tool
+* Add unit tests for compile and deploy
+
+### Documentation
+
+* Added contract compilation, deployment, and query documents
+
 ## [v3.2.0](https://github.com/cathayddt/bdk/releases/tag/v3.2.0) - 2025-01-15
 
 ### Features
