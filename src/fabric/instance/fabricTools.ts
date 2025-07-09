@@ -151,7 +151,14 @@ export default class FabricTools extends AbstractInstance {
       '--lang', chaincodeLang,
       '--label', chaincodeLabel,
     ],
-    ['GOCACHE=/tmp/gocache'],
+    [
+      'GOCACHE=/tmp/gocache',
+      'GOMODCACHE=/tmp/gomodcache',
+      'GOPATH=/tmp/gopath',
+      'GOPROXY=direct',
+      'GOSUMDB=off',
+      'GOFLAGS=-mod=vendor',
+    ],
     [`${chaincodePath}:/chaincode`],
     options)
   }
