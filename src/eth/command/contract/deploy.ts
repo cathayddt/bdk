@@ -82,10 +82,17 @@ export const handler = async (argv: Arguments<OptType>) => {
     message: 'What is the account private key of deploy contract?',
   }, { onCancel })
 
+  const { port } = await prompts({
+    type: 'text',
+    name: 'port',
+    message: 'What is the connection port for deploying contracts?',
+    initial: 'http://localhost:8545',
+  }, { onCancel })
+
   const spinner = ora('Contract Deploy ...').start()
 
   // Besu/Quorum deploy contract
-  const contractAddress = await contract.deploy(contractFilePath, privateKey, params, etherValue)
+  const contractAddress = await contract.deploy(contractFilePath, privateKey, port, params, etherValue)
 
   spinner.succeed(`Contract Deploy Successfully! Address at: ${contractAddress}`)
 }

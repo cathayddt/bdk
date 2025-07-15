@@ -160,7 +160,7 @@ export default class Contract extends AbstractService {
    * @param params
    * @returns
    */
-  public async deploy (contractFilePath: string, privateKey: string, params: any, value: string) {
+  public async deploy (contractFilePath: string, privateKey: string, port: string, params: any, value: string) {
     try {
       let contractJson
       try {
@@ -171,7 +171,7 @@ export default class Contract extends AbstractService {
       if (!contractJson || typeof contractJson !== 'object' || !contractJson.abi || !contractJson.bytecode) {
         throw new DeployError(`Invalid contract JSON structure: ${contractFilePath}`)
       }
-      const provider = new ethers.JsonRpcProvider('http://localhost:8545')
+      const provider = new ethers.JsonRpcProvider(port)
       const wallet = this.createWallet(privateKey, provider)
       const abi = contractJson.abi
       const bytecode = contractJson.bytecode
