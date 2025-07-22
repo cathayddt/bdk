@@ -48,6 +48,8 @@ class PeerDockerComposeYaml extends DockerComposeYaml {
         `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/msp:/etc/hyperledger/fabric/msp`,
         `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/tls:/etc/hyperledger/fabric/tls`,
         `${containerName}:/var/hyperledger/production`,
+        `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/channel-artifacts/snapshots/peer${number}.${domain}:/var/hyperledger/production/snapshots`,
+        // `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/peerOrganizations/${domain}:/tmp/peerOrganizations/${domain}`,
       ],
       networks: [config.networkName],
       ports: ((isPublishPort ? [port] : []).concat(isPublishOperationPort ? [operationPort] : [])).filter(x => x !== 0).map(x => `${x}:${x}`),

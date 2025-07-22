@@ -141,3 +141,26 @@ export interface DecodeEnvelopeReturnType {
   anchorPeers?: string[]
   consensus?: string[]
 }
+
+/**
+ * @requires channelName - [string] channel 的名稱
+ * @requires blockNumber - [number] submit 跟 cancel 指定的區塊號碼
+ */
+export interface ChannelSubmitAndCancelSnapshotType {
+  channelName: string
+  blockNumber: number
+}
+
+/**
+ * @requires channelName - [string] channel 的名稱
+ */
+export interface ChannelListPendingSnapshotType {
+  channelName: string
+}
+
+/**
+ * @requires snapshotPath - [string] joinbysnapshot 時的 snapshot 路徑
+ */
+export interface ChannelJoinBySnapshotType {
+  snapshotPath: string
+}
