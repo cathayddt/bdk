@@ -32,6 +32,21 @@
           "isPublishOperationPort": true
         }
       ]
+    },
+    {
+      "name": "Org1",
+      "domain": "org1.bdk.example.com",
+      "enableNodeOUs": true,
+      "peerCount": 1,
+      "userCount": 1,
+      "ports": [
+        {
+          "port": 8051,
+          "isPublishPort": true,
+          "operationPort": 9543,
+          "isPublishOperationPort": true
+        }
+      ]
     }
   ]
 }

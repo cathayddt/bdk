@@ -199,7 +199,7 @@ describe('Fabric.CA', function () {
 
   describe('Fabric.CA.enrollRCA', function () {
     after(() => {
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
     })
 
     it('up & down', async () => {
@@ -232,7 +232,7 @@ describe('Fabric.CA', function () {
 
     after(async () => {
       await caService.down({ caName: rcaArgv.basic.caName })
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
     })
 
     it('enroll client', async () => {
@@ -285,7 +285,7 @@ describe('Fabric.CA', function () {
     after(async () => {
       await caService.down({ caName: rcaArgv.basic.caName })
       await caService.down({ caName: icaArgv.basic.caName })
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
     })
 
     it('enroll && register orderer', async () => {
@@ -392,7 +392,7 @@ describe('Fabric.CA', function () {
     after(async () => {
       await caService.down({ caName: rcaArgv.basic.caName })
       await caService.down({ caName: icaArgv.basic.caName })
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
     })
 
     it('reenroll orderer ca', async () => {

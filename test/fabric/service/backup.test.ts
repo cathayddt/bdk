@@ -25,7 +25,7 @@ describe('Fabric.Backup', function () {
 
   after(async () => {
     // Delete all backup files
-    fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true })
+    fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true, force: true })
     await minimumNetwork.deleteNetwork()
   })
 
@@ -124,7 +124,7 @@ describe('Fabric.Backup', function () {
 
     after(() => {
       fs.unlinkSync(`${config.infraConfig.bdkPath}/.env`)
-      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true })
+      fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
     })
 
     it('should exist network folder in specified path', () => {
@@ -140,7 +140,7 @@ describe('Fabric.Backup', function () {
     })
 
     it('should import a backup tarball', async () => {
-      fs.rmSync(resolve(`${bdkPath}/bdk-fabric-network`), { recursive: true })
+      fs.rmSync(resolve(`${bdkPath}/bdk-fabric-network`), { recursive: true, force: true })
       fs.mkdirSync(resolve(`${bdkPath}/bdk-fabric-network`))
       await sleep(500)
 
