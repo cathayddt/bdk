@@ -202,7 +202,7 @@ describe('Fabric.CA', function () {
       try {
         fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
       } catch (e) {
-        console.warn('Cleanup failed:', e.message)
+        console.warn('Cleanup failed:', e)
       }
     })
 
@@ -239,7 +239,7 @@ describe('Fabric.CA', function () {
       try {
         fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
       } catch (e) {
-        console.warn('Cleanup failed:', e.message)
+        console.warn('Cleanup failed:', e)
       }
     })
 
@@ -296,7 +296,7 @@ describe('Fabric.CA', function () {
       try {
         fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
       } catch (e) {
-        console.warn('Cleanup failed:', e.message)
+        console.warn('Cleanup failed:', e)
       }
     })
 
@@ -407,7 +407,7 @@ describe('Fabric.CA', function () {
       try {
         fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
       } catch (e) {
-        console.warn('Cleanup failed:', e.message)
+        console.warn('Cleanup failed:', e)
       }
     })
 

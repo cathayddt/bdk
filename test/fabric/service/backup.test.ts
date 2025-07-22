@@ -28,7 +28,7 @@ describe('Fabric.Backup', function () {
     try {
       fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true, force: true })
     } catch (e) {
-      console.warn('Cleanup failed:', e.message)
+      console.warn('Cleanup failed:', e)
     }
     await minimumNetwork.deleteNetwork()
   })
@@ -131,7 +131,7 @@ describe('Fabric.Backup', function () {
       try {
         fs.rmSync(`${config.infraConfig.bdkPath}/${config.networkName}`, { recursive: true, force: true })
       } catch (e) {
-        console.warn('Cleanup failed:', e.message)
+        console.warn('Cleanup failed:', e)
       }
     })
 
@@ -151,7 +151,7 @@ describe('Fabric.Backup', function () {
       try {
         fs.rmSync(resolve(`${bdkPath}/bdk-fabric-network`), { recursive: true, force: true })
       } catch (e) {
-        console.warn('Cleanup failed:', e.message)
+        console.warn('Cleanup failed:', e)
       }
       fs.mkdirSync(resolve(`${bdkPath}/bdk-fabric-network`))
       await sleep(500)
