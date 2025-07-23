@@ -209,7 +209,7 @@ bdk eth cluster generate -i
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MyToken is ERC20 {
     constructor(string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
@@ -217,6 +217,7 @@ contract MyToken is ERC20 {
     }
 }
 ```
+ERC20.sol請自行去openzeppelin下載
 ### 編譯 ERC20 合約
 ```bash
 #透過以下命令編譯合約
