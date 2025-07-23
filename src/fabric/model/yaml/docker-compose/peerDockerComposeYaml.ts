@@ -9,7 +9,7 @@ class PeerDockerComposeYaml extends DockerComposeYaml {
     this.addService(containerName, {
       container_name: containerName,
       image: `hyperledger/fabric-peer:${config.fabricVersion.peer}`,
-      user: '1001:128', // run the container as a user
+      // user: '1001:128', // run the container as a user
       environment: [
         // Generic peer variables
         'CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock',
