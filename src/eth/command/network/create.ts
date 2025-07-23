@@ -36,7 +36,6 @@ export const handler = async (argv: Arguments<OptType>) => {
   ])
 
   const network = new Network(config, networkType)
-  console.log(`Network: ${network}`)
   const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
   const backup = new Backup(config, networkType)
   const wallet = new Wallet()
