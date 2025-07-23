@@ -229,6 +229,10 @@ bdk fabric channel update-anchorpeer -i
 將路徑上的 Chaincode 的原始碼和所需要的相關套件，命名為 *fabcar* 和版本 1，編譯完後打包成 *.tar* 檔案
 
 ```bash
+# 在執行chaincode指令前需要先把套件載入專案掛進 vendor
+cd chaincode/fabcar/go
+go mod vendor
+
 bdk fabric chaincode package -i
 ```
 選擇
@@ -816,4 +820,79 @@ export BDK_ORG_DOMAIN='org1orderer.example.com'
 export BDK_HOSTNAME='orderer0'
 # application 
 bdk fabric org orderer add --interactive
+```
+
+## 使用 Snapshot 加入 Channel
+
+### Step 1 : 選擇已在 channel 內的 peer 執行 submitSnapshot
+
+```bash
+# Org0 中的 peer0 已在 Channel 內 (channel name: test)
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Operation : submitRequest
+- Channel Name : test
+- Block Number : 0 (立即執行 snapshot) or N (N個block後再執行 snapshot)
+
+### Step 2 (Optional) : 查看已提交的 snapshot request
+```bash
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Operation : listPending
+- Channel Name : test
+
+此指令會列出所有正在 pending 的 snapshot request (在submitRequest時 block number為0的 request不會顯示)
+
+### Step 3 (Optional) : 刪除多餘的 snapshot request
+
+```bash
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org0.example.com:7051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Operation : cancelRequest
+- Channel Name : test
+- Block Number : N (block N 的 snapshot request 將被刪除)
+
+刪除後可再次執行 listPending 來查看 snapshot request 是否已被刪除
+
+### Step 4 : 用 joinBySnapshot 將新的 peer 加入 channel
+
+```bash
+export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+export PEER_ADDRESS=peer0.org1.example.com:8051
+
+bdk fabric channel snapshot -i
+```
+
+選擇
+- Operation : joinBySnapshot
+- Snapshot Path : .bdk/fabric/bdk-fabric-network/channel-artifacts/snapshots/peer0.org0.example.com/completed/test/1/ （範例）（輸入被mount在本地的snapshot目錄的絕對路徑）
+
+### Step 5 : 確認新的 peer 是否加入 channel
+
+```bash
+# 到 peer0.org1.example.com 的 container 內下指令 peer channel list 查看是否已被加入 channel
+peer channel list
 ```

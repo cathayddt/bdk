@@ -282,6 +282,25 @@ Description: 解析 Approve 或 Update 的信封內容
 | -c, --channel-name | string  | Channel 的名稱                 |          |         |
 | -V, --verify       | boolean | 驗證組織內容的正確性           |          |         |
 
+### `bdk fabric channel snapshot`
+
+Description: 對channel進行快照
+
+|      Options       |  Type   |          Description           | Required | Default |
+| ------------------ | :-----: | ------------------------------ | :------: | ------- |
+| --help             | boolean | Show help                      |          |         |
+| --version          | boolean | Show version number            |          |         |
+| -i, --interactive  | boolean | 是否使用 Cathay BDK 互動式問答    |          |         |
+| -c, --channelName  | string  | 欲進行快照 Channel 的名稱         |          |         |
+| -b, --block        | number  | 欲提交或取消的快照區塊號碼          |          |         |
+| -p, --snapshotPath | string  | 欲使用的快照路徑                  |          |         |
+| -o, --operation    | string  | 欲執行的快照操作                  |          |         |
+
+Caution:
+1. 要使用snapshot command前請先export BDK_ORG_NAME, BDK_ORG_DOMAIN, BDK_HOSTNAME, PEER_ADDRESS，環境變數設定可至EXAMPLE內查詢。
+3. joinBySnapshot 的 --snapshotPath 參數請輸入本地端的快照目錄路徑
+4. 用submitRequest快照完成的snapshot資料通常放在peer container內的/var/hyperledger/production/snapshots/completed/{channel-name}/{block-height}下
+
 ## Config
 
 ### `bdk fabric config init`
