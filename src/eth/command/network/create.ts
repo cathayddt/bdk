@@ -36,6 +36,7 @@ export const handler = async (argv: Arguments<OptType>) => {
   ])
 
   const network = new Network(config, networkType)
+  console.log(`Network: ${network}`)
   const networkTypeWithBigFirstLetter = networkType.charAt(0).toUpperCase() + networkType.slice(1)
   const backup = new Backup(config, networkType)
   const wallet = new Wallet()
@@ -208,11 +209,12 @@ export const handler = async (argv: Arguments<OptType>) => {
         return { networkType, chainId, validatorNumber, memberNumber, alloc, isBootNode, bootNodeList }
       } else {
         const { address, privateKey } = wallet.createWalletAddress(WalletType.ETHEREUM)
-        return defaultNetworkConfig(address, privateKey)
+        return defaultNetworkConfig(networkType, address, privateKey)
       }
     }
     )()
     const spinner = ora(`${networkTypeWithBigFirstLetter} Network Create ...`).start()
+    console.log(`Network Create: ${JSON.stringify(networkCreate, null, 2)}`)
     await network.create(networkCreate)
     spinner.succeed(`${networkTypeWithBigFirstLetter} Network Create Successfully!`)
   }
