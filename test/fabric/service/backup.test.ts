@@ -26,11 +26,13 @@ describe('Fabric.Backup', function () {
   after(async () => {
     // Delete all backup files
     try {
+      console.log("Delete network ...")
+      await minimumNetwork.deleteNetwork()
+      console.log("Delete: backup")
       fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true, force: true })
     } catch (e) {
       console.warn('Cleanup failed:', e)
     }
-    await minimumNetwork.deleteNetwork()
   })
 
   // create a new backup instance
