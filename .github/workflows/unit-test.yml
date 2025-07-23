@@ -17,6 +17,10 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build:console
+    - name: Discover User ID
+      run: id -u
+    - name: Discover Group ID
+      run: id -g
     - name: Install solc 0.8.17
       run: |
         sudo apt-get update
