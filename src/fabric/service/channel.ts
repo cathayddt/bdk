@@ -470,7 +470,7 @@ export default class Channel extends AbstractService {
     params: ChannelJoinBySnapshotType,
   ): Promise<InfraRunnerResultType> {
     const homeDir = os.homedir()
-    const snapshotPath = `${homeDir}/.bdk/fabric/${this.config.networkName}/channel-artifacts/snapshots/${this.config.hostname}.${this.config.orgDomainName}/temp`
+    const snapshotPath = `${homeDir}/.bdk/fabric/${this.config.networkName}/channel-artifacts/${this.config.hostname}.${this.config.orgDomainName}/snapshots/temp`
     await fs.copy(`${homeDir}/${params.snapshotPath}`, snapshotPath, { overwrite: true })
     const dockerSnapshotPath = '/var/hyperledger/production/snapshots/temp'
     return await (new FabricInstance(this.config, this.infra)).joinBySnapshot(dockerSnapshotPath)
