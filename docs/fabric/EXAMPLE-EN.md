@@ -905,11 +905,12 @@ bdk fabric channel snapshot -i
 
 choose
 - Operation : joinBySnapshot
-- Snapshot Path : .bdk/fabric/bdk-fabric-network/channel-artifacts/snapshots/peer0.org0.example.com/completed/test/1/ (Example) (Enter the absolute path of the snapshot directory mounted locally)
+- Snapshot Path : .bdk/fabric/bdk-fabric-network/channel-artifacts/peer0.org0.example.com/snapshots/completed/test/1/ (Example) (Enter the absolute path of the snapshot directory mounted locally)
 
 ### Step 5: Verify whether the new peer has joined the channel successfully
 
 ```bash
-# Inside peer0.org1.example.com's container, run `peer channel list` to check if it has joined
+# Inside peer0.org1.example.com's container, run `peer channel list or peer channel getinfo` to check if it has joined
 peer channel list
+peer channel getinfo -c {channelName}
 ```
