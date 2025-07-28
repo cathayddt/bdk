@@ -18,18 +18,6 @@ All notable changes to BDK project will be documented here.
 
 ### Features
 
-* Select a node to deploy the contract
-* [#119](https://github.com/cathayddt/bdk/issues/119) Added Ethereum contract compilation, deployment, and retrieval on Besu and Quorum
-
-### Fixes
-
-* Resolving conflicts
-* Quickly build the besu chain to build a quorum
-
-## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-06-19
-
-### Features
-
 * Automatically load a specific version of solc from the Internet
 * Add `bdk eth contract` command
 * Support contract compile and deploy on Besu and Quorum
