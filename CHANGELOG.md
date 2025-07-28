@@ -3,6 +3,18 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
+## [v3.3.1](https://github.com/cathayddt/bdk/releases/tag/v3.3.1) - 2025-07-28
+
+### Features
+
+* Select a node to deploy the contract
+* [#119](https://github.com/cathayddt/bdk/issues/119) Added Ethereum contract compilation, deployment, and retrieval on Besu and Quorum
+
+### Fixes
+
+* Resolving conflicts
+* Quickly build the besu chain to build a quorum
+
 ## [v3.3.0](https://github.com/cathayddt/bdk/releases/tag/v3.3.0) - 2025-06-19
 
 ### Features
