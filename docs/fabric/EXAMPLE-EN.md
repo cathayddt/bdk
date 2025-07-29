@@ -856,7 +856,7 @@ choose
 - Channel Name : test
 - Block Number : 0 (execute snapshot immediately) or N (execute snapshot after N blocks)
 
-p.s. The completed snapshot will be mounted to host under $.bdk/fabric/${networkName}/channel-artifacts/snapshots/${peerContainerName}/completed/${channelName}/${blockHeight}
+p.s. The completed snapshot will be copied to host under .bdk/fabric/{networkName}/peerOrganizations/{domain}/peers/peer{number}.{domain}/snapshots/completed/{channelName}/{blockHeight}
 
 ### Step 2 (Optional) : Check submitted snapshot requests
 
@@ -905,11 +905,12 @@ bdk fabric channel snapshot -i
 
 choose
 - Operation : joinBySnapshot
-- Snapshot Path : .bdk/fabric/bdk-fabric-network/channel-artifacts/snapshots/peer0.org0.example.com/completed/test/1/ (Example) (Enter the absolute path of the snapshot directory mounted locally)
+- Snapshot Path : $.bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ (Example) (Enter the absolute path of the snapshot directory on host)
 
 ### Step 5: Verify whether the new peer has joined the channel successfully
 
 ```bash
-# Inside peer0.org1.example.com's container, run `peer channel list` to check if it has joined
+# Inside peer0.org1.example.com's container, run `peer channel list or peer channel getinfo` to check if it has joined
 peer channel list
+peer channel getinfo -c {channelName}
 ```

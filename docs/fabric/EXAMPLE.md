@@ -840,6 +840,7 @@ bdk fabric channel snapshot -i
 - Operation : submitRequest
 - Channel Name : test
 - Block Number : 0 (立即執行 snapshot) or N (N個block後再執行 snapshot)
+p.s. 完成的快照會被複製到本地端的 .bdk/fabric/{networkName}/peerOrganizations/{domain}/peers/peer{number}.{domain}/snapshots/completed/{channelName}/{blockHeight} 下
 
 ### Step 2 (Optional) : 查看已提交的 snapshot request
 ```bash
@@ -888,11 +889,12 @@ bdk fabric channel snapshot -i
 
 選擇
 - Operation : joinBySnapshot
-- Snapshot Path : .bdk/fabric/bdk-fabric-network/channel-artifacts/snapshots/peer0.org0.example.com/completed/test/1/ （範例）（輸入被mount在本地的snapshot目錄的絕對路徑）
+- Snapshot Path : .bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ （範例）（輸入被copy在本地的snapshot目錄的絕對路徑）
 
 ### Step 5 : 確認新的 peer 是否加入 channel
 
 ```bash
-# 到 peer0.org1.example.com 的 container 內下指令 peer channel list 查看是否已被加入 channel
+# 到 peer0.org1.example.com 的 container 內下指令 peer channel list 或 peer channel getinfo 查看是否已被加入 channel
 peer channel list
+peer channel getinfo -c {channelName}
 ```
