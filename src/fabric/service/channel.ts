@@ -14,6 +14,9 @@ import {
   DecodeEnvelopeReturnType,
   EnvelopeTypeEnum,
   EnvelopeVerifyEnum,
+  ChannelSubmitAndCancelSnapshotType,
+  ChannelListPendingSnapshotType,
+  ChannelJoinBySnapshotType,
 } from '../model/type/channel.type'
 import ConfigtxYaml from '../model/yaml/network/configtx'
 import FabricTools from '../instance/fabricTools'
@@ -21,6 +24,12 @@ import FabricInstance from '../instance/fabricInstance'
 import { AbstractService, ParserType } from './Service.abstract'
 import { DockerResultType, InfraRunnerResultType } from '../instance/infra/InfraRunner.interface'
 import { ProcessError } from '../../util'
+import fs from 'fs-extra'
+import os from 'os'
+import { exec } from 'child_process' // Import exec from child_process
+import { promisify } from 'util' // Import promisify to use exec with async/await
+
+const execPromise = promisify(exec) // Promisify exec for easier async/await usage
 
 interface ChannelParser extends ParserType {
   listJoinedChannel: (result: DockerResultType) => string[]
@@ -426,5 +435,59 @@ export default class Channel extends AbstractService {
 
   public listJoinedChannel = async (): Promise<InfraRunnerResultType> => {
     return await (new FabricInstance(this.config, this.infra)).listJoinedChannel()
+  }
+
+  /**
+   * @description 提交快照請求
+   */
+  public async submitSnapshotRequest (
+    params: ChannelSubmitAndCancelSnapshotType,
+  ): Promise<InfraRunnerResultType> {
+    // return await (new FabricInstance(this.config, this.infra)).submitSnapshotRequest(params.channelName,params.blockNumber)
+    const result = await (new FabricInstance(this.config, this.infra)).submitSnapshotRequest(params.channelName, params.blockNumber)
+    const containerName = `${this.config.hostname}.${this.config.orgDomainName}`
+    const sourceContainerPath = '/var/hyperledger/production/snapshots/'
+    const hostDestinationPath = `${os.homedir()}/.bdk/fabric/${this.config.networkName}/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/`
+    const copyCommand = `docker cp ${containerName}:${sourceContainerPath} ${hostDestinationPath}`
+    const { stdout, stderr } = await execPromise(copyCommand)
+    if (stderr) {
+      console.error(`[Snapshot Copy] Error during Docker CP: ${stderr}`)
+      // You might want to consider this a partial failure or re-throw
+    }
+    console.log(`[Snapshot Copy] Docker CP stdout: ${stdout}`)
+    console.log(`[Snapshot Copy] Successfully initiated snapshot copy to host: ${hostDestinationPath}`)
+    return result
+  }
+
+  /**
+   * @description 列出待處理快照
+   */
+  public async listPendingSnapshots (
+    params: ChannelListPendingSnapshotType,
+  ): Promise<InfraRunnerResultType> {
+    return await (new FabricInstance(this.config, this.infra)).listPendingSnapshots(params.channelName)
+  }
+
+  /**
+   * @description 取消快照請求
+   */
+  public async cancelSnapshotRequest (
+    params: ChannelSubmitAndCancelSnapshotType,
+  ): Promise<InfraRunnerResultType> {
+    return await (new FabricInstance(this.config, this.infra)).cancelSnapshotRequest(params.channelName, params.blockNumber)
+  }
+
+  /**
+   * @description 透過快照加入通道
+   */
+  public async joinBySnapshot (
+    params: ChannelJoinBySnapshotType,
+  ): Promise<InfraRunnerResultType> {
+    const homeDir = os.homedir()
+    const snapshotPath = `${homeDir}/.bdk/fabric/${this.config.networkName}/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/snapshots/temp`
+    if (!fs.pathExistsSync(snapshotPath)) { fs.mkdirpSync(snapshotPath) }
+    await fs.copy(`${homeDir}/${params.snapshotPath}`, snapshotPath, { overwrite: true })
+    const dockerSnapshotPath = `/tmp/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/snapshots/temp`
+    return await (new FabricInstance(this.config, this.infra)).joinBySnapshot(dockerSnapshotPath)
   }
 }

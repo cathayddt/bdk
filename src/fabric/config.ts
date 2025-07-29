@@ -90,9 +90,9 @@ const config: Config = {
   orgDomainName: process.env.BDK_ORG_DOMAIN || '',
   hostname: process.env.BDK_HOSTNAME || '',
   fabricVersion: {
-    orderer: process.env.FABRIC_ORDERER_VERSION || '2.2.1',
-    peer: process.env.FABRIC_PEER_VERSION || '2.2.1',
-    tools: process.env.FABRIC_TOOLS_VERSION || '2.2.1',
+    orderer: process.env.FABRIC_ORDERER_VERSION || '2.5.10',
+    peer: process.env.FABRIC_PEER_VERSION || '2.5.10',
+    tools: process.env.FABRIC_TOOLS_VERSION || '2.5.10',
     ca: process.env.FABRIC_CA_VERSION || '1.5.0',
     explorer: '1.1.3',
     explorerDb: '1.1.3',

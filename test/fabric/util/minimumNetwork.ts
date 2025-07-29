@@ -12,6 +12,7 @@ import { PolicyTypeEnum } from '../../../src/fabric/model/type/channel.type'
 export default class MinimumNetwork {
   public networkCreateJson: NetworkCreateType
   public org0PeerConfig: Config
+  public org1PeerConfig: Config
   public org0OrdererConfig: Config
   public channelName: string
   public chaincodeName: string
@@ -31,6 +32,13 @@ export default class MinimumNetwork {
       orgName: this.getPeer().orgName,
       orgDomainName: this.getPeer().orgDomain,
       hostname: this.getPeer().hostname,
+    }
+    this.org1PeerConfig = {
+      ...config,
+      orgType: OrgTypeEnum.PEER,
+      orgName: this.getPeer(1, 0).orgName,
+      orgDomainName: this.getPeer(1, 0).orgDomain,
+      hostname: this.getPeer(1, 0).hostname,
     }
     this.org0OrdererConfig = {
       ...config,
@@ -84,6 +92,7 @@ export default class MinimumNetwork {
 
   public async peerAndOrdererUp () {
     await this.peerService.up({ peerHostname: `${this.getPeer().hostname}.${this.getPeer().orgDomain}` })
+    await this.peerService.up({ peerHostname: `${this.getPeer(1, 0).hostname}.${this.getPeer(1, 0).orgDomain}` })
     await this.ordererService.up({ ordererHostname: `${this.getOrderer().hostname}.${this.getOrderer().orgDomain}` })
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
@@ -96,7 +105,7 @@ export default class MinimumNetwork {
   public async createChannelAndJoin () {
     await this.channelServiceOrg0Peer.create({
       channelName: this.channelName,
-      orgNames: [this.getPeer().orgName],
+      orgNames: [this.getPeer().orgName, this.getPeer(1, 0).orgName],
       channelAdminPolicy: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Admins' },
       lifecycleEndorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
       endorsement: { type: PolicyTypeEnum.IMPLICITMETA, value: 'ANY Endorsement' },
