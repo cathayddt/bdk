@@ -3,8 +3,8 @@ import { OrgTypeEnum } from '../model/type/config.type'
 import { InfraRunner, InfraRunnerResultType } from './infra/InfraRunner.interface'
 import { AbstractInstance } from './Instance.abstract'
 
-// import path from 'path'
-// import fs from 'fs'
+import path from 'path'
+import fs from 'fs-extra'
 
 interface OptionsType {
   tag?: string
@@ -402,8 +402,8 @@ export default class FabricInstance extends AbstractInstance {
     options?: OptionsType,
   ): Promise<InfraRunnerResultType> {
     // this.validateTLSCert();
-    console.log(`${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`)
-    return await this.infraRunCommand(
+    // console.log(`${this.dockerPath}/tlsca/${process.env.BDK_HOSTNAME}.${process.env.BDK_ORG_DOMAIN}/ca.crt`)
+    const result = await this.infraRunCommand(
       [
         'peer', 'snapshot', 'submitrequest',
         '-c', channelName,
@@ -419,6 +419,29 @@ export default class FabricInstance extends AbstractInstance {
       undefined,
       options,
     )
+
+    const containerSourceDir = '/var/hyperledger/production/snapshots/'
+    const containerTargetSnapshotDir = `/tmp/peerOrganizations/${process.env.BDK_ORG_DOMAIN}/peers/${this.config.hostname}.${this.config.orgDomainName}/`
+
+    // Ensure the source directory exists before attempting to copy from it
+    console.log(`Ensuring source directory exists inside container: ${containerSourceDir}`)
+    await this.infraRunCommand(
+      ['mkdir', '-p', containerSourceDir],
+      OrgTypeEnum.PEER,
+      undefined,
+      undefined,
+      options,
+    )
+
+    console.log(`Copying snapshot content from ${containerSourceDir} to ${containerTargetSnapshotDir} inside container`)
+    await this.infraRunCommand(
+      ['cp', '-r', containerSourceDir, containerTargetSnapshotDir],
+      OrgTypeEnum.PEER,
+      undefined,
+      undefined,
+      options, // Use updated options to ensure mount is active
+    )
+    return result
   }
 
   public async listPendingSnapshots (
