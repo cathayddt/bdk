@@ -419,28 +419,6 @@ export default class FabricInstance extends AbstractInstance {
       undefined,
       options,
     )
-
-    const containerSourceDir = '/var/hyperledger/production/snapshots/'
-    const containerTargetSnapshotDir = `/tmp/peerOrganizations/${process.env.BDK_ORG_DOMAIN}/peers/${this.config.hostname}.${this.config.orgDomainName}/`
-
-    // Ensure the source directory exists before attempting to copy from it
-    console.log(`Ensuring source directory exists inside container: ${containerSourceDir}`)
-    await this.infraRunCommand(
-      ['mkdir', '-p', containerSourceDir],
-      OrgTypeEnum.PEER,
-      undefined,
-      undefined,
-      options,
-    )
-
-    console.log(`Copying snapshot content from ${containerSourceDir} to ${containerTargetSnapshotDir} inside container`)
-    await this.infraRunCommand(
-      ['cp', '-r', containerSourceDir, containerTargetSnapshotDir],
-      OrgTypeEnum.PEER,
-      undefined,
-      undefined,
-      options, // Use updated options to ensure mount is active
-    )
     return result
   }
 

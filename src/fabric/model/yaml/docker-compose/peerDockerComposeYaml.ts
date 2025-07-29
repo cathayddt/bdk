@@ -42,7 +42,8 @@ class PeerDockerComposeYaml extends DockerComposeYaml {
         'CORE_PEER_GOSSIP_ORGLEADER=false',
       ],
       working_dir: '/opt/gopath/src/github.com/hyperledger/fabric/peer',
-      command: `bash -c "mkdir -p /tmp/peerOrganizations/${domain}/peers/peer${number}.${domain} && ln -s /var/hyperledger/production/snapshots /tmp/peerOrganizations/${domain}/peers/peer${number}.${domain}/snapshots && peer node start"`,
+      // command: `bash -c "mkdir -p /tmp/peerOrganizations/${domain}/peers/peer${number}.${domain}/snapshots && ln -s /var/hyperledger/production/snapshots /tmp/peerOrganizations/${domain}/peers/peer${number}.${domain}/snapshots && peer node start"`,
+      command: 'peer node start',
       volumes: [
         '/var/run/:/host/var/run/',
         `\${BDK_DOCKER_HOST_PATH:-~/.bdk/fabric}/${config.networkName}/peerOrganizations/${domain}/peers/peer${number}.${domain}/msp:/etc/hyperledger/fabric/msp`,
