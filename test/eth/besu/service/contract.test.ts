@@ -12,6 +12,7 @@ import { CompileType } from '../../../../src/eth/model/type/compile.type'
 import { ethers } from 'ethers'
 import sinon from 'sinon'
 
+const rpcUrl = 'http://localhost:8545'
 const baseDir = '__tests__'
 const testDir = `${baseDir}/contracts`
 const testDeployDir = '__tests__/contracts/build'
@@ -490,14 +491,14 @@ describe('Besu.Contract.Service', function () {
     it('Should return deploy error when contract json is invalid', async () => {
       createFile(`${testDeployDir}/test.json`, ContractInvalidJson)
       await assert.rejects(async () => {
-        await contract.deploy(`${testDeployDir}/test.json`, privateKey, params, '0')
+        await contract.deploy(`${testDeployDir}/test.json`, privateKey, rpcUrl, params, '0')
       }, DeployError)
     })
 
     it('Should return deploy error when contract json is not exist abi or bytecode', async () => {
       createFile(`${testDeployDir}/test.json`, ContractInvalidFormat)
       await assert.rejects(async () => {
-        await contract.deploy(`${testDeployDir}/test.json`, privateKey, params, '0')
+        await contract.deploy(`${testDeployDir}/test.json`, privateKey, rpcUrl, params, '0')
       }, DeployError)
     })
 
@@ -538,7 +539,7 @@ describe('Besu.Contract.Service', function () {
       const createAddressStub = sinon.stub((contract as any).bdkFile, 'createContractAddress').returns(undefined)
 
       // Execute the deployment function under test.
-      const result = await contract.deploy(`${testDeployDir}/test.json`, privateKey, params, '0')
+      const result = await contract.deploy(`${testDeployDir}/test.json`, privateKey, rpcUrl, params, '0')
 
       // Assertions: Verify that stubs were called correctly and the result is as expected.
       sinon.assert.calledOnce(deployStub)
