@@ -447,7 +447,7 @@ export default class Channel extends AbstractService {
     const result = await (new FabricInstance(this.config, this.infra)).submitSnapshotRequest(params.channelName, params.blockNumber)
     const containerName = `${this.config.hostname}.${this.config.orgDomainName}`
     const sourceContainerPath = '/var/hyperledger/production/snapshots/'
-    const hostDestinationPath = `${os.homedir()}/.bdk/fabric/${this.config.networkName}/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/`
+    const hostDestinationPath = `${this.config.infraConfig.bdkPath}/${this.config.networkName}/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/`
     const copyCommand = `docker cp ${containerName}:${sourceContainerPath} ${hostDestinationPath}`
     const { stdout, stderr } = await execPromise(copyCommand)
     if (stderr) {
@@ -483,10 +483,9 @@ export default class Channel extends AbstractService {
   public async joinBySnapshot (
     params: ChannelJoinBySnapshotType,
   ): Promise<InfraRunnerResultType> {
-    const homeDir = os.homedir()
-    const snapshotPath = `${homeDir}/.bdk/fabric/${this.config.networkName}/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/snapshots/temp`
+    const snapshotPath = `${this.config.infraConfig.bdkPath}/${this.config.networkName}/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/snapshots/temp`
     if (!fs.pathExistsSync(snapshotPath)) { fs.mkdirpSync(snapshotPath) }
-    await fs.copy(`${homeDir}/${params.snapshotPath}`, snapshotPath, { overwrite: true })
+    await fs.copy(`${params.snapshotPath}`, snapshotPath, { overwrite: true })
     const dockerSnapshotPath = `/tmp/peerOrganizations/${this.config.orgDomainName}/peers/${this.config.hostname}.${this.config.orgDomainName}/snapshots/temp`
     return await (new FabricInstance(this.config, this.infra)).joinBySnapshot(dockerSnapshotPath)
   }

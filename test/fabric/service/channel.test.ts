@@ -827,10 +827,10 @@ describe('Channel service:', function () {
       assert.deepStrictEqual(joinedChannel, [minimumNetwork.channelName])
     })
   })
-  /*
+
   describe('snapshot operations', () => {
     let channelName: string
-    const testSnapshotPath = 'Desktop/bdk-3.4.0/bdk/test/bdk/bdk-fabric-network/channel-artifacts/snapshots/peer0.org0.bdk.example.com/completed/test-channel/0/'
+    const testSnapshotPath = '/Users/casper/Desktop/bdk-3.4.0/bdk/test/bdk/bdk-fabric-network/peerOrganizations/org0.bdk.example.com/peers/peer0.org0.bdk.example.com/snapshots/completed/test-channel/1/'
 
     before(async () => {
       await minimumNetwork.createNetwork()
@@ -854,9 +854,6 @@ describe('Channel service:', function () {
           channelName,
           blockNumber: 0,
         })
-
-        const testpath = execSync(`ls ${config.infraConfig.bdkPath}/${config.networkName}/channel-artifacts/snapshots`)
-        console.log('testpath: ', testpath)
 
         console.log('submitSnapshot: 10')
         const result = await channelServiceOrg0Peer.submitSnapshotRequest({
@@ -918,11 +915,12 @@ describe('Channel service:', function () {
     })
 
     describe('joinBySnapshot', () => {
-      it('should call FabricInstance with correct path mapping', async () => {
-        process.env.BDK_HOSTNAME = minimumNetwork.getPeer(1,0).hostname
-        process.env.BDK_ORG_DOMAIN = minimumNetwork.getPeer(1,0).orgDomain
-        process.env.PEER_ADDRESS = `${minimumNetwork.getPeer(1,0).hostname}.${minimumNetwork.getPeer(1,0).orgDomain}:8051`
-        process.env.BDK_ORG_NAME = minimumNetwork.getPeer(1,0).orgName
+      it('should call FabricInstance and return the name of joined channel', async () => {
+        process.env.BDK_HOSTNAME = minimumNetwork.getPeer(1, 0).hostname
+        process.env.BDK_ORG_DOMAIN = minimumNetwork.getPeer(1, 0).orgDomain
+        process.env.PEER_ADDRESS = `${minimumNetwork.getPeer(1, 0).hostname}.${minimumNetwork.getPeer(1, 0).orgDomain}:8051`
+        process.env.BDK_ORG_NAME = minimumNetwork.getPeer(1, 0).orgName
+
         await channelServiceOrg1Peer.joinBySnapshot({
           snapshotPath: testSnapshotPath,
         })
@@ -934,5 +932,4 @@ describe('Channel service:', function () {
       })
     })
   })
-  */
 })
