@@ -608,11 +608,26 @@ peer channel list
 peer channel getinfo -c {channelName}
 ```
 
-## Add new peer org
+## Add New Peer Org
 
-First, we need to prepare a file named *org-peer-create.json*, with the required variables. We then use `cryptogen` to generate the certificates and keys required for the peer organization. Next, we add the Orgnew(the new peer org) to the settings file for the application channel. Last, we start the peers in Orgnew and add it to the `test1` channel. Test transactions and queries should be successful at this point.
+First, we need to prepare a file named *org-peer-create.json*, with the required variables. We then use `cryptogen` to generate the certificates and keys required for the peer organization. Next, we add the Orgnew(the new peer org) to the application channel configuration file. We then start the peers in Orgnew and add them to the `test` channel. Finally, we test transactions and queries initiated by Orgnew.
 
-### Prepare settings files
+### Important Process Overview
+
+**The complete process for adding a new peer organization includes the following key steps:**
+
+1. **Generate organization certificates and configuration files** - Using `bdk fabric org peer create` 
+2. **Generate channel configuration update** - Using `bdk fabric org peer add-channel` 
+3. **⚠️ Critical Step: Submit configuration update to orderer** - Using `peer channel update` command
+4. **Start the new organization's peer containers**
+5. **All peers individually join the channel** - Using `bdk fabric channel join`
+
+**Important Notes:**
+- Step 2 only generates the configuration update file, **Step 2.1 must be executed to submit it to the orderer for it to take effect**
+- Without executing Step 2.1, the new organization's peers will encounter `FORBIDDEN` errors
+- Configuration updates need to be submitted by an organization with administrative privileges (such as Org0)
+
+### Prerequisites
 
  *org-peer-create.json* contains parameters required for generating *configtx.yaml*, *crypto-config.yaml*, and *docker-compose.yaml*. Place the file in the current working directory.
 
@@ -642,7 +657,7 @@ First, we need to prepare a file named *org-peer-create.json*, with the required
       "name": "Orgnew",
       "domain": "orgnew.example.com",
       "enableNodeOUs": true,
-      "peerCount": 3,
+      "peerCount": 2,
       "userCount": 1,
       "ports": [
         {
@@ -650,12 +665,6 @@ First, we need to prepare a file named *org-peer-create.json*, with the required
           "isPublishPort": true,
           "operationPort": 9743,
           "isPublishOperationPort": true
-        },
-        {
-          "port": 7351,
-          "isPublishPort": false,
-          "operationPort": 9743,
-          "isPublishOperationPort": false
         },
         {
           "port": 7351,
@@ -676,9 +685,9 @@ Create *crypto-config.yaml* for `cryptogen` to generate the certificates and key
 bdk fabric org peer create -f ./org-peer-create.json --create-full
 ```
 
-### Step 2：Add Org0 and Orgnew to channel
+### Step 2：Add Orgnew to Channel Configuration
 
-Add Orgnew to application channel with Org0
+Add Orgnew to the Application Channel configuration with Org0 identity
 
 ```bash
 export BDK_ORG_NAME='Org0'
@@ -688,8 +697,35 @@ export BDK_HOSTNAME='peer0'
 bdk fabric org peer add -i
 ```
 choose
-- test1
+- test
 - Orgnew
+
+**Important: This step only generates the configuration update file, the next step is required to submit it to the orderer for it to take effect**
+
+### Step 2.1：Submit Configuration Update to Orderer
+
+**Critical Step**: Submit the configuration update to the orderer to make it effective. Use BDK's `channel update` command to complete this step.
+
+```bash
+export BDK_ORG_NAME='Org0'
+export BDK_ORG_DOMAIN='org0.example.com'
+export BDK_HOSTNAME='peer0'
+
+bdk fabric channel update -c test -o orderer0.orderer.org0.example.com:7050
+```
+
+**Or use interactive mode:**
+```bash
+bdk fabric channel update -i
+```
+choose
+- test
+- orderer0.orderer.org0.example.com:7050
+
+**Important Notes:**
+- This step must be executed by an organization with administrative privileges (such as Org0)
+- After successful execution, the new organization is truly added to the channel configuration
+- Only after this step succeeds can the new organization's peers join the channel
 
 ### Step 3：Start Orgnew containers
 
@@ -702,10 +738,11 @@ export BDK_HOSTNAME='peer0'
 
 bdk fabric peer up -i
 ```
-choose peer0.org0.example.com, peer0.org1.example.com, peer0.orgnew.example.com, peer1.org0.example.com, peer1.org1.example.com, peer1.orgnew.example.com, peer2.orgnew.example.com
+choose peer0.orgnew.example.com, peer1.orgnew.example.com
 
 ### Step 4: Add Orgnew to system-channel
-Add Orgnew to system channel with Org0Orderer
+
+Add Orgnew to System Channel with Org0Orderer identity and approve
 
 ```bash
 export BDK_ORG_TYPE='orderer'
@@ -723,35 +760,11 @@ bdk fabric channel approve -i
 ```
 choose system-channel
 
-(skip no Org2Orderer) Approve system-channel change with Org2Orderer
-```bash
-# export BDK_ORG_TYPE='orderer'
-# export BDK_ORG_NAME='Org2Orderer'
-# export BDK_ORG_DOMAIN='org2.example.com'
-# export BDK_HOSTNAME='orderer0'
+### Step 5：All Orgnew peers join Channel
 
-# choose Orgnew; orderer0.orderer.org0.example.com:7050
-bdk fabric org peer add-system-channel -i
-# choose system-channel
-bdk fabric channel approve -i
-```
+All Orgnew peers join the Application Channel named *test*. Since joining the Application Channel is done on a per-peer basis, each peer needs to join individually.
 
-(skip no Org2Orderer) update system-channel with Org1Orderer
-
-```bash
-# export BDK_ORG_TYPE='orderer'
-# export BDK_ORG_NAME='Org1Orderer'
-# export BDK_ORG_DOMAIN='org1.example.com'
-# export BDK_HOSTNAME='orderer0'
-
-# choose system-channel; orderer0.orderer.org0.example.com:7050
-bdk fabric channel update -i
-```
-
-### Step 5：Add Orgnew to channel
-
-Add Orgnew to the application channel named *test1*. Since each peer is added individually to the application channel, changes to variables *BDK_ORG_NAME*, *BDK_ORG_DOMAIN*, and *BDK_HOSTNAME* in *~/.bdk/.env* are required every time.
-
+#### Peer0 joins the channel
 ```bash
 export BDK_ORG_NAME='Orgnew'
 export BDK_ORG_DOMAIN='orgnew.example.com'
@@ -760,8 +773,10 @@ export BDK_HOSTNAME='peer0'
 bdk fabric channel join -i
 ```
 choose
-- test1
+- test
 - orderer0.orderer.org0.example.com:7050
+
+#### Peer1 joins the channel
 ```bash
 export BDK_ORG_NAME='Orgnew'
 export BDK_ORG_DOMAIN='orgnew.example.com'
@@ -770,12 +785,23 @@ export BDK_HOSTNAME='peer1'
 bdk fabric channel join -i
 ```
 choose
-- test1
+- test
 - orderer0.orderer.org0.example.com:7050
+
+#### Verify all peers have successfully joined the channel
+You can use the following commands to verify that each peer has joined the channel:
+
+```bash
+# Check peer0
+docker exec peer0.orgnew.example.com peer channel list
+
+# Check peer1  
+docker exec peer1.orgnew.example.com peer channel list
+```
 
 ### Step 6：Deploy chaincode on Orgnew
 
-Install and approve the chaincode named fabcar_1. Since we are using the blockchain network from before, we only need to do `peer chaincode lifecycle approveformyorg` up to this step. We can use the `-a` parameter to restrict the deployment of the chaincode lifecycle, and require the chaincode to be initialized with parameter ``-I`. We then install the chaincode named fabcar_1 on peer1 of Orgnew.
+Install and approve the chaincode labeled fabcar_1. Since we are using the blockchain network from before, we only need to do `peer chaincode lifecycle approveformyorg` up to this step. We use the `-a` parameter to restrict the deployment of the chaincode lifecycle to only `peer chaincode lifecycle approveformyorg`, and use `-I` to indicate that this chaincode needs to be initialized before use. We then install the chaincode named fabcar_1 on peer1 of Orgnew.
 
 ```bash
 export BDK_ORG_NAME='Orgnew'
@@ -792,7 +818,7 @@ choose
 bdk fabric chaincode approve -i
 ```
 choose
-- test1
+- test
 - fabcar
 - 1
 - true
@@ -810,9 +836,9 @@ choose
 - fabcar
 - 1
 
-### Step 7：Initiate and query a transaction on Orgnew
+### Step 7：Initiate and query transactions on Orgnew
 
-Initiate a chaincode transaction on fabcar_1 with `bdk fabric chaincode invoke`. We use the `-f` parameter to select the function used to initialize the chaincode, and `-a` parameter to pass in the variables for the chaincode function. We can then query the chaincode with `bdk fabric chaincode query`.
+Use `bdk fabric chaincode invoke` with the chaincode named fabcar_1 to initiate transactions. Use the `-f` parameter to select the function used to initialize the chaincode, and `-a` parameter to input the parameters required by the chaincode function. You can then use `bdk fabric chaincode query` to query information from the chaincode.
 
 ```bash
 # Initiate transaction
@@ -823,25 +849,24 @@ export BDK_HOSTNAME='peer0'
 bdk fabric chaincode invoke -i
 ```
 choose
-- test1
+- test
 - fabcar
 - CreateCar
-- CAR_ORG3_PEER0, BMW, X6, blue, Org3
+- CAR_ORGNEW_PEER0, BMW, X6, blue, Orgnew
 - false
 - Yes
 - orderer0.orderer.org0.example.com:7050
 - Yes
 - all
 ```bash
-
-# Query chaincode information
+# Query information
 bdk fabric chaincode query -i
 ```
 choose
-- test1
+- test
 - fabcar
 - QueryCar
-- CAR_ORG3_PEER0
+- CAR_ORGNEW_PEER0
 ```bash
 export BDK_ORG_NAME='Orgnew'
 export BDK_ORG_DOMAIN='orgnew.example.com'
@@ -851,25 +876,71 @@ export BDK_HOSTNAME='peer1'
 bdk fabric chaincode invoke -i
 ```
 choose
-- test1
+- test
 - fabcar
 - CreateCar
-- CAR_ORG3_PEER1, BMW, X6, blue, Org3
+- CAR_ORGNEW_PEER1, BMW, X6, blue, Orgnew
 - false
 - Yes
 - orderer0.orderer.org0.example.com:7050
 - Yes
 - all
 ```bash
-
-# Query chaincode information
+# Query information
 bdk fabric chaincode query -i
 ```
 choose
-- test1
+- test
 - fabcar
 - QueryCar
-- CAR_ORG3_PEER1
+- CAR_ORGNEW_PEER1
+
+### Common Issues and Troubleshooting
+
+#### Issue 1: FORBIDDEN error when peer joins channel
+
+**Symptom:**
+```
+Error: can't read the block: &{FORBIDDEN}
+```
+
+**Cause:** Configuration update was not submitted to the orderer, so the new organization has not actually been added to the channel configuration.
+
+**Solution:** Ensure Step 2.1 configuration update submission has been executed.
+
+#### Issue 2: Certificate path error
+
+**Symptom:**
+```
+Cannot run peer because cannot init crypto, specified path does not exist
+```
+
+**Solution:** Check and use the correct paths inside the container:
+- MSP path: `/tmp/peerOrganizations/orgnew.example.com/users/Admin@orgnew.example.com/msp`
+- TLS CA certificate: Copy to the correct location inside the container
+
+#### Issue 3: TLS certificate verification failure
+
+**Symptom:**
+```
+tls: failed to verify certificate: x509: certificate signed by unknown authority
+```
+
+**Solution:** Use the correct orderer TLS CA certificate:
+```bash
+docker cp ~/.bdk/fabric/bdk-fabric-network/ordererOrganizations/orderer.org0.example.com/tlsca/tlsca.orderer.org0.example.com-cert.pem peer0.org0.example.com:/tmp/
+```
+
+#### Issue 4: Verify if configuration update is effective
+
+**Verification method:**
+```bash
+# Check if channel configuration includes the new organization
+peer channel fetch config -o orderer0.orderer.org0.example.com:7050 -c test --tls --cafile /path/to/orderer/ca.crt
+
+# Use configtxlator to decode and view
+configtxlator proto_decode --input config.pb --type common.Config --output config.json
+```
 
 ## Add New Orderer Org
 
