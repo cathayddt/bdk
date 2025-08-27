@@ -7,6 +7,7 @@
 - [加入新建 Channel](#加入新建-channel)
 - [加入新 Peer org](#加入新-peer-org)
 - [加入新 Orderer org](#加入新-orderer-org)
+- [使用 Snapshot 加入 Channel](#使用-snapshot-加入-channel)
 
 ## 建立 Blockchain network
 
@@ -48,7 +49,8 @@
       "enableNodeOUs": true,
       "hostname": [
         "orderer0",
-        "orderer1"
+        "orderer1",
+        "orderer2"
       ],
       "ports": [
         {
@@ -61,6 +63,12 @@
           "port": 7150,
           "isPublishPort": true,
           "operationPort": 8543,
+          "isPublishOperationPort": true
+        },
+        {
+          "port": 7250,
+          "isPublishPort": true,
+          "operationPort": 8643,
           "isPublishOperationPort": true
         }
       ]
@@ -96,15 +104,15 @@
       "userCount": 1,
       "ports": [
         {
-          "port": 7051,
+          "port": 8051,
           "isPublishPort": true,
-          "operationPort": 9443,
+          "operationPort": 9543,
           "isPublishOperationPort": true
         },
         {
-          "port": 7051,
+          "port": 8051,
           "isPublishPort": false,
-          "operationPort": 9443,
+          "operationPort": 9543,
           "isPublishOperationPort": false
         }
       ]
@@ -182,6 +190,17 @@ bdk fabric channel join -i
 - test
 - orderer0.orderer.org0.example.com:7050
 ```bash
+# Org1 的 peer0 加入 channel
+export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+
+bdk fabric channel join -i
+```
+選擇
+- test
+- orderer0.orderer.org0.example.com:7050
+```bash
 # Org1 的 peer1 加入 channel
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
@@ -213,14 +232,14 @@ bdk fabric channel update-anchorpeer -i
 # Org1 的 peer1 加入 channel
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer1'
+export BDK_HOSTNAME='peer0'
 
 bdk fabric channel update-anchorpeer -i
 ```
 選擇
 - test
 - orderer0.orderer.org0.example.com:7050
-- 7051
+- 8051
 
 ## 部署 Chaincode
 
@@ -229,10 +248,6 @@ bdk fabric channel update-anchorpeer -i
 將路徑上的 Chaincode 的原始碼和所需要的相關套件，命名為 *fabcar* 和版本 1，編譯完後打包成 *.tar* 檔案
 
 ```bash
-# 在執行chaincode指令前需要先把套件載入專案掛進 vendor
-cd chaincode/fabcar/go
-go mod vendor
-
 bdk fabric chaincode package -i
 ```
 選擇
@@ -480,6 +495,17 @@ bdk fabric channel join -i
 - test1
 - orderer0.orderer.org0.example.com:7050
 ```bash
+# Org1 的 peer0 加入 channel
+export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+
+bdk fabric channel join -i
+```
+選擇
+- test1
+- orderer0.orderer.org0.example.com:7050
+```bash
 # Org1 的 peer1 加入 channel
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
@@ -511,91 +537,14 @@ bdk fabric channel update-anchorpeer -i
 # Org1 的 peer1 加入 channel
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer1'
+export BDK_HOSTNAME='peer0'
 
 bdk fabric channel update-anchorpeer -i
 ```
 選擇
 - test1
 - orderer0.orderer.org0.example.com:7050
-- 7051
-
-## 使用 Snapshot 加入 Channel
-
-### Step 1 : 選擇已在 channel 內的 peer 執行 submitSnapshot
-
-```bash
-# Org0 中的 peer0 已在 Channel 內 (channel name: test)
-export BDK_ORG_NAME='Org0'
-export BDK_ORG_DOMAIN='org0.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org0.example.com:7051
-
-bdk fabric channel snapshot -i
-```
-
-選擇
-- Operation : submitRequest
-- Channel Name : test
-- Block Number : 0 (立即執行 snapshot) or N (N個block後再執行 snapshot)
-p.s. 完成的快照會被複製到本地端的 .bdk/fabric/{networkName}/peerOrganizations/{domain}/peers/peer{number}.{domain}/snapshots/completed/{channelName}/{blockHeight} 下
-
-### Step 2 (Optional) : 查看已提交的 snapshot request
-```bash
-export BDK_ORG_NAME='Org0'
-export BDK_ORG_DOMAIN='org0.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org0.example.com:7051
-
-bdk fabric channel snapshot -i
-```
-
-選擇
-- Operation : listPending
-- Channel Name : test
-
-此指令會列出所有正在 pending 的 snapshot request (在submitRequest時 block number為0的 request不會顯示)
-
-### Step 3 (Optional) : 刪除多餘的 snapshot request
-
-```bash
-export BDK_ORG_NAME='Org0'
-export BDK_ORG_DOMAIN='org0.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org0.example.com:7051
-
-bdk fabric channel snapshot -i
-```
-
-選擇
-- Operation : cancelRequest
-- Channel Name : test
-- Block Number : N (block N 的 snapshot request 將被刪除)
-
-刪除後可再次執行 listPending 來查看 snapshot request 是否已被刪除
-
-### Step 4 : 用 joinBySnapshot 將新的 peer 加入 channel
-
-```bash
-export BDK_ORG_NAME='Org1'
-export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org1.example.com:8051
-
-bdk fabric channel snapshot -i
-```
-
-選擇
-- Operation : joinBySnapshot
-- Snapshot Path : .bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ （範例）（輸入被copy在本地的snapshot目錄的絕對路徑）
-
-### Step 5 : 確認新的 peer 是否加入 channel
-
-```bash
-# 到 peer0.org1.example.com 的 container 內下指令 peer channel list 或 peer channel getinfo 查看是否已被加入 channel
-peer channel list
-peer channel getinfo -c {channelName}
-```
+- 8051
 
 ## 加入新 Peer org
 
@@ -751,7 +700,7 @@ bdk fabric channel approve -i
 
 ### Step 5：所有 Orgnew peer 加入 Channel
 
-Orgnew 的所有 peer 加入名稱為 *test* 的 Application Channel。由於加入 Application Channel 是以 Peer 單位加入，所以每個 peer 都需要單獨加入。
+Orgnew 的 peer0 加入名稱為 *test* 的 Application Channel。由於加入 Application Channel 是以 Peer 單位加入，所以每個 peer 都需要單獨加入。
 
 #### Peer0 加入頻道
 ```bash
@@ -765,27 +714,12 @@ bdk fabric channel join -i
 - test
 - orderer0.orderer.org0.example.com:7050
 
-#### Peer1 加入頻道
-```bash
-export BDK_ORG_NAME='Orgnew'
-export BDK_ORG_DOMAIN='orgnew.example.com'
-export BDK_HOSTNAME='peer1'
-
-bdk fabric channel join -i
-```
-選擇
-- test
-- orderer0.orderer.org0.example.com:7050
-
 #### 驗證所有 peer 都已成功加入頻道
 可以使用以下命令驗證每個 peer 都已加入頻道：
 
 ```bash
 # 檢查 peer0
 docker exec peer0.orgnew.example.com peer channel list
-
-# 檢查 peer1  
-docker exec peer1.orgnew.example.com peer channel list
 ```
 
 ### Step 6：Orgnew 部署 Chaincode
@@ -856,33 +790,6 @@ bdk fabric chaincode query -i
 - fabcar
 - QueryCar
 - CAR_ORGNEW_PEER0
-```bash
-export BDK_ORG_NAME='Orgnew'
-export BDK_ORG_DOMAIN='orgnew.example.com'
-export BDK_HOSTNAME='peer1'
-
-# 發起交易
-bdk fabric chaincode invoke -i
-```
-選擇
-- test
-- fabcar
-- CreateCar
-- CAR_ORGNEW_PEER1, BMW, X6, blue, Orgnew
-- false
-- Yes
-- orderer0.orderer.org0.example.com:7050
-- Yes
-- all
-```bash
-# 查詢資訊
-bdk fabric chaincode query -i
-```
-選擇
-- test
-- fabcar
-- QueryCar
-- CAR_ORGNEW_PEER1
 
 ### 常見問題與故障排除
 
@@ -944,9 +851,9 @@ bdk fabric org orderer create --interactive
 - org1orderer.example.com
 - True
 - orderer0
-- 7050
+- 7350
 - True
-- 8443
+- 8743
 - True
 - new.genesis
 - Yes, please generate them for me with cryptogen
@@ -957,23 +864,31 @@ bdk fabric org orderer create --interactive
 
 ```bash
 export BDK_ORG_TYPE='orderer'
-export BDK_ORG_NAME='Org1Orderer'
-export BDK_ORG_DOMAIN='org1orderer.example.com'
+export BDK_ORG_NAME='Org0Orderer'
+export BDK_ORG_DOMAIN='orderer.org0.example.com'
 export BDK_HOSTNAME='orderer0'
 # system-channel
 bdk fabric org orderer add --interactive
 ```
+選擇
+- orderer0.orderer.org0.example.com:7050
+- system-channel
+- Org1Orderer
 
 ### Step 3：Orderer org 加入 channel
 
 ```bash
 export BDK_ORG_TYPE='orderer'
-export BDK_ORG_NAME='Org1Orderer'
-export BDK_ORG_DOMAIN='org1orderer.example.com'
+export BDK_ORG_NAME='Org0Orderer'
+export BDK_ORG_DOMAIN='orderer.org0.example.com'
 export BDK_HOSTNAME='orderer0'
 # application 
 bdk fabric org orderer add --interactive
 ```
+選擇
+- orderer0.orderer.org0.example.com:7050
+- test
+- Org1Orderer
 
 ## 使用 Snapshot 加入 Channel
 
@@ -1032,17 +947,18 @@ bdk fabric channel snapshot -i
 ### Step 4 : 用 joinBySnapshot 將新的 peer 加入 channel
 
 ```bash
-export BDK_ORG_NAME='Org1'
-export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org1.example.com:8051
+# 將 Orgnew 中的 peer1 透過 snapshot 加入 Channel 內 (channel name: test)
+export BDK_ORG_NAME='Orgnew'
+export BDK_ORG_DOMAIN='orgnew.example.com'
+export BDK_HOSTNAME='peer1'
+export PEER_ADDRESS=peer1.orgnew.example.com:7051
 
 bdk fabric channel snapshot -i
 ```
 
 選擇
 - Operation : joinBySnapshot
-- Snapshot Path : .bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ （範例）（輸入被copy在本地的snapshot目錄的絕對路徑）
+- Snapshot Path : ${HOSTPAHTH}/.bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ （範例）（輸入被copy在本地的snapshot目錄的絕對路徑）
 
 ### Step 5 : 確認新的 peer 是否加入 channel
 

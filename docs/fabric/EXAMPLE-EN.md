@@ -7,6 +7,7 @@
 - [Add New Channel](#add-new-channel)
 - [Add New Peer Org](#add-new-peer-org)
 - [Add New Orderer Org](#add-new-orderer-org)
+- [Join a Channel Using Snapshot](#join-a-channel-using-snapshot)
 
 ## Create a Blockchain Network
 
@@ -48,7 +49,8 @@ Variables required by *network-create.json* are defined in the files *configtx.y
       "enableNodeOUs": true,
       "hostname": [
         "orderer0",
-        "orderer1"
+        "orderer1",
+        "orderer2"
       ],
       "ports": [
         {
@@ -61,6 +63,12 @@ Variables required by *network-create.json* are defined in the files *configtx.y
           "port": 7150,
           "isPublishPort": true,
           "operationPort": 8543,
+          "isPublishOperationPort": true
+        },
+        {
+          "port": 7250,
+          "isPublishPort": true,
+          "operationPort": 8643,
           "isPublishOperationPort": true
         }
       ]
@@ -96,15 +104,15 @@ Variables required by *network-create.json* are defined in the files *configtx.y
       "userCount": 1,
       "ports": [
         {
-          "port": 7051,
+          "port": 8051,
           "isPublishPort": true,
-          "operationPort": 9443,
+          "operationPort": 9543,
           "isPublishOperationPort": true
         },
         {
-          "port": 7051,
+          "port": 8051,
           "isPublishPort": false,
-          "operationPort": 9443,
+          "operationPort": 9543,
           "isPublishOperationPort": false
         }
       ]
@@ -185,6 +193,17 @@ choose
 # Add peer1 in Org1 into the channel
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+
+bdk fabric channel join -i
+```
+choose
+- test
+- orderer0.orderer.org0.example.com:7050
+```bash
+# Add peer1 in Org1 into the channel
+export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
 export BDK_HOSTNAME='peer1'
 
 bdk fabric channel join -i
@@ -213,14 +232,14 @@ choose
 # Update anchor peer1 on Org1
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer1'
+export BDK_HOSTNAME='peer0'
 
 bdk fabric channel update-anchorpeer -i
 ```
 choose
 - test
 - orderer0.orderer.org0.example.com:7050
-- 7051
+- 8051
 
 ## Deploy Chaincode
 
@@ -229,10 +248,6 @@ choose
 Packages the chaincode source code along with the required modules into a *.tar* package called *fabcar* with version 1.
 
 ```bash
-# Before executing chaincode command, do go vendor to enable go packages
-cd chaincode/fabcar/go
-go mod vendor
-
 bdk fabric chaincode package -i
 ```
 choose
@@ -490,6 +505,17 @@ choose
 - test1
 - orderer0.orderer.org0.example.com:7050
 ```bash
+# Add peer0 of Org1 to channel
+export BDK_ORG_NAME='Org1'
+export BDK_ORG_DOMAIN='org1.example.com'
+export BDK_HOSTNAME='peer0'
+
+bdk fabric channel join -i
+```
+choose
+- test1
+- orderer0.orderer.org0.example.com:7050
+```bash
 # Add peer1 of Org1 to channel
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
@@ -521,92 +547,14 @@ choose
 # Update anchor peer1 for Org1
 export BDK_ORG_NAME='Org1'
 export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer1'
+export BDK_HOSTNAME='peer0'
 
 bdk fabric channel update-anchorpeer -i
 ```
 choose
 - test1
 - orderer0.orderer.org0.example.com:7050
-- 7051
-
-## Joining a Channel Using Snapshot
-
-### Step 1: Execute `submitSnapshot` on a peer already in the channel
-
-```bash
-# peer0 in Org0 is already in the channel (channel name: test)
-export BDK_ORG_NAME='Org0'
-export BDK_ORG_DOMAIN='org0.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org0.example.com:7051
-
-bdk fabric channel snapshot -i
-```
-
-choose
-- Operation : submitRequest
-- Channel Name : test
-- Block Number : 0 (execute snapshot immediately) or N (execute snapshot after N blocks)
-
-p.s. The completed snapshot will be copied to host under .bdk/fabric/{networkName}/peerOrganizations/{domain}/peers/peer{number}.{domain}/snapshots/completed/{channelName}/{blockHeight}
-
-### Step 2 (Optional) : Check submitted snapshot requests
-
-```bash
-export BDK_ORG_NAME='Org0'
-export BDK_ORG_DOMAIN='org0.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org0.example.com:7051
-
-bdk fabric channel snapshot -i
-```
-
-choose
-- Operation : listPending
-- Channel Name : test
-
-This command lists all pending snapshot requests (requests with blockNumber=0 will not appear).
-
-### Step 3 (Optional): Delete unnecessary snapshot requests
-
-```bash
-export BDK_ORG_NAME='Org0'
-export BDK_ORG_DOMAIN='org0.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org0.example.com:7051
-
-bdk fabric channel snapshot -i
-```
-choose
-- Operation : cancelRequest
-- Channel Name : test
-- Block Number : N (the snapshot request for block N will be deleted)
-
-After deletion, run listPending again to verify the request has been removed.
-
-### Step 4: Use `joinBySnapshot` to add the new peer to the channel
-
-```bash
-export BDK_ORG_NAME='Org1'
-export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org1.example.com:8051
-
-bdk fabric channel snapshot -i
-```
-
-choose
-- Operation : joinBySnapshot
-- Snapshot Path : $.bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ (Example) (Enter the absolute path of the snapshot directory on host)
-
-### Step 5: Verify whether the new peer has joined the channel successfully
-
-```bash
-# Inside peer0.org1.example.com's container, run `peer channel list or peer channel getinfo` to check if it has joined
-peer channel list
-peer channel getinfo -c {channelName}
-```
+- 8051
 
 ## Add New Peer Org
 
@@ -762,7 +710,7 @@ choose system-channel
 
 ### Step 5：All Orgnew peers join Channel
 
-All Orgnew peers join the Application Channel named *test*. Since joining the Application Channel is done on a per-peer basis, each peer needs to join individually.
+peer 0 in Orgnew join the Application Channel named *test*. Since joining the Application Channel is done on a per-peer basis, each peer needs to join individually.
 
 #### Peer0 joins the channel
 ```bash
@@ -776,27 +724,12 @@ choose
 - test
 - orderer0.orderer.org0.example.com:7050
 
-#### Peer1 joins the channel
-```bash
-export BDK_ORG_NAME='Orgnew'
-export BDK_ORG_DOMAIN='orgnew.example.com'
-export BDK_HOSTNAME='peer1'
-
-bdk fabric channel join -i
-```
-choose
-- test
-- orderer0.orderer.org0.example.com:7050
-
 #### Verify all peers have successfully joined the channel
 You can use the following commands to verify that each peer has joined the channel:
 
 ```bash
 # Check peer0
 docker exec peer0.orgnew.example.com peer channel list
-
-# Check peer1  
-docker exec peer1.orgnew.example.com peer channel list
 ```
 
 ### Step 6：Deploy chaincode on Orgnew
@@ -867,33 +800,6 @@ choose
 - fabcar
 - QueryCar
 - CAR_ORGNEW_PEER0
-```bash
-export BDK_ORG_NAME='Orgnew'
-export BDK_ORG_DOMAIN='orgnew.example.com'
-export BDK_HOSTNAME='peer1'
-
-# Initiate transaction
-bdk fabric chaincode invoke -i
-```
-choose
-- test
-- fabcar
-- CreateCar
-- CAR_ORGNEW_PEER1, BMW, X6, blue, Orgnew
-- false
-- Yes
-- orderer0.orderer.org0.example.com:7050
-- Yes
-- all
-```bash
-# Query information
-bdk fabric chaincode query -i
-```
-choose
-- test
-- fabcar
-- QueryCar
-- CAR_ORGNEW_PEER1
 
 ### Common Issues and Troubleshooting
 
@@ -955,9 +861,9 @@ choose
 - org1orderer.example.com
 - True
 - orderer0
-- 7050
+- 7350
 - True
-- 8443
+- 8743
 - True
 - new.genesis
 - Yes, please generate them for me with cryptogen
@@ -968,25 +874,33 @@ choose
 
 ```bash
 export BDK_ORG_TYPE='orderer'
-export BDK_ORG_NAME='Org1Orderer'
-export BDK_ORG_DOMAIN='org1orderer.example.com'
+export BDK_ORG_NAME='Org0Orderer'
+export BDK_ORG_DOMAIN='orderer.org0.example.com'
 export BDK_HOSTNAME='orderer0'
 # system-channel
 bdk fabric org orderer add --interactive
 ```
+choose
+- orderer0.orderer.org0.example.com:7050
+- system-channel
+- Org1Orderer
 
 ### Step 3：Add orderer org to channel
 
 ```bash
 export BDK_ORG_TYPE='orderer'
-export BDK_ORG_NAME='Org1Orderer'
-export BDK_ORG_DOMAIN='org1orderer.example.com'
+export BDK_ORG_NAME='Org0Orderer'
+export BDK_ORG_DOMAIN='orderer.org0.example.com'
 export BDK_HOSTNAME='orderer0'
 # application 
 bdk fabric org orderer add --interactive
 ```
+choose
+- orderer0.orderer.org0.example.com:7050
+- test
+- Org1Orderer
 
-## Joining a Channel Using Snapshot
+## Join a Channel Using Snapshot
 
 ### Step 1: Execute `submitSnapshot` on a peer already in the channel
 
@@ -1044,17 +958,18 @@ After deletion, run listPending again to verify the request has been removed.
 ### Step 4: Use `joinBySnapshot` to add the new peer to the channel
 
 ```bash
-export BDK_ORG_NAME='Org1'
-export BDK_ORG_DOMAIN='org1.example.com'
-export BDK_HOSTNAME='peer0'
-export PEER_ADDRESS=peer0.org1.example.com:8051
+# peer1 in Orgnew joins the channel using snapshot (channel name: test)
+export BDK_ORG_NAME='Orgnew'
+export BDK_ORG_DOMAIN='orgnew.example.com'
+export BDK_HOSTNAME='peer1'
+export PEER_ADDRESS=peer1.orgnew.example.com:7051
 
 bdk fabric channel snapshot -i
 ```
 
 choose
 - Operation : joinBySnapshot
-- Snapshot Path : $.bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ (Example) (Enter the absolute path of the snapshot directory on host)
+- Snapshot Path : ${HOSTPATH}/.bdk/fabric/bdk-fabric-network/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/snapshots/completed/test/0/ (Example) (Enter the absolute path of the snapshot directory on host)
 
 ### Step 5: Verify whether the new peer has joined the channel successfully
 
