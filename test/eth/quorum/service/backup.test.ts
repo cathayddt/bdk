@@ -33,7 +33,6 @@ describe('Quorum.Backup', function () {
 
   after(async () => {
     // Delete all backup files
-    fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true })
     await network.delete()
   })
 
