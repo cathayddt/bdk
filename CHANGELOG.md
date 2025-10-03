@@ -5,11 +5,6 @@
 All notable changes to BDK project will be documented here.
 ## [v3.4.1](https://github.com/cathayddt/bdk/releases/tag/v3.4.1) - 2025-09-26
 
-### Features
-
-* Select a node to deploy the contract
-* [#119](https://github.com/cathayddt/bdk/issues/119) Added Ethereum contract compilation, deployment, and retrieval on Besu and Quorum
-
 ### Fixes
 
 * Repair Project Safety Warning

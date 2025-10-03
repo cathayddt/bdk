@@ -303,7 +303,6 @@ export default class Contract extends AbstractService {
         Object.keys(output.contracts[sourceFile]).forEach((contractName) => {
           const contractData = output.contracts[sourceFile][contractName]
           if (!contractData?.abi || !contractData?.evm?.bytecode?.object) {
-            // logger.warn(`⚠️ Contract ${contractName} has no ABI or bytecode.`)
             return
           }
           const contractPath = path.join(buildDir, `${contractName}.json`)
