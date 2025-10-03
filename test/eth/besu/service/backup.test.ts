@@ -40,7 +40,7 @@ describe('Besu.Backup', function () {
   // create a new backup instance
   describe('Besu.Backup.exportAll', () => {
     it('should create a backup tarball for all items', async () => {
-      backup.exportAll()
+      await backup.exportAll()
       await sleep(1000)
       const backupItems = backup.getBackupItems()
       assert(backupItems.length > 0, 'No backup items found')
