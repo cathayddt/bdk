@@ -6,13 +6,17 @@ import prompts from 'prompts'
 import ora from 'ora'
 import { getNetworkTypeChoices } from '../../config/network.type'
 
+export const command = 'get'
+
+export const desc = '取得合約地址'
+
 interface OptType {
   interactive: boolean
 }
 
 export const builder = (yargs: Argv<OptType>) => {
   return yargs
-    .example('bdk eth contract compile --interactive', 'Cathay BDK 互動式問答')
+    .example('bdk eth contract get --interactive', 'Cathay BDK 互動式問答')
     .option('interactive', { type: 'boolean', description: '是否使用 Cathay BDK 互動式問答', alias: 'i' })
 }
 

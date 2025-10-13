@@ -33,14 +33,13 @@ describe('Quorum.Backup', function () {
 
   after(async () => {
     // Delete all backup files
-    fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true })
     await network.delete()
   })
 
   // create a new backup instance
   describe('Quorum.Backup.exportAll', () => {
     it('should create a backup tarball for all items', async () => {
-      backup.exportAll()
+      await backup.exportAll()
       await sleep(1000)
       const backupItems = backup.getBackupItems()
       assert(backupItems.length > 0, 'No backup items found')
