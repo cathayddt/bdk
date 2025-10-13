@@ -7,14 +7,13 @@ All notable changes to BDK project will be documented here.
 
 ### Fixes
 
-* Repair Project Safety Warning
-* Remote solc compilation path problem、The get command is not displayed
-* Resolving conflicts
-* Quickly build the besu chain to build a quorum
+* Fixed project safety warning  
+* Fixed remote `solc` compilation path issue and missing `get` command display  
+* Fixed quick setup for Besu chain to build a Quorum network
 
 ### Documentation
 
-* [#136](https://github.com/cathayddt/bdk/issues/136) update EXAMPLE.md
+* Update EXAMPLE.md
 
 ## [v3.4.0](https://github.com/cathayddt/bdk/releases/tag/v3.4.0) - 2025-08-04
 
