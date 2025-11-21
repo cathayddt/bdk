@@ -3,7 +3,7 @@
 這份文件將記錄 BDK 專案的變更日誌
 
 All notable changes to BDK project will be documented here.
-## [v3.4.1](https://github.com/cathayddt/bdk/releases/tag/v3.4.1) - 2025-09-26
+## [v3.4.1](https://github.com/cathayddt/bdk/releases/tag/v3.4.1) - 2025-11-21
 
 ### Fixes
 
