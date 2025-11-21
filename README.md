@@ -37,9 +37,9 @@ bdk fabric network create -i
 
 |      Latest      |      Stable      |
 | ---------------- | ---------------- |
-| [v3.4.0][v3.4.0] | [v3.4.0][v3.4.0] |
+| [v3.4.1][v3.4.1] | [v3.4.1][v3.4.1] |
 
-[v3.4.0]: https://github.com/cathayddt/bdk/releases/tag/v3.4.0
+[v3.4.1]: https://github.com/cathayddt/bdk/releases/tag/v3.4.1
 
 [更新內容 (Changelog)](CHANGELOG.md)
 

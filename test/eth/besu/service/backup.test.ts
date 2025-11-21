@@ -33,14 +33,14 @@ describe('Besu.Backup', function () {
 
   after(async () => {
     // Delete all backup files
-    fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true })
+    fs.rmSync(resolve(`${bdkPath}/backup`), { recursive: true, force: true })
     await network.delete()
   })
 
   // create a new backup instance
   describe('Besu.Backup.exportAll', () => {
     it('should create a backup tarball for all items', async () => {
-      backup.exportAll()
+      await backup.exportAll()
       await sleep(1000)
       const backupItems = backup.getBackupItems()
       assert(backupItems.length > 0, 'No backup items found')

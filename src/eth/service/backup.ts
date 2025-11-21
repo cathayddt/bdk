@@ -7,20 +7,26 @@ export default class Backup extends AbstractService {
   /**
    * @description 匯出 eth network 備份資料
    */
-  public exportAll () {
+  public exportAll (): Promise<void> {
     const bdkPath = this.bdkFile.getBdkPath()
     const createOpts = {
       gzip: true,
       cwd: bdkPath,
-      sync: true,
     }
-    try {
-      tar
-        .c(createOpts, fs.readdirSync(bdkPath))
-        .pipe(this.bdkFile.createBackupTar('All', tarDateFormat(new Date())))
-    } catch (e: any) {
-      throw new BackupError(`[x] tar error: ${e.message}`)
-    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        const tarStream = tar.c(createOpts, fs.readdirSync(bdkPath))
+        const outStream = this.bdkFile.createBackupTar('All', tarDateFormat(new Date()))
+
+        tarStream.pipe(outStream)
+
+        outStream.on('finish', () => resolve())
+        outStream.on('error', (err) => reject(new BackupError(`[x] tar error: ${err.message}`)))
+      } catch (e: any) {
+        reject(new BackupError(`[x] tar error: ${e.message}`))
+      }
+    })
   }
 
   /**

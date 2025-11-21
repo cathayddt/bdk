@@ -1,6 +1,6 @@
 {
   "name": "@cathayddt/bdk",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Blockchain Deploy Kit",
   "homepage": "https://github.com/cathayddt/bdk#readme",
   "bugs": {
@@ -39,16 +39,17 @@
     "test": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter spec --require ts-node/register ./test/**/*.test.ts --exit",
     "test:dev": "nodemon --watch 'test/**/*.test.ts' -e ts,tsx --exec npm run test",
     "test:nyan": "NODE_ENV=testing mocha --reporter nyan --require ts-node/register ./test/**/*.test.ts --exit",
-    "test:quorum": "nyc npm run test -- --grep Quorum",
-    "test:besu": "nyc npm run test -- --grep Besu",
-    "test:fabric": "nyc npm run test -- --grep Fabric",
+    "test:fabric": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk nyc --temp-dir ./coverage/fabric/.nyc_output --report-dir ./coverage/fabric mocha --reporter spec --require ts-node/register './test/fabric/**/*.test.ts' --exit",
+    "test:besu": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk nyc --temp-dir ./coverage/besu/.nyc_output --report-dir ./coverage/besu mocha --reporter spec --require ts-node/register './test/eth/besu/**/*.test.ts' --exit",
+    "test:quorum": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk nyc --temp-dir ./coverage/quorum/.nyc_output --report-dir ./coverage/quorum mocha --reporter spec --require ts-node/register './test/eth/quorum/**/*.test.ts' --exit",
+    "test:others": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk nyc --temp-dir ./coverage/others/.nyc_output --report-dir ./coverage/others mocha --reporter spec --require ts-node/register './test/{hello,wallet,bdk}/**/*.test.ts' --exit",
     "test:coverage": "nyc npm run test",
     "test:json": "NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk mocha --reporter json --require ts-node/register ./test/**/*.test.ts --exit > test-results.json",
-    "git:changelog": "git-cliff --unreleased --tag v3.4.0 --prepend CHANGELOG.md",
+    "git:changelog": "git-cliff --unreleased --tag v3.4.1 --prepend CHANGELOG.md",
     "doc:create": "npx typedoc --readme none --out ./api-docs --packages  ."
   },
   "dependencies": {
-    "axios": "^1.6.5",
+    "axios": "^1.11.0",
     "deep-object-diff": "^1.1.0",
     "dockerode": "^3.3.5",
     "dotenv": "^16.3.1",

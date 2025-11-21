@@ -133,6 +133,7 @@ export default class Contract extends AbstractService {
    * @param compileFunction
    */
   public compile (contractFolderPath: string, contractFilePath: string, compileFunction: string, solcInstance: MinimalSolcInstance | null = null) {
+    contractFilePath = path.basename(contractFilePath)
     switch (compileFunction) {
       case 'bdkSolc':
         this.bdkSolcCompile(contractFolderPath, contractFilePath)
@@ -207,30 +208,35 @@ export default class Contract extends AbstractService {
       const processedFiles = new Set()
       const sources: Record<string, { content: string }> = {}
 
-      function readFile (filePath: string) {
-        if (processedFiles.has(filePath)) return
-        processedFiles.add(filePath)
+      function readFile (filePath: string, basePath: string = contractFolderPath) {
+        const resolvedPath = path.resolve(filePath)
+        if (processedFiles.has(resolvedPath)) return
+        processedFiles.add(resolvedPath)
 
-        const content = fs.readFileSync(filePath, 'utf8')
-        sources[path.relative(contractFolderPath, filePath)] = { content }
+        const content = fs.readFileSync(resolvedPath, 'utf8')
+        const key = path.relative(basePath, resolvedPath).replace(/\\/g, '/')
+        sources[key] = { content }
 
+        // 尋找 import
         const importRegex = /import\s+["']([^"']+)["'];/g
         let match
         while ((match = importRegex.exec(content)) !== null) {
           const importedFile = match[1]
-          let importPath: string
+          let importPath
           if (importedFile.startsWith('.')) {
-            importPath = path.resolve(path.dirname(filePath), importedFile)
-            readFile(importPath)
+            // 相對路徑
+            importPath = path.resolve(path.dirname(resolvedPath), importedFile)
           } else {
-            // node_modules module
-            importPath = require.resolve(importedFile, {
-              paths: [contractFolderPath],
-            })
+            // 非相對路徑，嘗試 node_modules
+            const nodeModulesPath = path.resolve(process.cwd(), 'node_modules', importedFile)
+            if (!fs.existsSync(nodeModulesPath)) {
+              throw new Error(`❌ Import not found: ${importedFile}`)
+            }
+            importPath = nodeModulesPath
           }
+          readFile(importPath, basePath)
         }
       }
-
       readFile(path.resolve(contractFolderPath, filename))
       return sources
     }
@@ -251,14 +257,23 @@ export default class Contract extends AbstractService {
         },
       }
 
-      const importCallback = function (importPath: string) {
-        try {
-          const resolvedPath = require.resolve(importPath, { paths: [contractFolderPath] })
-          const content = fs.readFileSync(resolvedPath, 'utf8')
-          return { contents: content }
-        } catch (err) {
+      const importCallback = (importPath: string) => {
+        let resolvedPath
+
+        if (importPath.startsWith('.')) {
+          // 相對路徑
+          resolvedPath = path.resolve(contractFolderPath, importPath)
+        } else {
+          // 非相對路徑，嘗試從 node_modules 尋找
+          resolvedPath = path.resolve(process.cwd(), 'node_modules', importPath)
+        }
+
+        if (!fs.existsSync(resolvedPath)) {
           return { error: `File not found: ${importPath}` }
         }
+
+        const content = fs.readFileSync(resolvedPath, 'utf8')
+        return { contents: content }
       }
 
       // Compile the contract
@@ -270,7 +285,14 @@ export default class Contract extends AbstractService {
         }))
 
       if (output.errors) {
-        throw new SolcError(`❌ Solidity Compile Error: ${output.errors}`)
+        if (output.errors && output.errors.length > 0) {
+          const formattedErrors = output.errors
+            .map((e: { severity?: string; formattedMessage?: string; message?: string }) =>
+              `[${e.severity?.toUpperCase() || 'UNKNOWN'}] ${e.formattedMessage || e.message}`,
+            )
+            .join('\n')
+          throw new SolcError(`❌ Solidity Compile Error:\n${formattedErrors}`)
+        }
       }
 
       const buildDir = path.resolve(contractFolderPath, 'build')
@@ -281,7 +303,6 @@ export default class Contract extends AbstractService {
         Object.keys(output.contracts[sourceFile]).forEach((contractName) => {
           const contractData = output.contracts[sourceFile][contractName]
           if (!contractData?.abi || !contractData?.evm?.bytecode?.object) {
-            logger.warn(`⚠️ Contract ${contractName} has no ABI or bytecode.`)
             return
           }
           const contractPath = path.join(buildDir, `${contractName}.json`)
@@ -297,20 +318,26 @@ export default class Contract extends AbstractService {
         })
       })
     } catch (error) {
-      throw new SolcError(`❌ An error occurred during compilation: ${error}`)
+      throw new SolcError(`${error}`)
     }
   }
 
   private localSolcCompile (contractFolderPath: string, filename: string): void {
     const contractPath = path.resolve(contractFolderPath, filename)
     let output: string
-    const cliCmd = [
-      'solc --base-path . --include-path node_modules/ --optimize',
-      '--evm-version istanbul',
-      `--combined-json abi,bin ${contractPath}`,
-    ].join(' ')
     try {
-      output = childProcess.execSync(cliCmd, { encoding: 'utf-8' })
+      output = childProcess.execFileSync(
+        'solc',
+        [
+          '--base-path', '.',
+          '--include-path', 'node_modules/',
+          '--optimize',
+          '--evm-version', 'istanbul',
+          '--combined-json', 'abi,bin',
+          contractPath,
+        ],
+        { encoding: 'utf-8' },
+      )
     } catch (error: any) {
       throw new SolcError(`SolcError❌ An error occurred during compilation: ${error.message}`)
     }

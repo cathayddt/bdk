@@ -9,29 +9,172 @@ permissions:
   actions: read
   checks: write
 jobs:
-  report:
-    runs-on: ubuntu-22.04 # ubuntu-latest | ubuntu-22.04
+  test-fabric:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build:console
-    - name: Install solc 0.8.17
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3 python3-pip curl
-        pip3 install solc-select
-        solc-select install 0.8.17
-        solc-select use 0.8.17
-        solc --version
-    - run: npm run test:json
-      
-    - uses: dorny/test-reporter@v1
-      if: success() || failure()  
-      with:
-        name: mocha-report                 # Name of the check run which will be created
-        path: 'test-*.json'                # Path to test results (inside artifact .zip)
-        reporter: mocha-json               # Format of test results
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:console
+
+      - name: Run mocha tests and generate json report
+        run: |
+          set -e
+          mkdir -p reports
+          NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk npx nyc --silent --temp-dir ./coverage/fabric/.nyc_output --report-dir ./coverage/fabric npx mocha --reporter json --require ts-node/register './test/fabric/**/*.test.ts' --exit > reports/fabric.json || echo '{}' > reports/fabric.json
+          echo 'Coverage summary:'
+          npx nyc report --temp-dir ./coverage/fabric/.nyc_output --report-dir ./coverage/fabric --reporter=text
+
+      - name: Upload Fabric JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: mocha-fabric
+          path: reports/fabric.json
+          retention-days: 1
+
+      - name: Show Fabric test
+        run: cat reports/fabric.json
+
+  test-besu:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:console
+
+      - name: Install solc 0.8.17
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip curl
+          pip3 install solc-select
+          solc-select install 0.8.17
+          solc-select use 0.8.17
+          solc --version
+
+      - name: Run mocha tests and generate json report
+        run: |
+          set -e
+          mkdir -p reports
+            echo '--- List test files ---'
+            ls -lR test/eth/besu || true
+            echo '--- Mocha version ---'
+            npx mocha --version || true
+            echo '--- Run Mocha with nyc and env ---'
+            NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk npx nyc --silent --temp-dir ./coverage/besu/.nyc_output --report-dir ./coverage/besu npx mocha --reporter json --require ts-node/register './test/eth/besu/**/*.test.ts' --exit > reports/besu.json || echo '{}' > reports/besu.json
+            echo 'Coverage summary:'
+            npx nyc report --temp-dir ./coverage/besu/.nyc_output --report-dir ./coverage/besu --reporter=text
+
+      - name: Upload Besu JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: mocha-besu
+          path: reports/besu.json
+          retention-days: 1
+
+      - name: Show Besu test
+        run: cat reports/besu.json
+
+  test-quorum:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:console
+
+      - name: Install solc 0.8.17
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip curl
+          pip3 install solc-select
+          solc-select install 0.8.17
+          solc-select use 0.8.17
+          solc --version
+
+      - name: Run mocha tests and generate json report
+        run: |
+          set -e
+          mkdir -p reports
+          NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk npx nyc --silent --temp-dir ./coverage/quorum/.nyc_output --report-dir ./coverage/quorum npx mocha --reporter json --require ts-node/register './test/eth/quorum/**/*.test.ts' --exit > reports/quorum.json || echo '{}' > reports/quorum.json
+          echo 'Coverage summary:'
+          npx nyc report --temp-dir ./coverage/quorum/.nyc_output --report-dir ./coverage/quorum --reporter=text
+
+      - name: Upload Quorum JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: mocha-quorum
+          path: reports/quorum.json
+          retention-days: 1
+
+      - name: Show Quorum test
+        run: cat reports/quorum.json
+
+  test-others:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:console
+
+      - name: Run mocha tests and generate json report
+        run: |
+          set -e
+          mkdir -p reports
+          NODE_ENV=testing BDK_PATH=$(pwd)/test/bdk BDK_DOCKER_HOST_PATH=$(pwd)/test/bdk npx nyc --silent --temp-dir ./coverage/others/.nyc_output --report-dir ./coverage/others npx mocha --reporter json --require ts-node/register './test/{hello,wallet,bdk}/**/*.test.ts' --exit > reports/others.json || echo '{}' > reports/others.json
+          echo 'Coverage summary:'
+          npx nyc report --temp-dir ./coverage/others/.nyc_output --report-dir ./coverage/others --reporter=text
+
+      - name: Upload Others JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: mocha-others
+          path: reports/others.json
+          retention-days: 1
+
+      - name: Show Others test
+        run: cat reports/others.json
+
+  report:
+    runs-on: ubuntu-22.04
+    needs: [test-fabric, test-besu, test-quorum, test-others]
+    if: success() || failure()
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mocha-*
+          path: reports/
+
+      - uses: dorny/test-reporter@v1
+        with:
+          name: mocha-report
+          path: 'reports/**/*.json'
+          reporter: mocha-json

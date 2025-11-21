@@ -208,7 +208,7 @@ bdk eth cluster generate -i
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "./contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MyToken is ERC20 {
     constructor(string memory name, string memory symbol, uint256 initialSupply) ERC20(name, symbol) {
@@ -216,7 +216,11 @@ contract MyToken is ERC20 {
     }
 }
 ```
-請自行下載ERC20.sol合約放入`./contracts/token/ERC20/ERC20.sol`
+請使用以下命令下載所需合約 
+```bash
+npm install @openzeppelin/contracts
+```
+或自行下載ERC20.sol合約放入存放合約資料夾
 ### 編譯 ERC20 合約
 ```bash
 #透過以下命令編譯合約
